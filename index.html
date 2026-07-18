@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المسابقة العائلية اليومية</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Fonts for Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <div id="root" class="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 transition-all duration-300">
+        <!-- سيتم تحميل المحتوى ديناميكياً بواسطة الجافا سكريبت هنا -->
+        <div class="text-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <p class="text-gray-600 font-semibold">جاري تحميل مسابقة اليوم...</p>
+        </div>
+    </div>
+
+    <!-- React and ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+    <script>
+        // رابط الـ API المباشر لجلب البيانات من جدول جوجل
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzE8g5h7M4aPz3t1R8Q_example/exec";
+
+        function FamilyQuizApp() {
+            const [quiz, setQuiz] = React.useState(null);
+            const [loading, setLoading] = React.useState(true);
+            const [selectedOption, setSelectedOption] = React.useState(null);
+            const [isCorrect, setIsCorrect] = React.useState(null);
+            const [revealed, setRevealed] = React.useState(false);
+
+            React.useEffect(() => {
+                fetch(SCRIPT_URL)
+                    .then(response => response.json())
+                    .then(data => {
+                        // الحصول على تاريخ اليوم بتنسيق YYYY-MM-DD متوافق مع توقيت الجهاز
+                        const today = new Date().toISOString().split('T')[0];
+                        
+                        // البحث عن سؤال يطابق تاريخ اليوم
+                        const todayQuiz = data.find(item => item.publish_date === today);
+                        
+                        if (todayQuiz) {
+                            setQuiz(todayQuiz);
+                        }
+                        setLoading(false);
+                    })
+                    .catch(error => {
+                        console.error("Error fetching data:", error);
+                        setLoading(false);
+                    });
+            }, []);
+
+            if (loading) {
+                return (
+                    <div class="text-center py-8">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                        <p class="text-gray-600 font-semibold">جاري جلب أسئلة اليوم...</p>
+                    </div>
+                );
+            }
+
+            if (!quiz) {
+                return (
+                    <div class="text-center py-8 space-y-4">
+                        <div class="text-6xl text-amber-500 animate-bounce">⏳</div>
+                        <h2 class="text-xl font-bold text-gray-800">لا توجد مسابقة منشورة لهذا اليوم بعد. انتظر المشرف!</h2>
+                        <p class="text-sm text-gray-500 bg-gray-50 py-2 px-4 rounded-xl inline-block">يتم نشر المسابقات تلقائياً وبشكل يومي عبر المجموعات.</p>
+                    </div>
+                );
+            }
+
+            const handleOptionClick = (optionLetter) => {
+                if (revealed) return;
+                setSelectedOption(optionLetter);
+                const correct = optionLetter === quiz.correct_option.toUpperCase();
+                setIsCorrect(correct);
+                setRevealed(true);
+            };
+
+            return React.createElement('div', { class: 'space-y-6' },
+                // الرأس
+                React.createElement('div', { class: 'text-center border-b border-gray-100 pb-4' },
+                    React.createElement('span', { class: 'text-xs text-indigo-600 font-semibold bg-indigo-50 py-2 px-4 rounded-xl inline-block mb-2' }, 'تحديث تلقائي مستقر ومباشر'),
+                    React.createElement('h1', { class: 'text-2xl font-bold text-gray-800' }, '🏆 مسابقة العائلة اليومية')
+                ),
+                // نص السؤال
+                React.createElement('div', { class: 'bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/50' },
+                    React.createElement('p', { class: 'text-lg font-bold text-gray-800 leading-relaxed text-center' }, quiz.question_text)
+                ),
+                // الخيارات
+                React.createElement('div', { class: 'space-y-3' },
+                    ['A', 'B', 'C'].map((letter) => {
+                        const optionText = quiz[`option_${letter.toLowerCase()}`];
+                        if (!optionText) return null;
+
+                        let buttonClass = "w-full text-right p-4 rounded-xl border-2 font-semibold transition-all duration-200 flex items-center justify-between ";
+                        
+                        if (!revealed) {
+                            buttonClass += "border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 text-gray-700 cursor-pointer";
+                        } else {
+                            if (letter === quiz.correct_option.toUpperCase()) {
+                                buttonClass += "border-green-500 bg-green-50 text-green-800 shadow-sm shadow-green-100";
+                            } else if (selectedOption === letter && !isCorrect) {
+                                buttonClass += "border-red-500 bg-red-50 text-red-800";
+                            } else {
+                                buttonClass += "border-gray-100 bg-gray-50 text-gray-400 opacity-60";
+                            }
+                        }
+
+                        return React.createElement('button', {
+                            key: letter,
+                            onClick: () => handleOptionClick(letter),
+                            disabled: revealed,
+                            class: buttonClass
+                        }, 
+                            React.createElement('span', null, optionText),
+                            revealed && letter === quiz.correct_option.toUpperCase() && React.createElement('span', { class: 'text-green-600' }, '✓'),
+                            revealed && selectedOption === letter && !isCorrect && React.createElement('span', { class: 'text-red-600' }, '✗')
+                        );
+                    })
+                ),
+                // النتيجة
+                revealed && React.createElement('div', { class: `text-center p-4 rounded-xl animate-fade-in ${isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}` },
+                    React.createElement('p', { class: 'text-xl font-bold mb-1' }, isCorrect ? '🎉 إجابة صحيحة! أحسنت!' : '😢 للأسف، إجابة خاطئة! حاول غداً!'),
+                    React.createElement('p', { class: 'text-sm opacity-90' }, `الإجابة الصحيحة هي: ${quiz[`option_${quiz.correct_option.toLowerCase()}`]}`)
+                )
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(FamilyQuizApp));
+    </script>
+</body>
+</html>
