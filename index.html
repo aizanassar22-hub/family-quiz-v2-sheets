@@ -108,8 +108,8 @@
 
     <!-- Quiz Logic Code -->
     <script>
-        // رابط الـ API الفعلي لجدول بيانات جوجل شيت الخاص بك
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDs8H_36mcDS3F264GRhfy9qr9lHVlBtQZawfHrqz_Cu8yoPH0rLCZGPJet-0wnJf3/exec";
+        // رابط الـ API المحدث تلقائياً بناءً على عملية النشر الأخيرة الخاصة بك
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWdj6fqe8zavs8sE6av7SGuOac6UlfAljFSLGK0CyxQnONe7-tsm4y2jepsywnTK6c/exec";
 
         let quizData = [];
         let currentQuestionIndex = 0;
@@ -274,13 +274,11 @@
             const currentQuestion = quizData[currentQuestionIndex];
             const buttons = optionsContainer.querySelectorAll('button');
             
-            const correctIndex = currentQuestion.correctAnswer - 1; // converting 1-based index to 0-based
+            const correctIndex = currentQuestion.correctAnswer - 1; 
 
-            // Disable further clicks
             buttons.forEach(btn => btn.style.pointerEvents = 'none');
 
             if (selectedOptionIndex === correctIndex) {
-                // Correct Answer
                 score++;
                 scoreCounterText.innerText = `النقاط: ${score}`;
                 
@@ -291,13 +289,11 @@
                 feedbackArea.classList.remove('hidden');
                 feedbackArea.classList.add('bg-emerald-100', 'text-emerald-800');
             } else {
-                // Wrong Answer
                 if (selectedOptionIndex !== null) {
                     buttons[selectedOptionIndex].classList.remove('border-indigo-500', 'bg-indigo-50/50');
                     buttons[selectedOptionIndex].classList.add('border-rose-500', 'bg-rose-50/50');
                 }
                 
-                // Show Correct answer in Green
                 if (buttons[correctIndex]) {
                     buttons[correctIndex].classList.add('border-emerald-500', 'bg-emerald-50/50');
                 }
@@ -307,7 +303,6 @@
                 feedbackArea.classList.add('bg-rose-100', 'text-rose-800');
             }
 
-            // Update button text for next step
             if (currentQuestionIndex < quizData.length - 1) {
                 actionBtn.innerHTML = `<span>السؤال التالي</span> ➡️`;
             } else {
