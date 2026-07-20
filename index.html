@@ -23,7 +23,7 @@
                 <span>🏆</span> المسابقة العائلية اليومية
             </h1>
             <div id="date-display" class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm font-bold">
-                2026 / 07 / 20
+                -- / -- / ----
             </div>
         </div>
     </header>
@@ -84,35 +84,77 @@
 
     <!-- Application JavaScript Layer -->
     <script>
-        // رابط الـ API المحدث والأخير المتوافق تماماً مع صيغة البيانات الجديدة
         const API_URL = "https://script.google.com/macros/s/AKfycbzWdj6fqe8zavS8sE6av7SGuOaC6UIfAIjFSLGK0CyxQnONe7-tsm4y2jepsywnTK6c/exec";
         
         let currentQuizData = null;
         let selectedOptionIndex = null;
 
-        // Fetch daily quiz from the sheet via API
+        // الحصول على تاريخ اليوم وتنسيقه بعدة أشكال مختلفة لتفادي مشاكل جوجل شيتس
+        function getFormattedDates() {
+            const now = new Date();
+            
+            // تحويل التوقيت محلياً ليطابق توقيت الأردن/عمان
+            const ammanTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Amman"}));
+            
+            const year = ammanTime.getFullYear();
+            const month = String(ammanTime.getMonth() + 1).padStart(2, '0');
+            const day = String(ammanTime.getDate()).padStart(2, '0');
+            
+            // الصيغة المائلة لعرضها في أعلى الموقع بشكل جميل
+            document.getElementById('date-display').innerText = `${day} / ${month} / ${year}`;
+
+            // إرجاع مصفوفة بالصيغ المحتملة التي قد يخزنها جوجل شيتس تلقائياً
+            return [
+                `${year}-${month}-${day}`, // 2026-07-20
+                `${day}/${month}/${year}`, // 20/07/2026
+                `${month}/${day}/${year}`, // 07/20/2026
+                `${ammanTime.getDate()}/${ammanTime.getMonth()+1}/${year}` // بدون أصفار حشوة
+            ];
+        }
+
+        // دالة جلب المسابقة الذكية مع ميزة المحاولة البديلة للصيغ المفقودة
         async function fetchDailyQuiz() {
+            const dateFormats = getFormattedDates();
+            let success = false;
+
+            // المحاولة الأولى: طلب التوقيت الافتراضي القياسي
+            success = await tryFetchQuiz(API_URL);
+
+            // المحاولة البديلة: إذا لم يجد السيرفر التاريخ القياسي، نقوم بإرسال الصيغ الأخرى بالتوالي
+            if (!success) {
+                for (let format of dateFormats) {
+                    console.log("جاري تجربة صيغة التاريخ البديلة: ", format);
+                    success = await tryFetchQuiz(`${API_URL}?date=${encodeURIComponent(format)}`);
+                    if (success) break;
+                }
+            }
+
+            document.getElementById('loading-state').classList.add('hidden');
+            if (!success) {
+                showEmptyState("لا توجد مسابقة نشطة لتاريخ اليوم في الجدول حالياً.");
+            }
+        }
+
+        async function tryFetchQuiz(url) {
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(url);
                 const data = await response.json();
-                
-                document.getElementById('loading-state').classList.add('hidden');
-                
-                // التعديل الجذري لقراءة المتغير المباشر data.data المتوافق مع إصدار Apps Script 7
                 if (data && data.status === "success" && data.data) {
                     currentQuizData = data.data;
                     renderQuiz(currentQuizData);
-                } else {
-                    showEmptyState("لا توجد مسابقة نشطة حالياً.");
+                    return true;
                 }
+                return false;
             } catch (error) {
-                console.error("Error loading quiz:", error);
-                document.getElementById('loading-state').classList.add('hidden');
-                showEmptyState("فشل الاتصال بخادم البيانات. يرجى التحقق من اتصالك بالإنترنت.");
+                console.error("خطأ في جلب البيانات من الرابط الفرعي:", error);
+                return false;
             }
         }
 
         function renderQuiz(quiz) {
+            // إخفاء أي واجهة خطأ أو استراحة سابقة لضمان نظافة العرض
+            document.getElementById('empty-state').classList.add('hidden');
+            
             document.getElementById('question-text').innerText = quiz.question;
             const container = document.getElementById('options-container');
             container.innerHTML = '';
