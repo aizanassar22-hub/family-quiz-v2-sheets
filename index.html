@@ -3,238 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المسابقة العائلية اليومية</title>
+    <title>🏆 المسابقة العائلية اليومية</title>
+    
+    <!-- Open Graph Meta Tags للبطاقة الاحترافية في الواتساب -->
+    <meta property="og:title" content="🏆 المسابقة العائلية اليومية">
+    <meta property="og:description" content="اضغط للدخول إلى المسابقة والمشاركة مع العائلة">
+    <meta property="og:type" content="website">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Google Fonts for Arabic -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Cairo', sans-serif; }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen text-gray-800 antialiased flex flex-col justify-between">
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between antialiased">
 
     <!-- Header -->
-    <header class="bg-white shadow-sm py-4 px-6 sticky top-0 z-10">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl md:text-2xl font-bold text-indigo-700 flex items-center gap-2">
-                <span>🏆</span> المسابقة العائلية اليومية
+    <header class="bg-white border-b border-slate-100 shadow-sm py-4 px-6 sticky top-0 z-10">
+        <div class="max-w-xl mx-auto flex justify-between items-center">
+            <h1 class="text-lg md:text-xl font-bold text-indigo-700 flex items-center gap-2">
+                <span>🏆</span> <span id="header-title">المسابقة العائلية اليومية</span>
             </h1>
-            <div id="date-display" class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm font-bold">
+            <div id="date-display" class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">
                 -- / -- / ----
             </div>
         </div>
     </header>
 
-    <!-- Main Content Container -->
-    <main class="max-w-4xl w-full mx-auto px-4 py-8 flex-grow flex flex-col justify-center items-center">
+    <!-- Main Container -->
+    <main class="max-w-xl w-full mx-auto px-4 py-6 flex-grow flex flex-col justify-center items-center">
         
-        <!-- Loading Spinner -->
+        <!-- 1️⃣ Loading State -->
         <div id="loading-state" class="text-center py-12">
             <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-700 border-t-transparent mb-4"></div>
-            <p class="text-gray-500 font-medium">جاري تحميل مسابقة اليوم النشطة...</p>
+            <p class="text-slate-500 font-medium text-sm">جاري جلب بيانات مسابقة اليوم...</p>
         </div>
 
-        <!-- Quiz Content View -->
-        <div id="quiz-state" class="hidden w-full bg-white rounded-2xl shadow-md p-6 md:p-8 transition-all duration-300">
-            <!-- Question Box -->
-            <div class="mb-8">
-                <span class="text-xs uppercase tracking-wider font-bold text-indigo-500 block mb-1">سؤال اليوم</span>
-                <h2 id="question-text" class="text-xl md:text-2xl font-bold text-gray-900 leading-relaxed"></h2>
+        <!-- 2️⃣ Welcome & Category Select State -->
+        <div id="welcome-state" class="hidden w-full bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 text-center">
+            <div class="text-5xl mb-4">👋</div>
+            <h2 class="text-xl font-bold text-slate-900 mb-2" id="welcome-quiz-title">أهلاً بك في مسابقة اليوم</h2>
+            <p class="text-slate-500 text-sm mb-6">يرجى تحديد الفئة الخاصة بك لبدء التحدي:</p>
+            
+            <div class="mb-6 text-right">
+                <label class="block text-xs font-bold text-slate-600 mb-2">اختر الفئة:</label>
+                <select id="category-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-medium text-slate-700 focus:outline-none focus:border-indigo-600">
+                    <option value="">-- اضغط للاختيار --</option>
+                    <option value="رجال 1">رجال 1</option>
+                    <option value="رجال 2">رجال 2</option>
+                    <option value="نساء 1">نساء 1</option>
+                    <option value="نساء 2">نساء 2</option>
+                </select>
             </div>
 
-            <!-- Options Grid -->
-            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                <!-- Options will be injected via JavaScript -->
+            <button id="start-btn" class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-all active:scale-98">
+                ابدأ المسابقة الآن 🚀
+            </button>
+        </div>
+
+        <!-- 3️⃣ Quiz Question State -->
+        <div id="quiz-state" class="hidden w-full bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8">
+            <div class="mb-6 border-b border-slate-100 pb-4 flex justify-between items-center">
+                <span id="quiz-badge" class="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-md">المسابقة رقم #</span>
+                <span id="participant-badge" class="text-xs text-slate-400 font-medium"></span>
             </div>
 
-            <!-- Action Footer -->
+            <!-- Question -->
+            <div class="mb-6">
+                <h2 id="question-text" class="text-lg md:text-xl font-bold text-slate-900 leading-relaxed"></h2>
+            </div>
+
+            <!-- Options -->
+            <div id="options-container" class="grid grid-cols-1 gap-3 mb-6"></div>
+
+            <!-- Feedback Area -->
+            <div id="feedback-area" class="hidden p-4 rounded-xl mb-6 text-sm font-bold text-center"></div>
+
+            <!-- Actions -->
             <div class="flex justify-end">
-                <button id="submit-btn" disabled class="bg-indigo-300 text-white font-bold px-8 py-3 rounded-xl cursor-not-allowed transition-all duration-200 shadow-sm">
+                <button id="submit-btn" disabled class="w-full bg-slate-200 text-slate-400 font-bold py-3.5 rounded-xl cursor-not-allowed transition-all">
                     تأكيد الإجابة
+                </button>
+                <button id="finish-btn" class="hidden w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all">
+                    حفظ المسابقة والخروج 💾
                 </button>
             </div>
         </div>
 
-        <!-- Feedback & Results View -->
-        <div id="result-state" class="hidden w-full bg-white rounded-2xl shadow-md p-6 md:p-8 text-center transition-all duration-300">
-            <div id="result-icon" class="text-6xl mb-4"></div>
-            <h3 id="result-title" class="text-2xl font-bold mb-2"></h3>
-            <p id="result-message" class="text-gray-600 mb-6"></p>
-            <div class="bg-gray-50 p-4 rounded-xl inline-block font-medium mb-6">
-                الإجابة الصحيحة كانت: <span id="correct-answer-text" class="font-bold text-emerald-600"></span>
+        <!-- 4️⃣ Completed / Saved State -->
+        <div id="completed-state" class="hidden w-full bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
+            <div class="text-6xl mb-4">✨</div>
+            <h3 class="text-2xl font-bold text-slate-900 mb-2">تم تقديم إجابتك بنجاح!</h3>
+            <p class="text-slate-600 text-sm leading-relaxed mb-6">
+                شكراً لمشاركتك اليوم. تم حفظ إجاباتك في سجل النتائج لدى المشرف، وسوف تُعلن النتائج النهائية في قروب العائلة.
+            </p>
+            <div class="inline-block bg-slate-50 text-slate-500 text-xs px-4 py-2 rounded-full font-medium">
+                🔒 يرجى العودة في المسابقة القادمة
             </div>
         </div>
 
-        <!-- Error / Rest State -->
-        <div id="empty-state" class="hidden w-full bg-white rounded-2xl shadow-md p-8 text-center max-w-md transition-all duration-300">
+        <!-- 5️⃣ Already Submitted State -->
+        <div id="already-done-state" class="hidden w-full bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
+            <div class="text-5xl mb-4">✋</div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">لقد شاركت سابقاً!</h3>
+            <p class="text-slate-500 text-sm leading-relaxed">
+                عذراً، تسمح سياسة المسابقة بمحاولة واحدة فقط لكل يوم، وقد قمت برفع إجابتك بنجاح مسبقاً.
+            </p>
+        </div>
+
+        <!-- 6️⃣ Empty State -->
+        <div id="empty-state" class="hidden w-full bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center max-w-sm">
             <div class="text-5xl mb-4">☕</div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">استراحة اليوم!</h3>
-            <p class="text-gray-500 text-sm leading-relaxed" id="empty-message">لا توجد مسابقة مجدولة لتاريخ اليوم في جدول البيانات. انتظرونا في الأيام القادمة!</p>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">استراحة اليوم</h3>
+            <p id="empty-message" class="text-slate-500 text-sm leading-relaxed">لا توجد مسابقة نشطة حالياً لتاريخ اليوم في جدول البيانات.</p>
         </div>
 
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-100 py-4 text-center text-xs text-gray-400">
-        تطبيق المسابقة العائلية اليومية © 2026
+    <footer class="bg-white border-t border-slate-100 py-4 text-center text-xs text-slate-400">
+        منصة المسابقة العائلية اليومية © 2026
     </footer>
 
-    <!-- Application JavaScript Layer -->
+    <!-- JavaScript -->
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbzWdj6fqe8zavS8sE6av7SGuOaC6UIfAIjFSLGK0CyxQnONe7-tsm4y2jepsywnTK6c/exec";
         
-        let currentQuizData = null;
-        let selectedOptionIndex = null;
+        let currentQuiz = null;
+        let selectedOption = null;
+        let userCategory = "";
+        let todayDateStr = "";
+        let isAnswered = false;
+        let score = 0;
 
-        // الحصول على تاريخ اليوم وتنسيقه بعدة أشكال مختلفة لتفادي مشاكل جوجل شيتس
-        function getFormattedDates() {
+        function getTodayString() {
             const now = new Date();
-            
-            // تحويل التوقيت محلياً ليطابق توقيت الأردن/عمان
-            const ammanTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Amman"}));
-            
-            const year = ammanTime.getFullYear();
-            const month = String(ammanTime.getMonth() + 1).padStart(2, '0');
-            const day = String(ammanTime.getDate()).padStart(2, '0');
-            
-            // الصيغة المائلة لعرضها في أعلى الموقع بشكل جميل
-            document.getElementById('date-display').innerText = `${day} / ${month} / ${year}`;
-
-            // إرجاع مصفوفة بالصيغ المحتملة التي قد يخزنها جوجل شيتس تلقائياً
-            return [
-                `${year}-${month}-${day}`, // 2026-07-20
-                `${day}/${month}/${year}`, // 20/07/2026
-                `${month}/${day}/${year}`, // 07/20/2026
-                `${ammanTime.getDate()}/${ammanTime.getMonth()+1}/${year}` // بدون أصفار حشوة
-            ];
+            const amman = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Amman"}));
+            const y = amman.getFullYear();
+            const m = String(amman.getMonth() + 1).padStart(2, '0');
+            const d = String(amman.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
         }
 
-        // دالة جلب المسابقة الذكية مع ميزة المحاولة البديلة للصيغ المفقودة
-        async function fetchDailyQuiz() {
-            const dateFormats = getFormattedDates();
-            let success = false;
+        async function init() {
+            todayDateStr = getTodayString();
+            document.getElementById('date-display').innerText = todayDateStr;
 
-            // المحاولة الأولى: طلب التوقيت الافتراضي القياسي
-            success = await tryFetchQuiz(API_URL);
-
-            // المحاولة البديلة: إذا لم يجد السيرفر التاريخ القياسي، نقوم بإرسال الصيغ الأخرى بالتوالي
-            if (!success) {
-                for (let format of dateFormats) {
-                    console.log("جاري تجربة صيغة التاريخ البديلة: ", format);
-                    success = await tryFetchQuiz(`${API_URL}?date=${encodeURIComponent(format)}`);
-                    if (success) break;
-                }
+            // التحقق هل شارك المتسابق اليوم من قبل
+            if (localStorage.getItem(`quiz_done_${todayDateStr}`)) {
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('already-done-state').classList.remove('hidden');
+                return;
             }
 
-            document.getElementById('loading-state').classList.add('hidden');
-            if (!success) {
-                showEmptyState("لا توجد مسابقة نشطة لتاريخ اليوم في الجدول حالياً.");
-            }
+            await fetchQuiz();
         }
 
-        async function tryFetchQuiz(url) {
+        async function fetchQuiz() {
             try {
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data && data.status === "success" && data.data) {
-                    currentQuizData = data.data;
-                    renderQuiz(currentQuizData);
-                    return true;
+                const res = await fetch(API_URL);
+                const result = await res.json();
+                
+                document.getElementById('loading-state').classList.add('hidden');
+
+                if (result && result.status === "success" && result.data) {
+                    currentQuiz = result.data;
+                    setupWelcomeScreen();
+                } else {
+                    document.getElementById('empty-state').classList.remove('hidden');
                 }
-                return false;
-            } catch (error) {
-                console.error("خطأ في جلب البيانات من الرابط الفرعي:", error);
-                return false;
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('empty-state').classList.remove('hidden');
             }
         }
 
-        function renderQuiz(quiz) {
-            // إخفاء أي واجهة خطأ أو استراحة سابقة لضمان نظافة العرض
-            document.getElementById('empty-state').classList.add('hidden');
-            
-            document.getElementById('question-text').innerText = quiz.question;
+        function setupWelcomeScreen() {
+            if(currentQuiz.quizTitle) {
+                document.getElementById('welcome-quiz-title').innerText = currentQuiz.quizTitle;
+                document.getElementById('header-title').innerText = currentQuiz.quizTitle;
+            }
+            document.getElementById('welcome-state').classList.remove('hidden');
+        }
+
+        document.getElementById('start-btn').onclick = () => {
+            const sel = document.getElementById('category-select');
+            if (!sel.value) {
+                alert("يرجى اختيار الفئة أولاً للبدء!");
+                return;
+            }
+            userCategory = sel.value;
+            document.getElementById('welcome-state').classList.add('hidden');
+            renderQuiz();
+        };
+
+        function renderQuiz() {
+            document.getElementById('quiz-badge').innerText = `المسابقة رقم #${currentQuiz.quizNumber || 1}`;
+            document.getElementById('participant-badge').innerText = `الفئة: ${userCategory}`;
+            document.getElementById('question-text').innerText = currentQuiz.question;
+
             const container = document.getElementById('options-container');
             container.innerHTML = '';
 
-            quiz.options.forEach((option, index) => {
-                const button = document.createElement('button');
-                button.className = "w-full text-right p-4 rounded-xl border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50/50 transition-all font-medium flex items-center justify-between group";
-                button.innerHTML = `
-                    <span class="text-gray-800">${option}</span>
-                    <span class="h-5 w-5 rounded-full border border-gray-300 flex items-center justify-center group-hover:border-indigo-500 text-transparent text-xs font-bold">✓</span>
-                `;
-                button.onclick = () => selectOption(index, button);
-                container.appendChild(button);
+            currentQuiz.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-right p-4 rounded-xl border-2 border-slate-200 hover:border-indigo-500 font-medium transition-all flex items-center justify-between";
+                btn.innerHTML = `<span>${opt}</span><span class="w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center text-xs font-bold text-transparent">✓</span>`;
+                btn.onclick = () => selectOption(idx, btn);
+                container.appendChild(btn);
             });
 
             document.getElementById('quiz-state').classList.remove('hidden');
         }
 
-        function selectOption(index, element) {
-            selectedOptionIndex = index;
-            
-            const buttons = document.getElementById('options-container').children;
-            for (let btn of buttons) {
-                btn.classList.remove('border-indigo-600', 'bg-indigo-50');
-                btn.classList.add('border-gray-200');
-                btn.querySelector('span:last-child').classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
+        function selectOption(idx, el) {
+            if(isAnswered) return;
+            selectedOption = idx;
+
+            const btns = document.getElementById('options-container').children;
+            for (let b of btns) {
+                b.className = "w-full text-right p-4 rounded-xl border-2 border-slate-200 font-medium transition-all flex items-center justify-between";
+                b.querySelector('span:last-child').className = "w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center text-xs font-bold text-transparent";
             }
 
-            element.classList.remove('border-gray-200');
-            element.classList.add('border-indigo-600', 'bg-indigo-50');
-            const indicator = element.querySelector('span:last-child');
-            indicator.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
+            el.className = "w-full text-right p-4 rounded-xl border-2 border-indigo-600 bg-indigo-50/50 font-medium transition-all flex items-center justify-between";
+            const check = el.querySelector('span:last-child');
+            check.className = "w-5 h-5 rounded-full border border-indigo-600 bg-indigo-600 text-white flex items-center justify-center text-xs font-bold";
 
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = false;
-            submitBtn.classList.remove('bg-indigo-300', 'cursor-not-allowed');
-            submitBtn.classList.add('bg-indigo-700', 'hover:bg-indigo-800', 'active:scale-98');
+            submitBtn.className = "w-full bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-all cursor-pointer";
         }
 
-        function verifyAnswer() {
-            if (selectedOptionIndex === null || !currentQuizData) return;
+        document.getElementById('submit-btn').onclick = () => {
+            if (selectedOption === null || isAnswered) return;
+            isAnswered = true;
 
-            document.getElementById('quiz-state').classList.add('hidden');
-            const resultState = document.getElementById('result-state');
+            const correctNum = parseInt(currentQuiz.correctAnswer) - 1;
+            const feedback = document.getElementById('feedback-area');
             
-            const correctNum = parseInt(currentQuizData.correctAnswer);
-            const userNum = selectedOptionIndex + 1;
-
-            const iconEl = document.getElementById('result-icon');
-            const titleEl = document.getElementById('result-title');
-            const msgEl = document.getElementById('result-message');
-            const correctTextEl = document.getElementById('correct-answer-text');
-
-            correctTextEl.innerText = currentQuizData.options[correctNum - 1];
-
-            if (userNum === correctNum) {
-                iconEl.innerText = "🎉";
-                titleEl.innerText = "إجابة صحيحة ورائعة!";
-                titleEl.className = "text-2xl font-bold mb-2 text-emerald-600";
-                msgEl.innerText = "أحسنت صنعاً، لقد حصلت على الدرجة الكاملة في سؤال اليوم.";
+            if (selectedOption === correctNum) {
+                score = 1; // إجابة صحيحة
+                feedback.className = "p-4 rounded-xl mb-6 text-sm font-bold text-center bg-emerald-50 text-emerald-700 border border-emerald-200";
+                feedback.innerText = "🎉 إجابة متميزة وصحيحة! أحسنت صنعاً.";
             } else {
-                iconEl.innerText = "❌";
-                titleEl.innerText = "للأسف، إجابة غير صحيحة";
-                titleEl.className = "text-2xl font-bold mb-2 text-rose-600";
-                msgEl.innerText = "حظاً أوفر في مسابقة يوم غد إن شاء الله، حاول مجدداً!";
+                score = 0; // إجابة خاطئة
+                feedback.className = "p-4 rounded-xl mb-6 text-sm font-bold text-center bg-rose-50 text-rose-700 border border-rose-200";
+                feedback.innerText = `❌ للأسف، إجابة غير صحيحة. الإجابة الصحيحة هي: (${currentQuiz.options[correctNum]})`;
             }
 
-            resultState.classList.remove('hidden');
-        }
+            feedback.classList.remove('hidden');
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('finish-btn').classList.remove('hidden');
+        };
 
-        function showEmptyState(message) {
-            const emptyState = document.getElementById('empty-state');
-            if (message) {
-                document.getElementById('empty-message').innerText = message;
+        document.getElementById('finish-btn').onclick = async () => {
+            const finishBtn = document.getElementById('finish-btn');
+            finishBtn.disabled = true;
+            finishBtn.innerText = "جاري الحفظ والخروج...";
+
+            const payload = {
+                date: todayDateStr,
+                category: userCategory,
+                quizNumber: currentQuiz.quizNumber || "1",
+                quizTitle: currentQuiz.quizTitle || "مسابقة اليوم",
+                score: score === 1 ? "1 من 1 (صحيحة)" : "0 من 1 (خاطئة)"
+            };
+
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                // قفل المسابقة لهذا اليوم في جهاز المتسابق
+                localStorage.setItem(`quiz_done_${todayDateStr}`, 'true');
+
+                document.getElementById('quiz-state').classList.add('hidden');
+                document.getElementById('completed-state').classList.remove('hidden');
+
+            } catch (e) {
+                console.error(e);
+                alert("حدث خطأ أثناء الاتصال بالحافظة، يرجى المحاولة مرة أخرى.");
+                finishBtn.disabled = false;
+                finishBtn.innerText = "حفظ المسابقة والخروج 💾";
             }
-            emptyState.classList.remove('hidden');
-        }
+        };
 
-        document.getElementById('submit-btn').onclick = verifyAnswer;
-        window.onload = fetchDailyQuiz;
+        window.onload = init;
     </script>
 </body>
 </html>
