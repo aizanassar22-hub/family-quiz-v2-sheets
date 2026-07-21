@@ -146,8 +146,9 @@
 
         function fetchQuizData() {
             const sheetId = '1l7oNORcR5mXDZVNoOnFdqJ-0Thqry3klpAloSAHVSQ';
-            // جلب البيانات من أول ورقة عمل فوراً
-            const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+            // القراءة المباشرة وتحديد اسم الورقة "أسئلة المسابقة" بالتحديد
+            const sheetName = encodeURIComponent('أسئلة المسابقة');
+            const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${sheetName}&tqx=out:json`;
 
             fetch(gvizUrl)
                 .then(res => res.text())
@@ -158,25 +159,8 @@
 
                     let quizToUse = null;
 
-                    // 1. محاولة البحث عن تاريخ اليوم
-                    rows.forEach(row => {
-                        if (row.c && row.c[0]) {
-                            const dVal = extractVal(row.c[0]);
-                            if (dVal.includes("21") || dVal.includes(todayStr)) {
-                                quizToUse = {
-                                    question: extractVal(row.c[1]),
-                                    opt1: extractVal(row.c[2]),
-                                    opt2: extractVal(row.c[3]),
-                                    opt3: extractVal(row.c[4]),
-                                    opt4: extractVal(row.c[5]),
-                                    correct: extractVal(row.c[6])
-                                };
-                            }
-                        }
-                    });
-
-                    // 2. إذا لم يتطابق التاريخ، خذ أول صف يحتوي على سؤال مباشرة (ضمان لعدم ظهور الاستراحة)
-                    if (!quizToUse && rows.length > 0) {
+                    // البحث في صفوف ورقة "أسئلة المسابقة"
+                    if (rows && rows.length > 0) {
                         for (let r of rows) {
                             if (r.c && r.c[1] && extractVal(r.c[1]) !== '') {
                                 quizToUse = {
@@ -200,7 +184,7 @@
                     }
                 })
                 .catch(err => {
-                    console.error("خطأ:", err);
+                    console.error("خطأ للجلب من الورقة:", err);
                     showScreen('rest-screen');
                 });
         }
