@@ -91,32 +91,19 @@
             </button>
             
             <button id="save-exit-btn" onclick="saveAndExit()" class="hidden w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition duration-200">
-                حفظ المسابقة والخروج 💾
+                حفظ والخروج من المسابقة 💾
             </button>
         </div>
 
-        <!-- شاشة النجاح -->
+        <!-- شاشة النهاية والخروج للمتسابق -->
         <div id="success-screen" class="hidden bg-white p-8 rounded-2xl shadow-xl border border-slate-100 text-center w-full">
-            <div class="text-6xl mb-4">🌟</div>
-            <h2 class="text-2xl font-black text-slate-800 mb-2">تم تقديم إجابتك بنجاح!</h2>
-            <p class="text-slate-600 text-sm mb-6 leading-relaxed">
-                شكراً لمشاركتك اليوم. تم تسجيل إجاباتك بنجاح، وسوف تُعلن النتائج النهائية في قروب العائلة.
+            <div class="text-6xl mb-4">✅</div>
+            <h2 class="text-2xl font-black text-slate-800 mb-2">تم تسجيل إجابتك بنجاح!</h2>
+            <p class="text-slate-600 text-sm mb-4 leading-relaxed">
+                شكراً لمشاركتك. تم إرسال إجابتك للمشرف، وسوف تُعلن النتائج النهائية لاحقاً في القروب.
             </p>
-
-            <div class="space-y-3">
-                <!-- زر انسخ نص المشاركة -->
-                <button id="copy-btn" onclick="copyShareText()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-md transition duration-200 flex items-center justify-center gap-2">
-                    <span>📋 انسخ رسالة المشاركة للقروب</span>
-                </button>
-
-                <!-- زر فتح واتساب مباشر -->
-                <a id="whatsapp-share-btn" href="#" target="_blank" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition duration-200 flex items-center justify-center gap-2">
-                    <span>📲 فتح واتساب مباشر</span>
-                </a>
-            </div>
-
-            <div id="copy-toast" class="hidden mt-3 p-2 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-lg border border-emerald-200">
-                ✅ تم نسخ النص بنجاح! يمكنك الآن لصقه في القروب.
+            <div class="p-3 bg-slate-100 text-slate-500 rounded-xl text-xs font-bold">
+                🔒 تم إغلاق المسابقة لهذا اليوم.
             </div>
         </div>
 
@@ -132,7 +119,6 @@
         let selectedCategory = "";
         let timerInterval = null;
         let timeLeft = 60;
-        let generatedShareText = "";
 
         document.getElementById('current-year').innerText = new Date().getFullYear();
 
@@ -303,25 +289,11 @@
         }
 
         function saveAndExit() {
+            // حفظ حالة المحاولة لمنع العودة مجدداً بنفس اليوم
             localStorage.setItem('played_' + todayStr, 'true');
 
-            const currentUrl = window.location.href;
-            generatedShareText = `✨ تمت المشاركة في المسابقة العائلية اليومية 🏆\n👤 الفئة: ${selectedCategory}\n📅 التاريخ: ${todayStr}\n\nشاركونا التحدي الآن عبر الرابط! 👇\n${currentUrl}`;
-
-            // رابط wa.me المباشر والمضمون لواتساب ويب
-            document.getElementById('whatsapp-share-btn').href = `https://wa.me/?text=${encodeURIComponent(generatedShareText)}`;
-
+            // الانتقال لشاشة الخروج وتأكيد التسجيل دون أي أزرار أو مشتتات
             showScreen('success-screen');
-        }
-
-        function copyShareText() {
-            navigator.clipboard.writeText(generatedShareText).then(() => {
-                const toast = document.getElementById('copy-toast');
-                toast.classList.remove('hidden');
-                setTimeout(() => toast.classList.add('hidden'), 3000);
-            }).catch(err => {
-                alert("لم نتمكن من النسخ التلقائي، يمكنك نسخ الرابط يدوياً.");
-            });
         }
     </script>
 </body>
