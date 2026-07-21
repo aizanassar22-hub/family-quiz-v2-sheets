@@ -146,45 +146,39 @@
             fetchQuizData();
         }
 
-        // دالة تحويل نص CSV إلى مصفوفة
-        function parseCSV(text) {
-            const lines = text.trim().split('\n');
-            const result = [];
-            lines.forEach(line => {
-                // تقسيم بفاصلة CSV مع التعامل مع المسافات
-                const row = line.split(',').map(cell => cell.replace(/^"(.*)"$/, '$1').trim());
-                result.push(row);
-            });
-            return result;
-        }
-
         function fetchQuizData() {
-            // رابط القراءة المباشرة للشيت بدون وسطاء
-            const csvUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vSI4X-RLioAbJddVAp8Bb3eMyB2SwBkt3i-ftoack_KmJkSUYQJBP_eBiX23rEPAgPmwlhIYN9WyKn/pub?gid=0&single=true&output=csv`;
-            
-            fetch(csvUrl)
-                .then(res => res.text())
-                .then(csvText => {
-                    const rows = parseCSV(csvText);
-                    // البحث في الصفوف عن تاريخ اليوم
-                    let foundRow = null;
-                    for (let i = 1; i < rows.length; i++) {
-                        if (rows[i][0] && rows[i][0].includes(todayStr)) {
-                            foundRow = rows[i];
-                            break;
-                        }
-                    }
+            // سحب البيانات عبر رابط GViz لتجنب مشاكل التنسيق أو تحويل النص
+            const sheetId = '1l7oNORcR5mXDZVNoOnFdqJ-0Thqry3klpAloSAHVSQ';
+            const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
-                    if (foundRow) {
-                        currentQuizData = {
-                            date: foundRow[0],
-                            question: foundRow[1],
-                            opt1: foundRow[2],
-                            opt2: foundRow[3],
-                            opt3: foundRow[4],
-                            opt4: foundRow[5],
-                            correct: foundRow[6]
-                        };
+            fetch(gvizUrl)
+                .then(res => res.text())
+                .then(text => {
+                    // معالجة استجابة Google Visualization JSON
+                    const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                    const data = JSON.parse(jsonString);
+                    const rows = data.table.rows;
+
+                    let foundQuiz = null;
+
+                    rows.forEach(row => {
+                        if (row.c && row.c[0] && row.c[0].v) {
+                            const dateVal = String(row.c[0].v).trim();
+                            if (dateVal.includes(todayStr)) {
+                                foundQuiz = {
+                                    question: row.c[1] ? String(row.c[1].v).trim() : '',
+                                    opt1: row.c[2] ? String(row.c[2].v).trim() : '',
+                                    opt2: row.c[3] ? String(row.c[3].v).trim() : '',
+                                    opt3: row.c[4] ? String(row.c[4].v).trim() : '',
+                                    opt4: row.c[5] ? String(row.c[5].v).trim() : '',
+                                    correct: row.c[6] ? String(row.c[6].v).trim() : ''
+                                };
+                            }
+                        }
+                    });
+
+                    if (foundQuiz) {
+                        currentQuizData = foundQuiz;
                         showScreen('category-screen');
                     } else {
                         showScreen('rest-screen');
