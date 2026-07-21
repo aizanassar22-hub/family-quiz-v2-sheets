@@ -103,9 +103,21 @@
                 شكراً لمشاركتك اليوم. تم تسجيل إجاباتك بنجاح، وسوف تُعلن النتائج النهائية في قروب العائلة.
             </p>
 
-            <a id="whatsapp-share-btn" href="#" target="_blank" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition duration-200 flex items-center justify-center gap-2 mb-4">
-                <span>شارك مشاركتك في قروب العائلة</span> 📲
-            </a>
+            <div class="space-y-3">
+                <!-- زر انسخ نص المشاركة -->
+                <button id="copy-btn" onclick="copyShareText()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-md transition duration-200 flex items-center justify-center gap-2">
+                    <span>📋 انسخ رسالة المشاركة للقروب</span>
+                </button>
+
+                <!-- زر فتح واتساب مباشر -->
+                <a id="whatsapp-share-btn" href="#" target="_blank" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition duration-200 flex items-center justify-center gap-2">
+                    <span>📲 فتح واتساب مباشر</span>
+                </a>
+            </div>
+
+            <div id="copy-toast" class="hidden mt-3 p-2 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-lg border border-emerald-200">
+                ✅ تم نسخ النص بنجاح! يمكنك الآن لصقه في القروب.
+            </div>
         </div>
 
     </main>
@@ -120,6 +132,7 @@
         let selectedCategory = "";
         let timerInterval = null;
         let timeLeft = 60;
+        let generatedShareText = "";
 
         document.getElementById('current-year').innerText = new Date().getFullYear();
 
@@ -137,7 +150,6 @@
             fetchQuizData();
         }
 
-        // دالة بسيطة ومضمونة لتحليل أسطر CSV
         function parseCSVLine(text) {
             let p = '', c = '', r = [];
             let q = false;
@@ -157,7 +169,6 @@
         }
 
         function fetchQuizData() {
-            // رابط النشر المباشر بصيغة CSV المأخوذ من شيت المسابقات
             const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSl4X-RLioAbJddVAp8bB3eMyB2SwBkt3i-ftoack_KmJkSUYQJbP_eBiX2X3rEPAgPmwlHiYN9wyKr/pub?output=csv';
 
             fetch(csvUrl)
@@ -166,12 +177,10 @@
                     const lines = text.split(/\r?\n/);
                     let quizToUse = null;
 
-                    // تجاوز السطر الأول (الهيدر) والبحث عن أوّل سؤال متوفر
                     for (let i = 1; i < lines.length; i++) {
                         if (!lines[i].trim()) continue;
                         const cols = parseCSVLine(lines[i]);
                         
-                        // الترتيب: [0]=التاريخ, [1]=السؤال, [2]=خيار1, [3]=خيار2, [4]=خيار3, [5]=خيار4, [6]=الجواب الصحيح
                         if (cols.length >= 6 && cols[1]) {
                             quizToUse = {
                                 question: cols[1],
@@ -296,10 +305,23 @@
         function saveAndExit() {
             localStorage.setItem('played_' + todayStr, 'true');
 
-            const shareText = encodeURIComponent(`✨ تمت المشاركة في المسابقة العائلية اليومية 🏆\n👤 الفئة: ${selectedCategory}\n📅 التاريخ: ${todayStr}\n\nشاركونا التحدي الآن عبر الرابط! 👇`);
-            document.getElementById('whatsapp-share-btn').href = `https://api.whatsapp.com/send?text=${shareText}`;
+            const currentUrl = window.location.href;
+            generatedShareText = `✨ تمت المشاركة في المسابقة العائلية اليومية 🏆\n👤 الفئة: ${selectedCategory}\n📅 التاريخ: ${todayStr}\n\nشاركونا التحدي الآن عبر الرابط! 👇\n${currentUrl}`;
+
+            // رابط wa.me المباشر والمضمون لواتساب ويب
+            document.getElementById('whatsapp-share-btn').href = `https://wa.me/?text=${encodeURIComponent(generatedShareText)}`;
 
             showScreen('success-screen');
+        }
+
+        function copyShareText() {
+            navigator.clipboard.writeText(generatedShareText).then(() => {
+                const toast = document.getElementById('copy-toast');
+                toast.classList.remove('hidden');
+                setTimeout(() => toast.classList.add('hidden'), 3000);
+            }).catch(err => {
+                alert("لم نتمكن من النسخ التلقائي، يمكنك نسخ الرابط يدوياً.");
+            });
         }
     </script>
 </body>
