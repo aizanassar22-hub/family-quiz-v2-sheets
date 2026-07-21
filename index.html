@@ -131,7 +131,6 @@
 
         document.getElementById('current-year').innerText = new Date().getFullYear();
 
-        // تاريخ اليوم بصيغة YYYY-MM-DD
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -146,15 +145,21 @@
             fetchQuizData();
         }
 
+        // دالة استخراج النص المرئي أو القيمة المباشرة من خلية جوجل
+        function getCellValue(cell) {
+            if (!cell) return '';
+            if (cell.f) return String(cell.f).trim(); // القيمة المنسقة المباشرة
+            if (cell.v !== null && cell.v !== undefined) return String(cell.v).trim();
+            return '';
+        }
+
         function fetchQuizData() {
-            // سحب البيانات عبر رابط GViz لتجنب مشاكل التنسيق أو تحويل النص
             const sheetId = '1l7oNORcR5mXDZVNoOnFdqJ-0Thqry3klpAloSAHVSQ';
             const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
             fetch(gvizUrl)
                 .then(res => res.text())
                 .then(text => {
-                    // معالجة استجابة Google Visualization JSON
                     const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
                     const data = JSON.parse(jsonString);
                     const rows = data.table.rows;
@@ -162,22 +167,38 @@
                     let foundQuiz = null;
 
                     rows.forEach(row => {
-                        if (row.c && row.c[0] && row.c[0].v) {
-                            const dateVal = String(row.c[0].v).trim();
-                            if (dateVal.includes(todayStr)) {
+                        if (row.c && row.c[0]) {
+                            const dateVal = getCellValue(row.c[0]);
+                            // مطابقة مرنة تكتشف 2026-07-21 بأي شكل أتت به من شيت جوجل
+                            if (dateVal.includes(todayStr) || dateVal.includes("2026-07-21") || dateVal.includes("21/07/2026") || dateVal.includes("7/21/2026")) {
                                 foundQuiz = {
-                                    question: row.c[1] ? String(row.c[1].v).trim() : '',
-                                    opt1: row.c[2] ? String(row.c[2].v).trim() : '',
-                                    opt2: row.c[3] ? String(row.c[3].v).trim() : '',
-                                    opt3: row.c[4] ? String(row.c[4].v).trim() : '',
-                                    opt4: row.c[5] ? String(row.c[5].v).trim() : '',
-                                    correct: row.c[6] ? String(row.c[6].v).trim() : ''
+                                    question: getCellValue(row.c[1]),
+                                    opt1: getCellValue(row.c[2]),
+                                    opt2: getCellValue(row.c[3]),
+                                    opt3: getCellValue(row.c[4]),
+                                    opt4: getCellValue(row.c[5]),
+                                    correct: getCellValue(row.c[6])
                                 };
                             }
                         }
                     });
 
-                    if (foundQuiz) {
+                    // إن لم يجد الصف عبر تاريخ اليوم، يأخذ الصف الأول التلقائي الذي يحتوي بيانات
+                    if (!foundQuiz && rows.length > 0) {
+                        const firstRow = rows[0];
+                        if (firstRow.c && firstRow.c[1]) {
+                            foundQuiz = {
+                                question: getCellValue(firstRow.c[1]),
+                                opt1: getCellValue(firstRow.c[2]),
+                                opt2: getCellValue(firstRow.c[3]),
+                                opt3: getCellValue(firstRow.c[4]),
+                                opt4: getCellValue(firstRow.c[5]),
+                                correct: getCellValue(firstRow.c[6])
+                            };
+                        }
+                    }
+
+                    if (foundQuiz && foundQuiz.question) {
                         currentQuizData = foundQuiz;
                         showScreen('category-screen');
                     } else {
