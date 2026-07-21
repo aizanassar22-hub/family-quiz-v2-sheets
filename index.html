@@ -137,42 +137,51 @@
             fetchQuizData();
         }
 
-        function extractVal(cell) {
-            if (!cell) return '';
-            if (cell.f) return String(cell.f).trim();
-            if (cell.v !== null && cell.v !== undefined) return String(cell.v).trim();
-            return '';
+        // دالة بسيطة ومضمونة لتحليل أسطر CSV
+        function parseCSVLine(text) {
+            let p = '', c = '', r = [];
+            let q = false;
+            for (let i = 0; i < text.length; i++) {
+                c = text[i];
+                if (c === '"') {
+                    q = !q;
+                } else if (c === ',' && !q) {
+                    r.push(p.trim().replace(/^"|"$/g, ''));
+                    p = '';
+                } else {
+                    p += c;
+                }
+            }
+            r.push(p.trim().replace(/^"|"$/g, ''));
+            return r;
         }
 
         function fetchQuizData() {
-            const sheetId = '1l7oNORcR5mXDZVNoOnFdqJ-0Thqry3klpAloSAHVSQ';
-            // القراءة المباشرة وتحديد اسم الورقة "أسئلة المسابقة" بالتحديد
-            const sheetName = encodeURIComponent('أسئلة المسابقة');
-            const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${sheetName}&tqx=out:json`;
+            // رابط النشر المباشر بصيغة CSV المأخوذ من شيت المسابقات
+            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSl4X-RLioAbJddVAp8bB3eMyB2SwBkt3i-ftoack_KmJkSUYQJbP_eBiX2X3rEPAgPmwlHiYN9wyKr/pub?output=csv';
 
-            fetch(gvizUrl)
+            fetch(csvUrl)
                 .then(res => res.text())
                 .then(text => {
-                    const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-                    const data = JSON.parse(jsonString);
-                    const rows = data.table.rows;
-
+                    const lines = text.split(/\r?\n/);
                     let quizToUse = null;
 
-                    // البحث في صفوف ورقة "أسئلة المسابقة"
-                    if (rows && rows.length > 0) {
-                        for (let r of rows) {
-                            if (r.c && r.c[1] && extractVal(r.c[1]) !== '') {
-                                quizToUse = {
-                                    question: extractVal(r.c[1]),
-                                    opt1: extractVal(r.c[2]),
-                                    opt2: extractVal(r.c[3]),
-                                    opt3: extractVal(r.c[4]),
-                                    opt4: extractVal(r.c[5]),
-                                    correct: extractVal(r.c[6])
-                                };
-                                break;
-                            }
+                    // تجاوز السطر الأول (الهيدر) والبحث عن أوّل سؤال متوفر
+                    for (let i = 1; i < lines.length; i++) {
+                        if (!lines[i].trim()) continue;
+                        const cols = parseCSVLine(lines[i]);
+                        
+                        // الترتيب: [0]=التاريخ, [1]=السؤال, [2]=خيار1, [3]=خيار2, [4]=خيار3, [5]=خيار4, [6]=الجواب الصحيح
+                        if (cols.length >= 6 && cols[1]) {
+                            quizToUse = {
+                                question: cols[1],
+                                opt1: cols[2] || '',
+                                opt2: cols[3] || '',
+                                opt3: cols[4] || '',
+                                opt4: cols[5] || '',
+                                correct: cols[6] || ''
+                            };
+                            break;
                         }
                     }
 
@@ -184,7 +193,7 @@
                     }
                 })
                 .catch(err => {
-                    console.error("خطأ للجلب من الورقة:", err);
+                    console.error("خطأ جلب CSV:", err);
                     showScreen('rest-screen');
                 });
         }
