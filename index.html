@@ -114,11 +114,15 @@
     </footer>
 
     <script>
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-lampsS01cnHG_rPEmjthiUTAxi4Zfs86Ft7mRWoN4ROIvL39yhkPq6orQGLfC_J_/exec';
+
         let currentQuizData = null;
         let selectedOption = null;
         let selectedCategory = "";
         let timerInterval = null;
         let timeLeft = 60;
+        let timeTaken = 0;
+        let isCorrectAnswer = false;
 
         document.getElementById('current-year').innerText = new Date().getFullYear();
 
@@ -262,6 +266,7 @@
             }
 
             clearInterval(timerInterval);
+            timeTaken = 60 - timeLeft;
 
             const rawCorrect = String(currentQuizData.correct).trim();
             let correctAnswerText = rawCorrect;
@@ -271,12 +276,12 @@
             else if (rawCorrect === "3") correctAnswerText = currentQuizData.opt3;
             else if (rawCorrect === "4") correctAnswerText = currentQuizData.opt4;
 
-            const isCorrect = selectedOption === correctAnswerText;
+            isCorrectAnswer = (selectedOption === correctAnswerText);
             const feedbackArea = document.getElementById('feedback-area');
 
             feedbackArea.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800', 'bg-rose-100', 'text-rose-800');
             
-            if (isCorrect) {
+            if (isCorrectAnswer) {
                 feedbackArea.classList.add('bg-emerald-100', 'text-emerald-800');
                 feedbackArea.innerHTML = "🎉 إجابة صحيحة! أحسنت.";
             } else {
@@ -289,10 +294,28 @@
         }
 
         function saveAndExit() {
+            // إرسال البيانات إلى Google Sheets
+            const payload = {
+                date: todayStr,
+                category: selectedCategory,
+                answer: selectedOption || "لم يجّب (انتهى الوقت)",
+                isCorrect: isCorrectAnswer,
+                timeTaken: timeTaken
+            };
+
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }).catch(err => console.error("خطأ إرسال الإجابة:", err));
+
             // حفظ حالة المحاولة لمنع العودة مجدداً بنفس اليوم
             localStorage.setItem('played_' + todayStr, 'true');
 
-            // الانتقال لشاشة الخروج وتأكيد التسجيل دون أي أزرار أو مشتتات
+            // الانتقال لشاشة الخروج وتأكيد التسجيل
             showScreen('success-screen');
         }
     </script>
