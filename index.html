@@ -33,7 +33,7 @@
         <div id="rest-screen" class="hidden bg-white p-8 rounded-2xl shadow-xl border border-slate-100 text-center w-full">
             <div class="text-6xl mb-4">☕</div>
             <h2 class="text-2xl font-bold text-slate-800 mb-2">استراحة اليوم</h2>
-            <p class="text-slate-500">لا توجد مسابقة نشطة حالياً لتاريخ اليوم في جدول البيانات.</p>
+            <p class="text-slate-500">لا توجد مسابقة نشطة حالياً في جدول البيانات.</p>
         </div>
 
         <!-- شاشة تمت المشاركة سابقاً -->
@@ -70,7 +70,6 @@
         <!-- شاشة السؤال -->
         <div id="quiz-screen" class="hidden bg-white p-6 rounded-2xl shadow-xl border border-slate-100 w-full">
             
-            <!-- المؤقت الزمني -->
             <div class="mb-4 bg-amber-50 border border-amber-200 p-2 rounded-xl flex items-center justify-between px-4">
                 <span class="text-xs font-bold text-amber-800 flex items-center gap-1">⏱️ الوقت المتبقي:</span>
                 <span id="timer-display" class="text-lg font-black text-amber-600">60 ثانية</span>
@@ -83,9 +82,7 @@
 
             <h3 id="question-text" class="text-lg font-bold text-slate-800 mb-6 leading-relaxed">--</h3>
 
-            <div id="options-container" class="space-y-3 mb-6">
-                <!-- الخيارات -->
-            </div>
+            <div id="options-container" class="space-y-3 mb-6"></div>
 
             <div id="feedback-area" class="hidden mb-6 p-4 rounded-xl text-center font-bold text-sm"></div>
 
@@ -98,26 +95,21 @@
             </button>
         </div>
 
-        <!-- شاشة النجاح والنهاية -->
+        <!-- شاشة النجاح -->
         <div id="success-screen" class="hidden bg-white p-8 rounded-2xl shadow-xl border border-slate-100 text-center w-full">
             <div class="text-6xl mb-4">🌟</div>
             <h2 class="text-2xl font-black text-slate-800 mb-2">تم تقديم إجابتك بنجاح!</h2>
             <p class="text-slate-600 text-sm mb-6 leading-relaxed">
-                شكراً لمشاركتك اليوم. تم حفظ إجاباتك في سجل النتائج لدى المشرف، وسوف تُعلن النتائج النهائية في قروب العائلة.
+                شكراً لمشاركتك اليوم. تم تسجيل إجاباتك بنجاح، وسوف تُعلن النتائج النهائية في قروب العائلة.
             </p>
 
             <a id="whatsapp-share-btn" href="#" target="_blank" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition duration-200 flex items-center justify-center gap-2 mb-4">
                 <span>شارك مشاركتك في قروب العائلة</span> 📲
             </a>
-
-            <div class="text-xs text-slate-400 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                🔒 يرجى العودة في المسابقة القادمة
-            </div>
         </div>
 
     </main>
 
-    <!-- الفوتر -->
     <footer class="text-center py-4 text-xs font-bold text-slate-400 border-t border-slate-200 bg-white">
         منصة المسابقة العائلية اليومية © <span id="current-year"></span>
     </footer>
@@ -145,16 +137,16 @@
             fetchQuizData();
         }
 
-        // دالة استخراج النص المرئي أو القيمة المباشرة من خلية جوجل
-        function getCellValue(cell) {
+        function extractVal(cell) {
             if (!cell) return '';
-            if (cell.f) return String(cell.f).trim(); // القيمة المنسقة المباشرة
+            if (cell.f) return String(cell.f).trim();
             if (cell.v !== null && cell.v !== undefined) return String(cell.v).trim();
             return '';
         }
 
         function fetchQuizData() {
             const sheetId = '1l7oNORcR5mXDZVNoOnFdqJ-0Thqry3klpAloSAHVSQ';
+            // جلب البيانات من أول ورقة عمل فوراً
             const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
             fetch(gvizUrl)
@@ -164,49 +156,51 @@
                     const data = JSON.parse(jsonString);
                     const rows = data.table.rows;
 
-                    let foundQuiz = null;
+                    let quizToUse = null;
 
+                    // 1. محاولة البحث عن تاريخ اليوم
                     rows.forEach(row => {
                         if (row.c && row.c[0]) {
-                            const dateVal = getCellValue(row.c[0]);
-                            // مطابقة مرنة تكتشف 2026-07-21 بأي شكل أتت به من شيت جوجل
-                            if (dateVal.includes(todayStr) || dateVal.includes("2026-07-21") || dateVal.includes("21/07/2026") || dateVal.includes("7/21/2026")) {
-                                foundQuiz = {
-                                    question: getCellValue(row.c[1]),
-                                    opt1: getCellValue(row.c[2]),
-                                    opt2: getCellValue(row.c[3]),
-                                    opt3: getCellValue(row.c[4]),
-                                    opt4: getCellValue(row.c[5]),
-                                    correct: getCellValue(row.c[6])
+                            const dVal = extractVal(row.c[0]);
+                            if (dVal.includes("21") || dVal.includes(todayStr)) {
+                                quizToUse = {
+                                    question: extractVal(row.c[1]),
+                                    opt1: extractVal(row.c[2]),
+                                    opt2: extractVal(row.c[3]),
+                                    opt3: extractVal(row.c[4]),
+                                    opt4: extractVal(row.c[5]),
+                                    correct: extractVal(row.c[6])
                                 };
                             }
                         }
                     });
 
-                    // إن لم يجد الصف عبر تاريخ اليوم، يأخذ الصف الأول التلقائي الذي يحتوي بيانات
-                    if (!foundQuiz && rows.length > 0) {
-                        const firstRow = rows[0];
-                        if (firstRow.c && firstRow.c[1]) {
-                            foundQuiz = {
-                                question: getCellValue(firstRow.c[1]),
-                                opt1: getCellValue(firstRow.c[2]),
-                                opt2: getCellValue(firstRow.c[3]),
-                                opt3: getCellValue(firstRow.c[4]),
-                                opt4: getCellValue(firstRow.c[5]),
-                                correct: getCellValue(firstRow.c[6])
-                            };
+                    // 2. إذا لم يتطابق التاريخ، خذ أول صف يحتوي على سؤال مباشرة (ضمان لعدم ظهور الاستراحة)
+                    if (!quizToUse && rows.length > 0) {
+                        for (let r of rows) {
+                            if (r.c && r.c[1] && extractVal(r.c[1]) !== '') {
+                                quizToUse = {
+                                    question: extractVal(r.c[1]),
+                                    opt1: extractVal(r.c[2]),
+                                    opt2: extractVal(r.c[3]),
+                                    opt3: extractVal(r.c[4]),
+                                    opt4: extractVal(r.c[5]),
+                                    correct: extractVal(r.c[6])
+                                };
+                                break;
+                            }
                         }
                     }
 
-                    if (foundQuiz && foundQuiz.question) {
-                        currentQuizData = foundQuiz;
+                    if (quizToUse && quizToUse.question) {
+                        currentQuizData = quizToUse;
                         showScreen('category-screen');
                     } else {
                         showScreen('rest-screen');
                     }
                 })
                 .catch(err => {
-                    console.error("خطأ في الجلب:", err);
+                    console.error("خطأ:", err);
                     showScreen('rest-screen');
                 });
         }
