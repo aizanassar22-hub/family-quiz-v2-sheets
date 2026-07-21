@@ -131,7 +131,7 @@
 
         document.getElementById('current-year').innerText = new Date().getFullYear();
 
-        // جلب تاريخ اليوم بصيغة YYYY-MM-DD
+        // تاريخ اليوم بصيغة YYYY-MM-DD
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -146,20 +146,45 @@
             fetchQuizData();
         }
 
-        function fetchQuizData() {
-            const url = `https://opensheet.elk.sh/1l7oNORcR5mXDZVNoOnFdqJ-0Thqry3klpAloSAHVSQ/أسئلة%20المسابقة`;
-            
-            fetch(url)
-                .then(res => res.json())
-                .then(data => {
-                    // مطابقة هادئة لتاريخ اليوم بدون تشديد التنسيق
-                    const todayQuiz = data.find(item => {
-                        if (!item["التاريخ"]) return false;
-                        return String(item["التاريخ"]).trim().includes(todayStr);
-                    });
+        // دالة تحويل نص CSV إلى مصفوفة
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            const result = [];
+            lines.forEach(line => {
+                // تقسيم بفاصلة CSV مع التعامل مع المسافات
+                const row = line.split(',').map(cell => cell.replace(/^"(.*)"$/, '$1').trim());
+                result.push(row);
+            });
+            return result;
+        }
 
-                    if (todayQuiz) {
-                        currentQuizData = todayQuiz;
+        function fetchQuizData() {
+            // رابط القراءة المباشرة للشيت بدون وسطاء
+            const csvUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vSI4X-RLioAbJddVAp8Bb3eMyB2SwBkt3i-ftoack_KmJkSUYQJBP_eBiX23rEPAgPmwlhIYN9WyKn/pub?gid=0&single=true&output=csv`;
+            
+            fetch(csvUrl)
+                .then(res => res.text())
+                .then(csvText => {
+                    const rows = parseCSV(csvText);
+                    // البحث في الصفوف عن تاريخ اليوم
+                    let foundRow = null;
+                    for (let i = 1; i < rows.length; i++) {
+                        if (rows[i][0] && rows[i][0].includes(todayStr)) {
+                            foundRow = rows[i];
+                            break;
+                        }
+                    }
+
+                    if (foundRow) {
+                        currentQuizData = {
+                            date: foundRow[0],
+                            question: foundRow[1],
+                            opt1: foundRow[2],
+                            opt2: foundRow[3],
+                            opt3: foundRow[4],
+                            opt4: foundRow[5],
+                            correct: foundRow[6]
+                        };
                         showScreen('category-screen');
                     } else {
                         showScreen('rest-screen');
@@ -187,16 +212,16 @@
             }
 
             document.getElementById('user-category-tag').innerText = "الفئة: " + selectedCategory;
-            document.getElementById('question-text').innerText = currentQuizData["السؤال"];
+            document.getElementById('question-text').innerText = currentQuizData.question;
 
             const optionsContainer = document.getElementById('options-container');
             optionsContainer.innerHTML = '';
 
             const options = [
-                currentQuizData["الخيار 1"],
-                currentQuizData["الخيار 2"],
-                currentQuizData["الخيار 3"],
-                currentQuizData["الخيار 4"]
+                currentQuizData.opt1,
+                currentQuizData.opt2,
+                currentQuizData.opt3,
+                currentQuizData.opt4
             ].filter(Boolean);
 
             options.forEach((opt) => {
@@ -241,14 +266,13 @@
 
             clearInterval(timerInterval);
 
-            // قبول الإجابة سواء كُتبت كنص أو كرقم الخيار
-            const rawCorrect = String(currentQuizData["الإجابة الصحيحة"]).trim();
+            const rawCorrect = String(currentQuizData.correct).trim();
             let correctAnswerText = rawCorrect;
 
-            if (rawCorrect === "1") correctAnswerText = currentQuizData["الخيار 1"];
-            else if (rawCorrect === "2") correctAnswerText = currentQuizData["الخيار 2"];
-            else if (rawCorrect === "3") correctAnswerText = currentQuizData["الخيار 3"];
-            else if (rawCorrect === "4") correctAnswerText = currentQuizData["الخيار 4"];
+            if (rawCorrect === "1") correctAnswerText = currentQuizData.opt1;
+            else if (rawCorrect === "2") correctAnswerText = currentQuizData.opt2;
+            else if (rawCorrect === "3") correctAnswerText = currentQuizData.opt3;
+            else if (rawCorrect === "4") correctAnswerText = currentQuizData.opt4;
 
             const isCorrect = selectedOption === correctAnswerText;
             const feedbackArea = document.getElementById('feedback-area');
