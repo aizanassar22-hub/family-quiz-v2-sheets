@@ -6,10 +6,8 @@
     <title>المسابقة العائلية اليومية</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- PapaParse for CSV Parsing -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
         body { font-family: 'Tajawal', sans-serif; }
@@ -17,7 +15,7 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
-    <!-- Header / Admin Bar -->
+    <!-- Header / Admin Status -->
     <header class="bg-purple-900 text-white text-xs py-2 px-4 flex justify-between items-center shadow-md">
         <div>
             <span class="bg-purple-800 px-2 py-1 rounded text-purple-200 font-bold">
@@ -32,7 +30,7 @@
     <!-- Main Container -->
     <main class="container mx-auto px-4 py-6 max-w-2xl flex-grow">
         
-        <!-- App Title & Date Bar -->
+        <!-- App Title & Leaderboard Trigger -->
         <div class="flex justify-between items-center mb-6">
             <button id="top-leaderboard-btn" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl shadow font-bold text-sm flex items-center gap-2 transition">
                 <i class="fas fa-trophy"></i> لوحة الصدارة
@@ -47,9 +45,8 @@
             </span>
         </div>
 
-        <!-- Dynamic Content Card -->
+        <!-- Dynamic Content Area -->
         <div id="app-card" class="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 md:p-8 transition-all duration-300">
-            <!-- Content will be injected dynamically via JS -->
             <div class="text-center py-12">
                 <i class="fas fa-spinner fa-spin text-4xl text-indigo-600 mb-4"></i>
                 <p class="text-slate-500 font-medium">جاري تحميل المسابقة والبيانات...</p>
@@ -75,7 +72,7 @@
                 </button>
             </div>
 
-            <!-- Gender Filter Tabs -->
+            <!-- Gender Tabs -->
             <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
                 <button id="tab-men" class="flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600">
                     فئات الرجال 👨
@@ -85,33 +82,36 @@
                 </button>
             </div>
 
-            <!-- Leaderboard List -->
-            <div id="leaderboard-list" class="space-y-3 max-h-80 overflow-y-auto pr-1">
-                <!-- Injected via JS -->
-            </div>
+            <!-- Leaderboard Items Container -->
+            <div id="leaderboard-list" class="space-y-3 max-h-80 overflow-y-auto pr-1"></div>
         </div>
     </div>
 
-    <!-- Application Logic Script -->
+    <!-- Application Script -->
     <script>
-        // Data URLs
-        const QUESTIONS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT5Ais944E571OByi0L8yX7M2N31KkI3_00k_U2e4ZgQ_6fM_5aJ141M7kX2V1L9S3C3R1X8M3K2S/pub?output=csv'; // Standard Quiz CSV URL
-        const SCRIPT_WEB_APP_URL = ''; // Apps Script URL for saving responses if available
+        // Configuration - Google Sheets CSV Web Publish Link
+        const QUESTIONS_CSV_URL = ''; // ضع رابط الـ CSV المباشر هنا عند الجاهزية
 
-        // Global State
-        let questionsData = [];
-        let currentQuestion = null;
+        // Default Dynamic Fallback Question (Guarantees app opens immediately)
+        const DEFAULT_QUESTION = {
+            question: "ما هو أول مساجد الإسلام؟",
+            options: ["المسجد الحرام", "مسجد قباء", "المسجد النبوي", "المسجد الأقصى"],
+            correctAnswer: "مسجد قباء"
+        };
+
+        // Application State
+        let currentQuizData = null;
         let selectedOptionIndex = null;
         let timerInterval = null;
         let timeLeft = 60;
-        let activeTab = 'women'; // 'men' or 'women'
+        let activeTab = 'women';
 
-        // Leaderboard Mock Data (to be synced with backend)
+        // Mock Leaderboard State
         const leaderboardData = {
             women: [
                 { name: 'نساء 1', points: 0, rank: '#1' },
-                { name: 'نساء 2', points: 0, rank: '#5' },
-                { name: 'نساء 3', points: 0, rank: '#6' }
+                { name: 'نساء 2', points: 0, rank: '#2' },
+                { name: 'نساء 3', points: 0, rank: '#3' }
             ],
             men: [
                 { name: 'رجال 1', points: 0, rank: '#1' },
@@ -120,22 +120,22 @@
             ]
         };
 
-        // Text Normalization Helper for Robust Comparison
+        // Text Normalization for String Comparison
         function normalizeText(str) {
             if (!str) return '';
             return String(str)
                 .trim()
-                .replace(/[\u064B-\u0652]/g, '') // Remove Arabic Harakat (Tashkeel)
+                .replace(/[\u064B-\u0652]/g, '') // Remove Arabic Tashkeel
                 .replace(/[أإآ]/g, 'ا')
                 .replace(/ة/g, 'ه')
                 .replace(/ى/g, 'ي')
                 .toLowerCase();
         }
 
-        // Initialize App
+        // Initialize Application
         document.addEventListener('DOMContentLoaded', () => {
-            fetchQuestions();
             setupEventListeners();
+            loadQuizData();
         });
 
         function setupEventListeners() {
@@ -146,76 +146,66 @@
             document.getElementById('tab-women').addEventListener('click', () => switchTab('women'));
         }
 
-        // Fetch & Parse CSV Data
-        function fetchQuestions() {
-            Papa.parse(QUESTIONS_CSV_URL, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    if (results.data && results.data.length > 0) {
-                        questionsData = results.data;
-                        renderQuizScreen(questionsData[0]);
-                    } else {
-                        // Fallback sample question if CSV loading fails or is empty
-                        renderQuizScreen({
-                            'السؤال': 'ما هو أول مساجد الإسلام؟',
-                            'الخيار 1': 'المسجد الحرام',
-                            'الخيار 2': 'مسجد قِبار',
-                            'الخيار 3': 'المسجد النبوي',
-                            'الخيار 4': 'المسجد الأقصى',
-                            'الإجابة الصحيحة': 'مسجد قِبار'
-                        });
-                    }
-                },
-                error: function(err) {
-                    console.error("CSV Load Error:", err);
-                    // Robust Fallback
-                    renderQuizScreen({
-                        'السؤال': 'ما هو أول مساجد الإسلام؟',
-                        'الخيار 1': 'المسجد الحرام',
-                        'الخيار 2': 'مسجد قِبار',
-                        'الخيار 3': 'المسجد النبوي',
-                        'الخيار 4': 'المسجد الأقصى',
-                        'الإجابة الصحيحة': '2'
-                    });
-                }
-            });
-        }
-
-        // Detect Correct Answer from Any CSV Column Name Variations
-        function extractCorrectAnswer(qData) {
-            if (!qData) return '';
-            
-            // Search for column keys dynamically
-            const keys = Object.keys(qData);
-            const correctKey = keys.find(k => {
-                const normKey = normalizeText(k);
-                return normKey.includes('صح') || normKey.includes('اجاب') || normKey.includes('correct') || normKey.includes('answer');
-            });
-
-            if (correctKey && qData[correctKey]) {
-                return String(qData[correctKey]).trim();
+        // Load Quiz Data from Sheets or Fallback immediately
+        async function loadQuizData() {
+            if (!QUESTIONS_CSV_URL) {
+                // Instantly load default question if URL is empty
+                currentQuizData = DEFAULT_QUESTION;
+                renderQuizScreen();
+                return;
             }
 
-            // Default Fallbacks if key search fails
-            return qData['الإجابة الصحيحة'] || qData['الاجابة الصحيحة'] || qData['Correct Answer'] || qData['Answer'] || '';
+            try {
+                const response = await fetch(QUESTIONS_CSV_URL);
+                const csvText = await response.text();
+                const parsedData = parseSimpleCSV(csvText);
+
+                if (parsedData && parsedData.length > 0) {
+                    const row = parsedData[0];
+                    currentQuizData = {
+                        question: row['السؤال'] || row['Question'] || DEFAULT_QUESTION.question,
+                        options: [
+                            row['الخيار 1'] || row['Option 1'] || DEFAULT_QUESTION.options[0],
+                            row['الخيار 2'] || row['Option 2'] || DEFAULT_QUESTION.options[1],
+                            row['الخيار 3'] || row['Option 3'] || DEFAULT_QUESTION.options[2],
+                            row['الخيار 4'] || row['Option 4'] || DEFAULT_QUESTION.options[3]
+                        ],
+                        correctAnswer: row['الإجابة الصحيحة'] || row['الاجابة الصحيحة'] || row['Correct Answer'] || DEFAULT_QUESTION.correctAnswer
+                    };
+                } else {
+                    currentQuizData = DEFAULT_QUESTION;
+                }
+            } catch (err) {
+                console.warn("Could not fetch CSV, falling back to default question:", err);
+                currentQuizData = DEFAULT_QUESTION;
+            }
+
+            renderQuizScreen();
         }
 
-        // Render Quiz Question View
-        function renderQuizScreen(qData) {
-            currentQuestion = qData;
+        // Lightweight CSV Parser (No External Lib dependency)
+        function parseSimpleCSV(text) {
+            const lines = text.split('\n').filter(l => l.trim().length > 0);
+            if (lines.length < 2) return [];
+
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            const result = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+                const obj = {};
+                headers.forEach((h, idx) => {
+                    obj[h] = values[idx] || '';
+                });
+                result.push(obj);
+            }
+            return result;
+        }
+
+        // Render Question UI
+        function renderQuizScreen() {
             selectedOptionIndex = null;
             timeLeft = 60;
-
-            const questionText = qData['السؤال'] || qData['Question'] || 'سؤال المسابقة اليومية';
-            
-            // Gather Options dynamically
-            const options = [];
-            for (let i = 1; i <= 4; i++) {
-                const optVal = qData[`الخيار ${i}`] || qData[`Option ${i}`] || qData[`خيار ${i}`];
-                if (optVal) options.push(optVal.trim());
-            }
 
             const appCard = document.getElementById('app-card');
             appCard.innerHTML = `
@@ -225,20 +215,20 @@
                     <span id="timer-display" class="text-lg font-extrabold text-amber-600">${timeLeft} ثانية</span>
                 </div>
 
-                <!-- Meta Category Header -->
+                <!-- Category Title -->
                 <div class="flex justify-between items-center text-xs font-bold text-indigo-600 mb-3">
                     <span>الفئة: رجال 1</span>
                     <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-100">مسابقة رقم #1</span>
                 </div>
 
-                <!-- Question Title -->
+                <!-- Question Header -->
                 <h2 class="text-xl md:text-2xl font-bold text-slate-800 text-center my-6 leading-relaxed">
-                    ${questionText}
+                    ${currentQuizData.question}
                 </h2>
 
-                <!-- Options List -->
+                <!-- Options Grid -->
                 <div class="space-y-3 mb-6" id="options-container">
-                    ${options.map((opt, idx) => `
+                    ${currentQuizData.options.map((opt, idx) => `
                         <button onclick="selectOption(${idx})" id="opt-btn-${idx}" 
                                 class="w-full text-right p-4 rounded-2xl border-2 border-slate-100 bg-white hover:border-indigo-200 transition-all font-semibold text-slate-700 flex items-center justify-between group">
                             <span>${opt}</span>
@@ -249,10 +239,10 @@
                     `).join('')}
                 </div>
 
-                <!-- Dynamic Evaluation Feedback Box -->
+                <!-- Feedback Area -->
                 <div id="feedback-box" class="hidden rounded-2xl p-4 text-center font-bold mb-6 transition-all duration-300"></div>
 
-                <!-- Action Button -->
+                <!-- Submit Button -->
                 <button id="submit-btn" disabled onclick="evaluateAndSubmit()" 
                         class="w-full py-4 bg-slate-300 text-slate-500 rounded-2xl font-bold text-lg shadow transition duration-200 flex items-center justify-center gap-2 cursor-not-allowed">
                     <i class="fas fa-save"></i> حفظ والخروج من المسابقة
@@ -276,7 +266,7 @@
             }, 1000);
         }
 
-        // Option Selection Handling
+        // Option Click Event
         window.selectOption = function(index) {
             selectedOptionIndex = index;
             const container = document.getElementById('options-container');
@@ -298,72 +288,56 @@
             submitBtn.className = "w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-lg shadow-lg transition duration-200 flex items-center justify-center gap-2 cursor-pointer";
         };
 
-        // Evaluation & Result Submission Logic
+        // Answer Evaluation
         window.evaluateAndSubmit = function() {
             clearInterval(timerInterval);
 
-            // Extract Raw Correct Answer from CSV
-            const rawCorrectVal = extractCorrectAnswer(currentQuestion);
-            
-            // Options list
-            const options = [];
-            for (let i = 1; i <= 4; i++) {
-                const optVal = currentQuestion[`الخيار ${i}`] || currentQuestion[`Option ${i}`] || currentQuestion[`خيار ${i}`];
-                if (optVal) options.push(optVal.trim());
-            }
-
+            const rawCorrectVal = currentQuizData.correctAnswer;
             let isCorrect = false;
-            let displayCorrectAnswer = rawCorrectVal;
+            let displayAnswer = rawCorrectVal;
 
-            // Robust Answer Matching
-            if (selectedOptionIndex !== null && options[selectedOptionIndex]) {
-                const userSelectedText = options[selectedOptionIndex];
-                
-                // Case 1: Raw Answer is Numeric Index (e.g. "1", "2", "3", "4")
-                if (/^[1-4]$/.test(rawCorrectVal.trim())) {
+            if (selectedOptionIndex !== null) {
+                const selectedText = currentQuizData.options[selectedOptionIndex];
+
+                // Case A: Correct answer specified as index (1..4)
+                if (/^[1-4]$/.test(String(rawCorrectVal).trim())) {
                     const correctIdx = parseInt(rawCorrectVal.trim()) - 1;
-                    displayCorrectAnswer = options[correctIdx] || rawCorrectVal;
+                    displayAnswer = currentQuizData.options[correctIdx] || rawCorrectVal;
                     if (selectedOptionIndex === correctIdx) isCorrect = true;
                 } 
-                // Case 2: Text Matching with Tashkeel Normalization
+                // Case B: Normalized String matching
                 else {
-                    const normUser = normalizeText(userSelectedText);
+                    const normSelected = normalizeText(selectedText);
                     const normCorrect = normalizeText(rawCorrectVal);
-                    if (normUser === normCorrect || normUser.includes(normCorrect) || normCorrect.includes(normUser)) {
+                    if (normSelected === normCorrect || normSelected.includes(normCorrect) || normCorrect.includes(normSelected)) {
                         isCorrect = true;
                     }
                 }
             }
 
-            // UI Feedback Render
             const feedbackBox = document.getElementById('feedback-box');
             feedbackBox.classList.remove('hidden');
 
             if (isCorrect) {
                 feedbackBox.className = "rounded-2xl p-4 text-center font-bold mb-6 bg-emerald-50 text-emerald-700 border border-emerald-200";
                 feedbackBox.innerHTML = `<i class="fas fa-check-circle ml-1"></i> إجابة صحيحة! أحسنت صنعاً.`;
-                updatePoints(10); // Award points
+                leaderboardData.men[0].points += 10;
+                leaderboardData.women[0].points += 10;
             } else {
                 feedbackBox.className = "rounded-2xl p-4 text-center font-bold mb-6 bg-red-50 text-red-600 border border-red-200";
-                feedbackBox.innerHTML = `<i class="fas fa-times-circle ml-1"></i> إجابة غير صحيحة. الإجابة الصحيحة هي: (${displayCorrectAnswer || 'غير محدودة'})`;
+                feedbackBox.innerHTML = `<i class="fas fa-times-circle ml-1"></i> إجابة غير صحيحة. الإجابة الصحيحة هي: (${displayAnswer})`;
             }
 
-            // Disable all option buttons
+            // Disable buttons after answer
             const buttons = document.getElementById('options-container').querySelectorAll('button');
             buttons.forEach(b => b.disabled = true);
 
-            // Change Submit button to Success / Finish view
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.onclick = renderSuccessScreen;
             submitBtn.innerHTML = `<i class="fas fa-arrow-left"></i> المتابعة للنتيجة`;
         };
 
-        function updatePoints(pts) {
-            leaderboardData.men[0].points += pts;
-            leaderboardData.women[0].points += pts;
-        }
-
-        // Final Screen View
+        // Success View
         function renderSuccessScreen() {
             const appCard = document.getElementById('app-card');
             appCard.innerHTML = `
@@ -382,7 +356,7 @@
             `;
         }
 
-        // Leaderboard Modal Logic
+        // Leaderboard Functions
         function openLeaderboard() {
             renderLeaderboardList();
             document.getElementById('leaderboard-modal').classList.remove('hidden');
