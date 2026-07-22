@@ -64,7 +64,7 @@
             <div class="mb-6 text-right">
                 <label class="block text-xs font-bold text-slate-600 mb-2">اختر الفئة:</label>
                 <select id="category-select" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-bold">
-                    <option value="">-- اضغط للااختيار --</option>
+                    <option value="">-- اضغط للاختيار --</option>
                     <option value="رجال 1">رجال 1</option>
                     <option value="رجال 2">رجال 2</option>
                     <option value="رجال 3">رجال 3</option>
@@ -88,7 +88,7 @@
             </div>
 
             <div class="flex justify-between items-center mb-4">
-                <span id="quiz-title" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">تحدي اليوم 🏆</span>
+                <span id="quiz-title-tag" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">تحدي اليوم 🏆</span>
                 <span id="user-category-tag" class="text-xs font-bold text-slate-500">--</span>
             </div>
 
@@ -122,7 +122,7 @@
             </div>
         </div>
 
-        <!-- شاشة لوحة الصدارة (الجديدة) -->
+        <!-- شاشة لوحة الصدارة -->
         <div id="leaderboard-screen" class="hidden bg-white p-6 rounded-2xl shadow-xl border border-slate-100 w-full space-y-6">
             <div class="flex items-center justify-between border-b pb-4">
                 <h2 class="text-xl font-black text-indigo-700 flex items-center gap-2">
@@ -141,16 +141,12 @@
 
             <!-- محتوى اللوحة -->
             <div id="lb-content" class="hidden space-y-4">
-                <!-- أزرار التبديل بين الرجال والنساء -->
                 <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
                     <button id="tab-men" onclick="filterLeaderboard('men')" class="flex-1 py-2 rounded-lg bg-indigo-600 text-white transition">فئات الرجال 👨</button>
                     <button id="tab-women" onclick="filterLeaderboard('women')" class="flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition">فئات النساء 👩</button>
                 </div>
 
-                <!-- جدول العرض -->
-                <div id="lb-list" class="space-y-2 pt-2">
-                    <!-- Dynamic Rows Rendered Here -->
-                </div>
+                <div id="lb-list" class="space-y-2 pt-2"></div>
             </div>
         </div>
 
@@ -164,7 +160,8 @@
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-lampsS01cnHG_rPEmjthiUTAxi4Zfs86Ft7mRWoN4ROIvL39yhkPq6orQGLfC_J_/exec';
 
         let currentQuizData = null;
-        let selectedOption = null;
+        let selectedOptionText = null;
+        let selectedOptionIndex = null;
         let selectedCategory = "";
         let timerInterval = null;
         let timeLeft = 60;
@@ -220,14 +217,16 @@
                         if (!lines[i].trim()) continue;
                         const cols = parseCSVLine(lines[i]);
                         
-                        if (cols.length >= 6 && cols[1]) {
+                        if (cols.length >= 7 && cols[2]) {
                             quizToUse = {
-                                question: cols[1],
-                                opt1: cols[2] || '',
-                                opt2: cols[3] || '',
-                                opt3: cols[4] || '',
-                                opt4: cols[5] || '',
-                                correct: cols[6] || ''
+                                quizId: cols[0] || '1',
+                                date: cols[1] || '',
+                                question: cols[2],
+                                opt1: cols[3] || '',
+                                opt2: cols[4] || '',
+                                opt3: cols[5] || '',
+                                opt4: cols[6] || '',
+                                correctIndex: String(cols[7] || '').trim() // رقم الخيار الصحيح (1, 2, 3, 4)
                             };
                             break;
                         }
@@ -263,22 +262,23 @@
 
             document.getElementById('user-category-tag').innerText = "الفئة: " + selectedCategory;
             document.getElementById('question-text').innerText = currentQuizData.question;
+            document.getElementById('quiz-title-tag').innerText = "مسابقة رقم #" + currentQuizData.quizId;
 
             const optionsContainer = document.getElementById('options-container');
             optionsContainer.innerHTML = '';
 
             const options = [
-                currentQuizData.opt1,
-                currentQuizData.opt2,
-                currentQuizData.opt3,
-                currentQuizData.opt4
-            ].filter(Boolean);
+                { index: "1", text: currentQuizData.opt1 },
+                { index: "2", text: currentQuizData.opt2 },
+                { index: "3", text: currentQuizData.opt3 },
+                { index: "4", text: currentQuizData.opt4 }
+            ].filter(o => o.text !== '');
 
             options.forEach((opt) => {
                 const btn = document.createElement('button');
                 btn.className = "w-full text-right p-4 border border-slate-200 rounded-xl hover:bg-indigo-50 hover:border-indigo-300 font-bold transition duration-150 option-btn";
-                btn.innerText = opt;
-                btn.onclick = () => selectOption(btn, opt);
+                btn.innerText = opt.text;
+                btn.onclick = () => selectOption(btn, opt.index, opt.text);
                 optionsContainer.appendChild(btn);
             });
 
@@ -302,14 +302,15 @@
             }, 1000);
         }
 
-        function selectOption(btn, optValue) {
+        function selectOption(btn, optIndex, optText) {
             document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('bg-indigo-100', 'border-indigo-500', 'text-indigo-900'));
             btn.classList.add('bg-indigo-100', 'border-indigo-500', 'text-indigo-900');
-            selectedOption = optValue;
+            selectedOptionIndex = optIndex;
+            selectedOptionText = optText;
         }
 
         function submitAnswer(timeOut = false) {
-            if (!selectedOption && !timeOut) {
+            if (!selectedOptionIndex && !timeOut) {
                 alert("يرجى اختيار إجابة أولاً!");
                 return;
             }
@@ -317,17 +318,17 @@
             clearInterval(timerInterval);
             timeTaken = 60 - timeLeft;
 
-            const rawCorrect = String(currentQuizData.correct).trim();
-            let correctAnswerText = rawCorrect;
+            const targetIndex = currentQuizData.correctIndex;
+            isCorrectAnswer = (selectedOptionIndex === targetIndex);
 
-            if (rawCorrect === "1") correctAnswerText = currentQuizData.opt1;
-            else if (rawCorrect === "2") correctAnswerText = currentQuizData.opt2;
-            else if (rawCorrect === "3") correctAnswerText = currentQuizData.opt3;
-            else if (rawCorrect === "4") correctAnswerText = currentQuizData.opt4;
+            // معرفة النص الصحيح للعرض للمستخدم عند الخطأ
+            let correctText = "";
+            if (targetIndex === "1") correctText = currentQuizData.opt1;
+            else if (targetIndex === "2") correctText = currentQuizData.opt2;
+            else if (targetIndex === "3") correctText = currentQuizData.opt3;
+            else if (targetIndex === "4") correctText = currentQuizData.opt4;
 
-            isCorrectAnswer = (selectedOption === correctAnswerText);
             const feedbackArea = document.getElementById('feedback-area');
-
             feedbackArea.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800', 'bg-rose-100', 'text-rose-800');
             
             if (isCorrectAnswer) {
@@ -335,7 +336,7 @@
                 feedbackArea.innerHTML = "🎉 إجابة صحيحة! أحسنت.";
             } else {
                 feedbackArea.classList.add('bg-rose-100', 'text-rose-800');
-                feedbackArea.innerHTML = `❌ إجابة غير صحيحة. الإجابة الصحيحة هي: (${correctAnswerText})`;
+                feedbackArea.innerHTML = `❌ إجابة غير صحيحة. الإجابة الصحيحة هي: (${correctText})`;
             }
 
             document.getElementById('submit-btn').classList.add('hidden');
@@ -344,9 +345,10 @@
 
         function saveAndExit() {
             const payload = {
+                quizId: currentQuizData.quizId,
                 date: todayStr,
                 category: selectedCategory,
-                answer: selectedOption || "لم يجّب (انتهى الوقت)",
+                answer: selectedOptionText || "لم يجّب (انتهى الوقت)",
                 isCorrect: isCorrectAnswer,
                 timeTaken: timeTaken
             };
