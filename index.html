@@ -279,10 +279,10 @@
                     </div>
                     <div class="space-y-2">
                         <h2 class="text-2xl font-extrabold text-slate-800">فئة (${currentCategory.name}) شاركت بفعالية!</h2>
-                        <p class="text-slate-500 font-medium">لقد تم تقديم إجابة هذه الفئة للمسابقة رقم #${CURRENT_QUIZ_ID} سابقاً. لا يمكن إعادتها حفاظاً على عدالة المنافسة.</p>
+                        <p class="text-slate-500 font-medium text-sm">لقد تم تقديم إجابة هذه الفئة للمسابقة رقم #${CURRENT_QUIZ_ID} سابقاً. لا يمكن إعادتها حفاظاً على عدالة المنافسة.</p>
                     </div>
-                    <button onclick="renderCategorySelector()" class="px-6 py-3 bg-slate-200 text-slate-700 rounded-xl font-bold transition hover:bg-slate-300">
-                        العودة لاختيار فئة أخرى
+                    <button onclick="renderCategorySelector()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-md">
+                        <i class="fas fa-arrow-right ml-1"></i> العودة لاختيار فئة أخرى
                     </button>
                 </div>
             `;
@@ -413,7 +413,7 @@
         function renderCompletionScreen(isCorrect, points) {
             const appCard = document.getElementById('app-card');
             appCard.innerHTML = `
-                <div class="text-center py-8 space-y-6">
+                <div class="text-center py-6 space-y-6">
                     <div class="w-20 h-20 ${isCorrect ? 'bg-emerald-500' : 'bg-red-500'} text-white rounded-2xl flex items-center justify-center text-4xl mx-auto shadow-lg">
                         <i class="fas ${isCorrect ? 'fa-check' : 'fa-times'}"></i>
                     </div>
@@ -426,10 +426,23 @@
                         </p>
                     </div>
                     <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-500">
-                        تم تسجيل خروجك وحفظ النتيجة تلقائياً. شكراً لمشاركتك!
+                        تم تسجيل وحفظ النتيجة تلقائياً. شكراً لمشاركتك!
+                    </div>
+                    
+                    <!-- Player Exit Button -->
+                    <div class="pt-2">
+                        <button onclick="playerExit()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-base shadow-md transition duration-200 flex items-center justify-center gap-2">
+                            <i class="fas fa-sign-out-alt"></i> إنهاء وخروج المتسابق
+                        </button>
                     </div>
                 </div>
             `;
+        }
+
+        function playerExit() {
+            currentCategory = null;
+            selectedOptionIndex = null;
+            renderCategorySelector();
         }
 
         function openLeaderboard() {
