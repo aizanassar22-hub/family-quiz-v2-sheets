@@ -226,6 +226,13 @@
                         if (!lines[i].trim()) continue;
                         const cols = parseCSVLine(lines[i]);
                         if (cols.length >= 7 && cols[2]) {
+                            const cIndex = String(cols[7] || '').trim();
+                            let correctTextVal = "";
+                            if (cIndex === "1") correctTextVal = cols[3];
+                            else if (cIndex === "2") correctTextVal = cols[4];
+                            else if (cIndex === "3") correctTextVal = cols[5];
+                            else if (cIndex === "4") correctTextVal = cols[6];
+
                             currentQuizData = {
                                 quizId: String(cols[0] || '1').trim(),
                                 date: String(cols[1] || todayStr).trim(),
@@ -234,7 +241,8 @@
                                 opt2: String(cols[4] || '').trim(),
                                 opt3: String(cols[5] || '').trim(),
                                 opt4: String(cols[6] || '').trim(),
-                                correctIndex: String(cols[7] || '').trim()
+                                correctIndex: cIndex,
+                                correctText: String(correctTextVal || '').trim()
                             };
                             break;
                         }
@@ -324,7 +332,7 @@
             document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('bg-indigo-100', 'border-indigo-500', 'text-indigo-900'));
             btn.classList.add('bg-indigo-100', 'border-indigo-500', 'text-indigo-900');
             selectedOptionIndex = String(optIndex).trim();
-            selectedOptionText = optText;
+            selectedOptionText = String(optText).trim();
         }
 
         function submitAnswer(timeOut = false) {
@@ -336,14 +344,8 @@
             clearInterval(timerInterval);
             timeTaken = 60 - timeLeft;
 
-            const targetIndex = String(currentQuizData.correctIndex).trim();
-            isCorrectAnswer = (selectedOptionIndex === targetIndex);
-
-            let correctText = "";
-            if (targetIndex === "1") correctText = currentQuizData.opt1;
-            else if (targetIndex === "2") correctText = currentQuizData.opt2;
-            else if (targetIndex === "3") correctText = currentQuizData.opt3;
-            else if (targetIndex === "4") correctText = currentQuizData.opt4;
+            // مطابقة نصية وعددية لضمان صحة التقييم 100%
+            isCorrectAnswer = (selectedOptionIndex === currentQuizData.correctIndex) || (selectedOptionText === currentQuizData.correctText);
 
             const feedbackArea = document.getElementById('feedback-area');
             feedbackArea.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800', 'bg-rose-100', 'text-rose-800');
@@ -353,7 +355,7 @@
                 feedbackArea.innerHTML = "🎉 إجابة صحيحة! أحسنت.";
             } else {
                 feedbackArea.classList.add('bg-rose-100', 'text-rose-800');
-                feedbackArea.innerHTML = `❌ إجابة غير صحيحة. الإجابة الصحيحة هي: (${correctText})`;
+                feedbackArea.innerHTML = `❌ إجابة غير صحيحة. الإجابة الصحيحة هي: (${currentQuizData.correctText})`;
             }
 
             document.getElementById('submit-btn').classList.add('hidden');
@@ -431,26 +433,21 @@
             const listContainer = document.getElementById('lb-list');
             listContainer.innerHTML = '';
 
-            const filtered = fullLeaderboardData.filter(item => {
-                if (gender === 'men') return item.category.includes('رجال');
-                return item.category.includes('نساء');
-            });
+            const allCategories = gender === 'men' ? ['رجال 1', 'رجال 2', 'رجال 3'] : ['نساء 1', 'نساء 2', 'نساء 3'];
 
-            if (filtered.length === 0) {
-                listContainer.innerHTML = `<p class="text-center text-xs text-slate-400 py-4">لا توجد بيانات متاحة حالياً لهذا الفريق.</p>`;
-                return;
-            }
+            allCategories.forEach((catName, index) => {
+                const found = fullLeaderboardData.find(item => item.category === catName);
+                const pts = found ? found.points : 0;
 
-            filtered.forEach((item, index) => {
                 const rankColor = index === 0 ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-slate-100 text-slate-800 border-slate-300';
                 listContainer.innerHTML += `
                     <div class="flex items-center justify-between p-3 rounded-xl border ${rankColor} font-bold shadow-sm">
                         <div class="flex items-center gap-3">
-                            <span class="w-6 text-center text-sm font-black">#${item.rank || (index + 1)}</span>
-                            <span class="text-sm">${item.category}</span>
+                            <span class="w-6 text-center text-sm font-black">#${index + 1}</span>
+                            <span class="text-sm">${catName}</span>
                         </div>
                         <div class="text-left">
-                            <span class="text-sm font-black text-indigo-700">${item.points}</span>
+                            <span class="text-sm font-black text-indigo-700">${pts}</span>
                             <span class="text-[10px] text-slate-500 block">نقاط</span>
                         </div>
                     </div>
