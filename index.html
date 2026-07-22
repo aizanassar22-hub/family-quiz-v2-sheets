@@ -13,11 +13,17 @@
 <body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
     <!-- الهيدر -->
-    <header class="bg-white border-b border-slate-200 py-4 px-6 text-center shadow-sm">
-        <h1 class="text-2xl font-black text-indigo-700 flex items-center justify-center gap-2">
-            <span>🏆</span> المسابقة العائلية اليومية
-        </h1>
-        <div id="quiz-date" class="text-xs font-bold text-slate-500 mt-1 bg-slate-100 inline-block px-3 py-1 rounded-full">--</div>
+    <header class="bg-white border-b border-slate-200 py-4 px-6 shadow-sm flex items-center justify-between">
+        <div>
+            <h1 class="text-xl font-black text-indigo-700 flex items-center gap-2">
+                <span>🏆</span> المسابقة العائلية اليومية
+            </h1>
+            <div id="quiz-date" class="text-[10px] font-bold text-slate-500 mt-1 bg-slate-100 inline-block px-2.5 py-0.5 rounded-full">--</div>
+        </div>
+        <!-- زر فتح لوحة الصدارة -->
+        <button onclick="openLeaderboard()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+            <span>🏆</span> لوحة الصدارة
+        </button>
     </header>
 
     <!-- المحتوى الرئيسي -->
@@ -33,14 +39,20 @@
         <div id="rest-screen" class="hidden bg-white p-8 rounded-2xl shadow-xl border border-slate-100 text-center w-full">
             <div class="text-6xl mb-4">☕</div>
             <h2 class="text-2xl font-bold text-slate-800 mb-2">استراحة اليوم</h2>
-            <p class="text-slate-500">لا توجد مسابقة نشطة حالياً في جدول البيانات.</p>
+            <p class="text-slate-500 mb-6">لا توجد مسابقة نشطة حالياً في جدول البيانات.</p>
+            <button onclick="openLeaderboard()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 px-6 rounded-xl shadow-lg transition">
+                عرض لوحة الصدارة 🏆
+            </button>
         </div>
 
         <!-- شاشة تمت المشاركة سابقاً -->
         <div id="already-played-screen" class="hidden bg-white p-8 rounded-2xl shadow-xl border border-slate-100 text-center w-full">
             <div class="text-6xl mb-4">✋</div>
             <h2 class="text-2xl font-bold text-slate-800 mb-2">لقد شاركت سابقاً!</h2>
-            <p class="text-slate-500">عذراً، تسمح سياسة المسابقة بمحاولة واحدة فقط لكل يوم، وقد قمت برفع إجابتك بنجاح مسبقاً.</p>
+            <p class="text-slate-500 text-sm mb-6">عذراً، تسمح سياسة المسابقة بمحاولة واحدة فقط لكل يوم، وقد قمت برفع إجابتك بنجاح مسبقاً.</p>
+            <button onclick="openLeaderboard()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                <span>استعراض نتائج ولوحة الصدارة</span> 📊
+            </button>
         </div>
 
         <!-- شاشة اختيار الفئة -->
@@ -52,7 +64,7 @@
             <div class="mb-6 text-right">
                 <label class="block text-xs font-bold text-slate-600 mb-2">اختر الفئة:</label>
                 <select id="category-select" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 font-bold">
-                    <option value="">-- اضغط للاختيار --</option>
+                    <option value="">-- اضغط للااختيار --</option>
                     <option value="رجال 1">رجال 1</option>
                     <option value="رجال 2">رجال 2</option>
                     <option value="رجال 3">رجال 3</option>
@@ -99,11 +111,46 @@
         <div id="success-screen" class="hidden bg-white p-8 rounded-2xl shadow-xl border border-slate-100 text-center w-full">
             <div class="text-6xl mb-4">✅</div>
             <h2 class="text-2xl font-black text-slate-800 mb-2">تم تسجيل إجابتك بنجاح!</h2>
-            <p class="text-slate-600 text-sm mb-4 leading-relaxed">
-                شكراً لمشاركتك. تم إرسال إجابتك للمشرف، وسوف تُعلن النتائج النهائية لاحقاً في القروب.
+            <p class="text-slate-600 text-sm mb-6 leading-relaxed">
+                شكراً لمشاركتك. تم إرسال إجابتك للمشرف، وسوف تُعلن النتائج النهائية لاحقاً.
             </p>
+            <button onclick="openLeaderboard()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 px-6 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 mb-3">
+                <span>عرض لوحة الصدارة والترتيب</span> 🏆
+            </button>
             <div class="p-3 bg-slate-100 text-slate-500 rounded-xl text-xs font-bold">
                 🔒 تم إغلاق المسابقة لهذا اليوم.
+            </div>
+        </div>
+
+        <!-- شاشة لوحة الصدارة (الجديدة) -->
+        <div id="leaderboard-screen" class="hidden bg-white p-6 rounded-2xl shadow-xl border border-slate-100 w-full space-y-6">
+            <div class="flex items-center justify-between border-b pb-4">
+                <h2 class="text-xl font-black text-indigo-700 flex items-center gap-2">
+                    <span>🥇</span> لوحة الصدارة والترتيب
+                </h2>
+                <button onclick="closeLeaderboard()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg font-bold">
+                    إغلاق ✖
+                </button>
+            </div>
+
+            <!-- مؤشر التحميل -->
+            <div id="lb-loading" class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-amber-500 border-t-transparent"></div>
+                <p class="text-xs font-bold text-slate-500 mt-2">جاري جلب لوحة الصدارة...</p>
+            </div>
+
+            <!-- محتوى اللوحة -->
+            <div id="lb-content" class="hidden space-y-4">
+                <!-- أزرار التبديل بين الرجال والنساء -->
+                <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
+                    <button id="tab-men" onclick="filterLeaderboard('men')" class="flex-1 py-2 rounded-lg bg-indigo-600 text-white transition">فئات الرجال 👨</button>
+                    <button id="tab-women" onclick="filterLeaderboard('women')" class="flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition">فئات النساء 👩</button>
+                </div>
+
+                <!-- جدول العرض -->
+                <div id="lb-list" class="space-y-2 pt-2">
+                    <!-- Dynamic Rows Rendered Here -->
+                </div>
             </div>
         </div>
 
@@ -123,6 +170,8 @@
         let timeLeft = 60;
         let timeTaken = 0;
         let isCorrectAnswer = false;
+        let fullLeaderboardData = [];
+        let currentFilter = 'men';
 
         document.getElementById('current-year').innerText = new Date().getFullYear();
 
@@ -198,7 +247,7 @@
         }
 
         function showScreen(screenId) {
-            ['loading-screen', 'rest-screen', 'already-played-screen', 'category-screen', 'quiz-screen', 'success-screen'].forEach(id => {
+            ['loading-screen', 'rest-screen', 'already-played-screen', 'category-screen', 'quiz-screen', 'success-screen', 'leaderboard-screen'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
             document.getElementById(screenId).classList.remove('hidden');
@@ -294,7 +343,6 @@
         }
 
         function saveAndExit() {
-            // إرسال البيانات إلى Google Sheets
             const payload = {
                 date: todayStr,
                 category: selectedCategory,
@@ -306,17 +354,92 @@
             fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             }).catch(err => console.error("خطأ إرسال الإجابة:", err));
 
-            // حفظ حالة المحاولة لمنع العودة مجدداً بنفس اليوم
             localStorage.setItem('played_' + todayStr, 'true');
-
-            // الانتقال لشاشة الخروج وتأكيد التسجيل
             showScreen('success-screen');
+        }
+
+        /* --- وظائف لوحة الصدارة --- */
+        function openLeaderboard() {
+            showScreen('leaderboard-screen');
+            document.getElementById('lb-loading').classList.remove('hidden');
+            document.getElementById('lb-content').classList.add('hidden');
+
+            fetch(APPS_SCRIPT_URL)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success' && res.data) {
+                        fullLeaderboardData = res.data;
+                        document.getElementById('lb-loading').classList.add('hidden');
+                        document.getElementById('lb-content').classList.remove('hidden');
+                        filterLeaderboard(currentFilter);
+                    } else {
+                        alert("تعذر جلب لوحة الصدارة حالياً.");
+                    }
+                })
+                .catch(err => {
+                    console.error("خطأ لوحة الصدارة:", err);
+                    document.getElementById('lb-loading').classList.add('hidden');
+                    alert("حدث خطأ في الاتصال بالخادم.");
+                });
+        }
+
+        function closeLeaderboard() {
+            if (localStorage.getItem('played_' + todayStr)) {
+                showScreen('already-played-screen');
+            } else if (currentQuizData) {
+                showScreen('category-screen');
+            } else {
+                showScreen('rest-screen');
+            }
+        }
+
+        function filterLeaderboard(gender) {
+            currentFilter = gender;
+            const btnMen = document.getElementById('tab-men');
+            const btnWomen = document.getElementById('tab-women');
+
+            if (gender === 'men') {
+                btnMen.className = "flex-1 py-2 rounded-lg bg-indigo-600 text-white font-bold transition";
+                btnWomen.className = "flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 font-bold transition";
+            } else {
+                btnWomen.className = "flex-1 py-2 rounded-lg bg-pink-600 text-white font-bold transition";
+                btnMen.className = "flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 font-bold transition";
+            }
+
+            const listContainer = document.getElementById('lb-list');
+            listContainer.innerHTML = '';
+
+            const filtered = fullLeaderboardData.filter(item => {
+                if (gender === 'men') return item.category.includes('رجال');
+                return item.category.includes('نساء');
+            });
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `<p class="text-center text-xs text-slate-400 py-4">لا توجد بيانات متاحة لهذه الفئة حالياً.</p>`;
+                return;
+            }
+
+            filtered.forEach((item, index) => {
+                const rankColor = index === 0 ? 'bg-amber-100 text-amber-800 border-amber-300' :
+                                  index === 1 ? 'bg-slate-100 text-slate-800 border-slate-300' : 'bg-orange-50 text-orange-800 border-orange-200';
+                
+                listContainer.innerHTML += `
+                    <div class="flex items-center justify-between p-3 rounded-xl border ${rankColor} font-bold shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 text-center text-sm font-black">#${item.rank || (index + 1)}</span>
+                            <span class="text-sm">${item.category}</span>
+                        </div>
+                        <div class="text-left">
+                            <span class="text-sm font-black text-indigo-700">${item.points}</span>
+                            <span class="text-[10px] text-slate-500 block">نقاط</span>
+                        </div>
+                    </div>
+                `;
+            });
         }
     </script>
 </body>
