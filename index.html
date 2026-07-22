@@ -15,24 +15,24 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
-    <!-- Header / Admin Status -->
+    <!-- Header / Admin Bar -->
     <header class="bg-purple-900 text-white text-xs py-2 px-4 flex justify-between items-center shadow-md">
         <div>
             <span class="bg-purple-800 px-2 py-1 rounded text-purple-200 font-bold">
                 <i class="fas fa-tools ml-1"></i> وضع المشرف والاختبار نشط (تم إلغاء قيود الحظر)
             </span>
         </div>
-        <button id="exit-btn" class="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 rounded transition font-medium">
-            الخروج لوضع المتسابق
+        <button id="exit-btn" onclick="resetUserSelection()" class="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 rounded transition font-medium">
+            تغيير الفئة المختارة
         </button>
     </header>
 
     <!-- Main Container -->
     <main class="container mx-auto px-4 py-6 max-w-2xl flex-grow">
         
-        <!-- App Title & Leaderboard Trigger -->
+        <!-- App Title & Leaderboard Button -->
         <div class="flex justify-between items-center mb-6">
-            <button id="top-leaderboard-btn" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl shadow font-bold text-sm flex items-center gap-2 transition">
+            <button id="top-leaderboard-btn" onclick="openLeaderboard()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl shadow font-bold text-sm flex items-center gap-2 transition">
                 <i class="fas fa-trophy"></i> لوحة الصدارة
             </button>
             <div class="text-center">
@@ -45,12 +45,9 @@
             </span>
         </div>
 
-        <!-- Dynamic Content Area -->
+        <!-- Dynamic Content Card -->
         <div id="app-card" class="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 md:p-8 transition-all duration-300">
-            <div class="text-center py-12">
-                <i class="fas fa-spinner fa-spin text-4xl text-indigo-600 mb-4"></i>
-                <p class="text-slate-500 font-medium">جاري تحميل المسابقة والبيانات...</p>
-            </div>
+            <!-- Dynamic Injection via JS -->
         </div>
 
     </main>
@@ -62,23 +59,23 @@
 
     <!-- Leaderboard Modal -->
     <div id="leaderboard-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 relative animate-fade-in border border-slate-100">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 relative border border-slate-100">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
                 <h3 class="text-xl font-bold text-indigo-950 flex items-center gap-2">
                     <i class="fas fa-medal text-amber-500 text-2xl"></i> لوحة الصدارة والترتيب
                 </h3>
-                <button id="close-modal-btn" class="text-slate-400 hover:text-slate-600 bg-slate-100 px-3 py-1 rounded-lg text-sm font-bold">
+                <button onclick="closeLeaderboard()" class="text-slate-400 hover:text-slate-600 bg-slate-100 px-3 py-1 rounded-lg text-sm font-bold">
                     إغلاق <i class="fas fa-times mr-1"></i>
                 </button>
             </div>
 
             <!-- Gender Tabs -->
             <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
-                <button id="tab-men" class="flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600">
-                    فئات الرجال 👨
-                </button>
-                <button id="tab-women" class="flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-pink-600 text-white shadow-md">
+                <button id="tab-women" onclick="switchTab('women')" class="flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-pink-600 text-white shadow-md">
                     فئات النساء 👩
+                </button>
+                <button id="tab-men" onclick="switchTab('men')" class="flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600">
+                    فئات الرجال 👨
                 </button>
             </div>
 
@@ -89,67 +86,121 @@
 
     <!-- Application Script -->
     <script>
-        // Configuration - Google Sheets CSV Web Publish Link
-        const QUESTIONS_CSV_URL = ''; // ضع رابط الـ CSV المباشر هنا عند الجاهزية
+        // Configuration
+        const QUESTIONS_CSV_URL = ''; // رابط الـ CSV المباشر من جاجل شيت عند التجهيز
+        const SCRIPT_WEB_APP_URL = ''; // رابط Google Apps Script لحفظ الاجابات
 
-        // Default Dynamic Fallback Question (Guarantees app opens immediately)
+        // Default Question Data
         const DEFAULT_QUESTION = {
             question: "ما هو أول مساجد الإسلام؟",
             options: ["المسجد الحرام", "مسجد قباء", "المسجد النبوي", "المسجد الأقصى"],
             correctAnswer: "مسجد قباء"
         };
 
-        // Application State
+        // State Variables
         let currentQuizData = null;
         let selectedOptionIndex = null;
         let timerInterval = null;
         let timeLeft = 60;
         let activeTab = 'women';
+        let currentCategory = localStorage.getItem('family_quiz_category') || null;
 
-        // Mock Leaderboard State
-        const leaderboardData = {
-            women: [
-                { name: 'نساء 1', points: 0, rank: '#1' },
-                { name: 'نساء 2', points: 0, rank: '#2' },
-                { name: 'نساء 3', points: 0, rank: '#3' }
-            ],
-            men: [
-                { name: 'رجال 1', points: 0, rank: '#1' },
-                { name: 'رجال 2', points: 0, rank: '#2' },
-                { name: 'رجال 3', points: 0, rank: '#3' }
-            ]
-        };
+        // Default Categories Initialization in LocalStorage
+        function getScores() {
+            const saved = localStorage.getItem('family_quiz_scores');
+            if (saved) return JSON.parse(saved);
+            
+            const initial = {
+                women: [
+                    { id: 'w1', name: 'نساء 1', points: 0, rank: '#1' },
+                    { id: 'w2', name: 'نساء 2', points: 0, rank: '#2' },
+                    { id: 'w3', name: 'نساء 3', points: 0, rank: '#3' }
+                ],
+                men: [
+                    { id: 'm1', name: 'رجال 1', points: 0, rank: '#1' },
+                    { id: 'm2', name: 'رجال 2', points: 0, rank: '#2' },
+                    { id: 'm3', name: 'رجال 3', points: 0, rank: '#3' }
+                ]
+            };
+            localStorage.setItem('family_quiz_scores', JSON.stringify(initial));
+            return initial;
+        }
 
-        // Text Normalization for String Comparison
+        function saveScores(scores) {
+            localStorage.setItem('family_quiz_scores', JSON.stringify(scores));
+        }
+
+        // Text Normalization for String Matching
         function normalizeText(str) {
             if (!str) return '';
             return String(str)
                 .trim()
-                .replace(/[\u064B-\u0652]/g, '') // Remove Arabic Tashkeel
+                .replace(/[\u064B-\u0652]/g, '') // إزالة التشكيل
                 .replace(/[أإآ]/g, 'ا')
                 .replace(/ة/g, 'ه')
                 .replace(/ى/g, 'ي')
                 .toLowerCase();
         }
 
-        // Initialize Application
+        // App Init
         document.addEventListener('DOMContentLoaded', () => {
-            setupEventListeners();
-            loadQuizData();
+            if (!currentCategory) {
+                renderCategorySelector();
+            } else {
+                loadQuizData();
+            }
         });
 
-        function setupEventListeners() {
-            document.getElementById('top-leaderboard-btn').addEventListener('click', openLeaderboard);
-            document.getElementById('close-modal-btn').addEventListener('click', closeLeaderboard);
-            
-            document.getElementById('tab-men').addEventListener('click', () => switchTab('men'));
-            document.getElementById('tab-women').addEventListener('click', () => switchTab('women'));
+        // Step 1: Render Category Selection Screen
+        function renderCategorySelector() {
+            const appCard = document.getElementById('app-card');
+            appCard.innerHTML = `
+                <div class="text-center space-y-6 py-4">
+                    <h2 class="text-xl md:text-2xl font-extrabold text-indigo-950">اختر الفئة المشاركة للبدء</h2>
+                    <p class="text-slate-500 text-sm">حدد الفئة التي تمثلها ليتم احتساب نقاط المسابقة لحسابكم</p>
+                    
+                    <div class="space-y-4 max-w-md mx-auto text-right">
+                        <div>
+                            <label class="block text-xs font-bold text-pink-700 mb-2">فئات النساء 👩</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setCategory('w1', 'نساء 1', 'women')" class="p-3 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-sm text-center transition">نساء 1</button>
+                                <button onclick="setCategory('w2', 'نساء 2', 'women')" class="p-3 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-sm text-center transition">نساء 2</button>
+                                <button onclick="setCategory('w3', 'نساء 3', 'women')" class="p-3 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-sm text-center transition">نساء 3</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-indigo-700 mb-2">فئات الرجال 👨</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setCategory('m1', 'رجال 1', 'men')" class="p-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-sm text-center transition">رجال 1</button>
+                                <button onclick="setCategory('m2', 'رجال 2', 'men')" class="p-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-sm text-center transition">رجال 2</button>
+                                <button onclick="setCategory('m3', 'رجال 3', 'men')" class="p-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-sm text-center transition">رجال 3</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
-        // Load Quiz Data from Sheets or Fallback immediately
+        function setCategory(id, name, type) {
+            currentCategory = { id, name, type };
+            localStorage.setItem('family_quiz_category', JSON.stringify(currentCategory));
+            loadQuizData();
+        }
+
+        function resetUserSelection() {
+            localStorage.removeItem('family_quiz_category');
+            currentCategory = null;
+            renderCategorySelector();
+        }
+
+        // Fetch / Load Quiz Data
         async function loadQuizData() {
+            if (typeof currentCategory === 'string') {
+                try { currentCategory = JSON.parse(currentCategory); } catch(e){}
+            }
+
             if (!QUESTIONS_CSV_URL) {
-                // Instantly load default question if URL is empty
                 currentQuizData = DEFAULT_QUESTION;
                 renderQuizScreen();
                 return;
@@ -176,14 +227,12 @@
                     currentQuizData = DEFAULT_QUESTION;
                 }
             } catch (err) {
-                console.warn("Could not fetch CSV, falling back to default question:", err);
                 currentQuizData = DEFAULT_QUESTION;
             }
 
             renderQuizScreen();
         }
 
-        // Lightweight CSV Parser (No External Lib dependency)
         function parseSimpleCSV(text) {
             const lines = text.split('\n').filter(l => l.trim().length > 0);
             if (lines.length < 2) return [];
@@ -202,10 +251,12 @@
             return result;
         }
 
-        // Render Question UI
+        // Render Question Card
         function renderQuizScreen() {
             selectedOptionIndex = null;
             timeLeft = 60;
+
+            const categoryName = currentCategory ? currentCategory.name : 'رجال 1';
 
             const appCard = document.getElementById('app-card');
             appCard.innerHTML = `
@@ -215,13 +266,15 @@
                     <span id="timer-display" class="text-lg font-extrabold text-amber-600">${timeLeft} ثانية</span>
                 </div>
 
-                <!-- Category Title -->
+                <!-- Active Category Header -->
                 <div class="flex justify-between items-center text-xs font-bold text-indigo-600 mb-3">
-                    <span>الفئة: رجال 1</span>
-                    <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-100">مسابقة رقم #1</span>
+                    <span class="bg-indigo-50 text-indigo-800 px-3 py-1.5 rounded-lg border border-indigo-100 flex items-center gap-1">
+                        <i class="fas fa-user-check text-indigo-600"></i> الفئة: ${categoryName}
+                    </span>
+                    <span class="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">مسابقة رقم #1</span>
                 </div>
 
-                <!-- Question Header -->
+                <!-- Question Text -->
                 <h2 class="text-xl md:text-2xl font-bold text-slate-800 text-center my-6 leading-relaxed">
                     ${currentQuizData.question}
                 </h2>
@@ -266,7 +319,6 @@
             }, 1000);
         }
 
-        // Option Click Event
         window.selectOption = function(index) {
             selectedOptionIndex = index;
             const container = document.getElementById('options-container');
@@ -288,7 +340,7 @@
             submitBtn.className = "w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-lg shadow-lg transition duration-200 flex items-center justify-center gap-2 cursor-pointer";
         };
 
-        // Answer Evaluation
+        // Evaluation & Persistent Score Recording
         window.evaluateAndSubmit = function() {
             clearInterval(timerInterval);
 
@@ -299,13 +351,13 @@
             if (selectedOptionIndex !== null) {
                 const selectedText = currentQuizData.options[selectedOptionIndex];
 
-                // Case A: Correct answer specified as index (1..4)
+                // Numeric match (1 to 4)
                 if (/^[1-4]$/.test(String(rawCorrectVal).trim())) {
                     const correctIdx = parseInt(rawCorrectVal.trim()) - 1;
                     displayAnswer = currentQuizData.options[correctIdx] || rawCorrectVal;
                     if (selectedOptionIndex === correctIdx) isCorrect = true;
                 } 
-                // Case B: Normalized String matching
+                // String match
                 else {
                     const normSelected = normalizeText(selectedText);
                     const normCorrect = normalizeText(rawCorrectVal);
@@ -321,14 +373,18 @@
             if (isCorrect) {
                 feedbackBox.className = "rounded-2xl p-4 text-center font-bold mb-6 bg-emerald-50 text-emerald-700 border border-emerald-200";
                 feedbackBox.innerHTML = `<i class="fas fa-check-circle ml-1"></i> إجابة صحيحة! أحسنت صنعاً.`;
-                leaderboardData.men[0].points += 10;
-                leaderboardData.women[0].points += 10;
+                
+                // Add 10 points to active selected category
+                addPointsToCategory(10);
             } else {
                 feedbackBox.className = "rounded-2xl p-4 text-center font-bold mb-6 bg-red-50 text-red-600 border border-red-200";
                 feedbackBox.innerHTML = `<i class="fas fa-times-circle ml-1"></i> إجابة غير صحيحة. الإجابة الصحيحة هي: (${displayAnswer})`;
             }
 
-            // Disable buttons after answer
+            // Sync with backend if script url exists
+            sendToBackend(isCorrect ? 10 : 0);
+
+            // Disable options
             const buttons = document.getElementById('options-container').querySelectorAll('button');
             buttons.forEach(b => b.disabled = true);
 
@@ -337,7 +393,38 @@
             submitBtn.innerHTML = `<i class="fas fa-arrow-left"></i> المتابعة للنتيجة`;
         };
 
-        // Success View
+        function addPointsToCategory(pts) {
+            if (!currentCategory) return;
+            const scores = getScores();
+            const type = currentCategory.type; // 'men' or 'women'
+            const catId = currentCategory.id;
+
+            const categoryList = scores[type];
+            const target = categoryList.find(c => c.id === catId);
+            if (target) {
+                target.points += pts;
+                saveScores(scores);
+            }
+        }
+
+        async function sendToBackend(pts) {
+            if (!SCRIPT_WEB_APP_URL) return;
+            try {
+                await fetch(SCRIPT_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        category: currentCategory ? currentCategory.name : 'عام',
+                        points: pts,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+            } catch(e) {
+                console.warn("Could not log score to Apps Script:", e);
+            }
+        }
+
         function renderSuccessScreen() {
             const appCard = document.getElementById('app-card');
             appCard.innerHTML = `
@@ -347,7 +434,7 @@
                     </div>
                     <div class="space-y-2">
                         <h2 class="text-2xl font-extrabold text-slate-800">تم تسجيل إجابتك بنجاح!</h2>
-                        <p class="text-slate-500 font-medium">شكراً لمشاركتك. تم حفظ نتيجتك ونقاط فريقك بنجاح.</p>
+                        <p class="text-slate-500 font-medium">شكراً لمشاركتك. تم حفظ نقاط فئة (${currentCategory ? currentCategory.name : 'المشاركة'}) بنجاح.</p>
                     </div>
                     <button onclick="openLeaderboard()" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-bold text-lg shadow-lg transition duration-200 flex items-center justify-center gap-2">
                         <i class="fas fa-trophy"></i> عرض لوحة الصدارة والترتيب
@@ -356,7 +443,7 @@
             `;
         }
 
-        // Leaderboard Functions
+        // Leaderboard Modal Rendering
         function openLeaderboard() {
             renderLeaderboardList();
             document.getElementById('leaderboard-modal').classList.remove('hidden');
@@ -384,16 +471,20 @@
 
         function renderLeaderboardList() {
             const listContainer = document.getElementById('leaderboard-list');
-            const items = leaderboardData[activeTab];
+            const scores = getScores();
+            const items = scores[activeTab] || [];
 
-            listContainer.innerHTML = items.map(item => `
-                <div class="flex items-center justify-between p-4 rounded-2xl ${item.rank === '#1' ? 'bg-amber-50 border border-amber-200' : 'bg-slate-50 border border-slate-100'}">
+            // Sort by highest points
+            const sortedItems = [...items].sort((a, b) => b.points - a.points);
+
+            listContainer.innerHTML = sortedItems.map((item, index) => `
+                <div class="flex items-center justify-between p-4 rounded-2xl ${index === 0 ? 'bg-amber-50 border border-amber-200' : 'bg-slate-50 border border-slate-100'}">
                     <div class="flex items-center gap-3">
-                        <span class="text-xs font-extrabold text-amber-700 bg-amber-100 px-2 py-1 rounded-md">${item.rank}</span>
+                        <span class="text-xs font-extrabold ${index === 0 ? 'text-amber-800 bg-amber-200' : 'text-slate-600 bg-slate-200'} px-2 py-1 rounded-md">#${index + 1}</span>
                         <span class="font-bold text-slate-800">${item.name}</span>
                     </div>
                     <div class="text-left">
-                        <span class="text-lg font-black text-slate-900">${item.points}</span>
+                        <span class="text-lg font-black text-indigo-900">${item.points}</span>
                         <span class="text-xs text-slate-400 block">نقاط</span>
                     </div>
                 </div>
