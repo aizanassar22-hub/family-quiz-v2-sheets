@@ -12,7 +12,7 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
-    <!-- شريط وضع المطور (يظهر ويختفي بتلقائية وبضغط زر) -->
+    <!-- شريط وضع المطور -->
     <div id="dev-mode-banner" class="hidden bg-purple-900 text-purple-200 text-xs font-bold py-1.5 px-4 text-center flex items-center justify-between shadow-inner">
         <span>🛠️ وضع المشرف والاختبار نشط (تم إلغاء قيود الحظر)</span>
         <button onclick="toggleDevMode()" class="bg-purple-700 hover:bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded">الخروج لوضع المتسابق</button>
@@ -21,7 +21,6 @@
     <!-- الهيدر -->
     <header class="bg-white border-b border-slate-200 py-4 px-6 shadow-sm flex items-center justify-between">
         <div>
-            <!-- الضغط على الأيقونة 3 مرات يفعّل وضع المشرف تلقائياً دون روابط -->
             <h1 class="text-xl font-black text-indigo-700 flex items-center gap-2 cursor-pointer select-none" onclick="handleHeaderClick()">
                 <span>🏆</span> المسابقة العائلية اليومية
             </h1>
@@ -228,13 +227,13 @@
                         const cols = parseCSVLine(lines[i]);
                         if (cols.length >= 7 && cols[2]) {
                             currentQuizData = {
-                                quizId: cols[0] || '1',
-                                date: cols[1] || todayStr,
+                                quizId: String(cols[0] || '1').trim(),
+                                date: String(cols[1] || todayStr).trim(),
                                 question: cols[2],
-                                opt1: cols[3] || '',
-                                opt2: cols[4] || '',
-                                opt3: cols[5] || '',
-                                opt4: cols[6] || '',
+                                opt1: String(cols[3] || '').trim(),
+                                opt2: String(cols[4] || '').trim(),
+                                opt3: String(cols[5] || '').trim(),
+                                opt4: String(cols[6] || '').trim(),
                                 correctIndex: String(cols[7] || '').trim()
                             };
                             break;
@@ -324,7 +323,7 @@
         function selectOption(btn, optIndex, optText) {
             document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('bg-indigo-100', 'border-indigo-500', 'text-indigo-900'));
             btn.classList.add('bg-indigo-100', 'border-indigo-500', 'text-indigo-900');
-            selectedOptionIndex = optIndex;
+            selectedOptionIndex = String(optIndex).trim();
             selectedOptionText = optText;
         }
 
@@ -337,7 +336,7 @@
             clearInterval(timerInterval);
             timeTaken = 60 - timeLeft;
 
-            const targetIndex = currentQuizData.correctIndex;
+            const targetIndex = String(currentQuizData.correctIndex).trim();
             isCorrectAnswer = (selectedOptionIndex === targetIndex);
 
             let correctText = "";
@@ -438,7 +437,7 @@
             });
 
             if (filtered.length === 0) {
-                listContainer.innerHTML = `<p class="text-center text-xs text-slate-400 py-4">لا توجد بيانات متاحة حالياً.</p>`;
+                listContainer.innerHTML = `<p class="text-center text-xs text-slate-400 py-4">لا توجد بيانات متاحة حالياً لهذا الفريق.</p>`;
                 return;
             }
 
