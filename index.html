@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المسابقة العائلية اليومية</title>
+    <!-- Open Graph Meta Tags for WhatsApp Card Preview -->
+    <meta property="og:title" content="المسابقة العائلية اليومية 🏆">
+    <meta property="og:description" content="كل يوم فائدة ومعلومة جديدة! اضغط لدخول المسابقة والمشاركة.">
+    <meta property="og:type" content="website">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -15,39 +19,53 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
-    <!-- Header / Admin Bar -->
-    <header class="bg-purple-900 text-white text-xs py-2 px-4 flex justify-between items-center shadow-md">
-        <div>
+    <!-- Admin Header Bar (Only visible to Admin) -->
+    <header id="admin-header" class="bg-purple-900 text-white text-xs py-2 px-4 flex justify-between items-center shadow-md hidden">
+        <div class="flex items-center gap-2">
             <span class="bg-purple-800 px-2 py-1 rounded text-purple-200 font-bold">
-                <i class="fas fa-user-shield ml-1"></i> وضع المسابقة النشط
+                <i class="fas fa-user-shield ml-1"></i> لوحة التحكم والتحكم بالمسابقة
+            </span>
+            <span id="quiz-id-badge" class="bg-purple-950 text-amber-300 px-2 py-1 rounded font-mono font-bold">
+                مسابقة رقم #1
             </span>
         </div>
-        <button id="exit-btn" onclick="resetUserSelection()" class="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 rounded transition font-medium">
-            تغيير الفئة المختارة
-        </button>
+        <div class="flex items-center gap-2">
+            <button onclick="openLeaderboard()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1 rounded transition font-bold">
+                <i class="fas fa-trophy ml-1"></i> لوحة الصدارة
+            </button>
+            <button onclick="adminLogout()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition font-medium">
+                خروج المشرف
+            </button>
+        </div>
     </header>
+
+    <!-- Top Admin Bar Trigger (When not logged in) -->
+    <div id="admin-login-bar" class="p-2 text-left bg-slate-100 border-b border-slate-200">
+        <button onclick="promptAdminLogin()" class="text-xs text-slate-500 hover:text-indigo-600 font-bold flex items-center gap-1 mr-auto">
+            <i class="fas fa-lock"></i> دخول المشرف
+        </button>
+    </div>
 
     <!-- Main Container -->
     <main class="container mx-auto px-4 py-6 max-w-2xl flex-grow">
         
-        <!-- App Title & Leaderboard Button -->
-        <div class="flex justify-between items-center mb-6">
-            <button id="top-leaderboard-btn" onclick="openLeaderboard()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl shadow font-bold text-sm flex items-center gap-2 transition">
-                <i class="fas fa-trophy"></i> لوحة الصدارة
-            </button>
-            <div class="text-center">
-                <h1 class="text-2xl md:text-3xl font-extrabold text-indigo-900 flex items-center justify-center gap-2">
-                    <i class="fas fa-trophy text-amber-500"></i> المسابقة العائلية اليومية
-                </h1>
+        <!-- App Header & Encouragement Banner -->
+        <div class="text-center mb-6 space-y-3">
+            <div class="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-1.5 rounded-full shadow-md text-xs font-bold">
+                <i class="fas fa-lightbulb"></i>
+                <span>كل يوم فائدة ومعلومة جديدة!</span>
             </div>
-            <span id="current-date-badge" class="bg-slate-200 text-slate-600 text-xs px-2.5 py-1 rounded-full font-mono">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-indigo-900 flex items-center justify-center gap-2">
+                <i class="fas fa-trophy text-amber-500"></i> المسابقة العائلية اليومية
+            </h1>
+            <span id="current-date-badge" class="inline-block bg-slate-200 text-slate-600 text-xs px-3 py-1 rounded-full font-mono">
                 2026-07-22
             </span>
         </div>
 
         <!-- Dynamic Content Card -->
         <div id="app-card" class="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 md:p-8 transition-all duration-300">
-            <!-- Dynamic Injection via JS -->
+            <!-- Dynamic Content -->
         </div>
 
     </main>
@@ -57,12 +75,12 @@
         منصة المسابقة العائلية اليومية © 2026
     </footer>
 
-    <!-- Leaderboard Modal -->
+    <!-- Leaderboard Modal (Admin Only) -->
     <div id="leaderboard-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 relative border border-slate-100">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
                 <h3 class="text-xl font-bold text-indigo-950 flex items-center gap-2">
-                    <i class="fas fa-medal text-amber-500 text-2xl"></i> لوحة الصدارة والترتيب
+                    <i class="fas fa-medal text-amber-500 text-2xl"></i> لوحة الصدارة والنتائج (خاص بالمشرف)
                 </h3>
                 <button onclick="closeLeaderboard()" class="text-slate-400 hover:text-slate-600 bg-slate-100 px-3 py-1 rounded-lg text-sm font-bold">
                     إغلاق <i class="fas fa-times mr-1"></i>
@@ -84,29 +102,81 @@
         </div>
     </div>
 
-    <!-- Application Script -->
+    <!-- Application Logic -->
     <script>
-        const QUESTIONS_CSV_URL = ''; 
-        const SCRIPT_WEB_APP_URL = ''; 
+        const ADMIN_PIN = "1234554321";
+        const CURRENT_QUIZ_ID = "1";
+        const SCRIPT_WEB_APP_URL = "";
 
         const DEFAULT_QUESTION = {
+            id: CURRENT_QUIZ_ID,
             question: "ما هو أول مساجد الإسلام؟",
             options: ["المسجد الحرام", "مسجد قباء", "المسجد النبوي", "المسجد الأقصى"],
             correctAnswer: "مسجد قباء"
         };
 
-        let currentQuizData = null;
+        let isAdmin = localStorage.getItem('family_quiz_admin_logged') === 'true';
+        let currentCategory = null;
         let selectedOptionIndex = null;
         let timerInterval = null;
         let timeLeft = 60;
         let activeTab = 'women';
-        let currentCategory = localStorage.getItem('family_quiz_category') || null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUrlMode();
+            updateAdminUI();
+            renderCategorySelector();
+        });
+
+        function checkUrlMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('mode') === 'player') {
+                const loginBar = document.getElementById('admin-login-bar');
+                if (loginBar) loginBar.classList.add('hidden');
+                isAdmin = false;
+            }
+        }
+
+        function promptAdminLogin() {
+            const pin = prompt("رجاءً أدخل الرقم السري للمشرف:");
+            if (pin === ADMIN_PIN) {
+                isAdmin = true;
+                localStorage.setItem('family_quiz_admin_logged', 'true');
+                updateAdminUI();
+                alert("تم تسجيل دخول المشرف بنجاح.");
+            } else if (pin !== null) {
+                alert("الرقم السري غير صحيح!");
+            }
+        }
+
+        function adminLogout() {
+            isAdmin = false;
+            localStorage.removeItem('family_quiz_admin_logged');
+            updateAdminUI();
+            renderCategorySelector();
+        }
+
+        function updateAdminUI() {
+            const adminHeader = document.getElementById('admin-header');
+            const adminLoginBar = document.getElementById('admin-login-bar');
+
+            if (isAdmin) {
+                if (adminHeader) adminHeader.classList.remove('hidden');
+                if (adminLoginBar) adminLoginBar.classList.add('hidden');
+            } else {
+                if (adminHeader) adminHeader.classList.add('hidden');
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('mode') !== 'player' && adminLoginBar) {
+                    adminLoginBar.classList.remove('hidden');
+                }
+            }
+        }
 
         function getScores() {
             const saved = localStorage.getItem('family_quiz_scores');
             if (saved) return JSON.parse(saved);
             
-            const initial = {
+            return {
                 women: [
                     { id: 'w1', name: 'نساء 1', points: 0 },
                     { id: 'w2', name: 'نساء 2', points: 0 },
@@ -118,68 +188,50 @@
                     { id: 'm3', name: 'رجال 3', points: 0 }
                 ]
             };
-            localStorage.setItem('family_quiz_scores', JSON.stringify(initial));
-            return initial;
         }
 
         function saveScores(scores) {
             localStorage.setItem('family_quiz_scores', JSON.stringify(scores));
         }
 
-        function hasAnsweredToday(catId) {
-            const answered = JSON.parse(localStorage.getItem('family_quiz_answered') || '{}');
-            const today = '2026-07-22';
-            return answered[catId] === today;
+        function hasCategoryAnsweredQuiz(catId, quizId) {
+            const history = JSON.parse(localStorage.getItem('family_quiz_history') || '{}');
+            return history[`q_${quizId}_cat_${catId}`] === true;
         }
 
-        function markAsAnsweredToday(catId) {
-            const answered = JSON.parse(localStorage.getItem('family_quiz_answered') || '{}');
-            answered[catId] = '2026-07-22';
-            localStorage.setItem('family_quiz_answered', JSON.stringify(answered));
+        function markCategoryAnsweredQuiz(catId, quizId) {
+            const history = JSON.parse(localStorage.getItem('family_quiz_history') || '{}');
+            history[`q_${quizId}_cat_${catId}`] = true;
+            localStorage.setItem('family_quiz_history', JSON.stringify(history));
         }
-
-        function normalizeText(str) {
-            if (!str) return '';
-            return String(str)
-                .trim()
-                .replace(/[\u064B-\u0652]/g, '')
-                .replace(/[أإآ]/g, 'ا')
-                .replace(/ة/g, 'ه')
-                .replace(/ى/g, 'ي')
-                .toLowerCase();
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            if (!currentCategory) {
-                renderCategorySelector();
-            } else {
-                checkAndLoadQuiz();
-            }
-        });
 
         function renderCategorySelector() {
+            currentCategory = null;
             const appCard = document.getElementById('app-card');
             appCard.innerHTML = `
-                <div class="text-center space-y-6 py-4">
-                    <h2 class="text-xl md:text-2xl font-extrabold text-indigo-950">اختر الفئة المشاركة للبدء</h2>
-                    <p class="text-slate-500 text-sm">حدد الفئة التي تمثلها ليتم احتساب نقاط المسابقة لحسابكم</p>
+                <div class="text-center space-y-6 py-2">
+                    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl">
+                        <span class="text-xs font-bold text-indigo-600 block mb-1">دعوة للمشاركة</span>
+                        <h2 class="text-xl md:text-2xl font-extrabold text-indigo-950">مرحباً بكم في مسابقة رقم #${CURRENT_QUIZ_ID}</h2>
+                        <p class="text-slate-500 text-xs mt-1">اختر الفئة المشاركة الخاصة بك للبدء في الإجابة</p>
+                    </div>
                     
                     <div class="space-y-4 max-w-md mx-auto text-right">
                         <div>
                             <label class="block text-xs font-bold text-pink-700 mb-2">فئات النساء 👩</label>
                             <div class="grid grid-cols-3 gap-2">
-                                <button onclick="setCategory('w1', 'نساء 1', 'women')" class="p-3 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-sm text-center transition">نساء 1</button>
-                                <button onclick="setCategory('w2', 'نساء 2', 'women')" class="p-3 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-sm text-center transition">نساء 2</button>
-                                <button onclick="setCategory('w3', 'نساء 3', 'women')" class="p-3 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-sm text-center transition">نساء 3</button>
+                                <button onclick="selectCategory('w1', 'نساء 1', 'women')" class="p-3 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-sm text-center transition">نساء 1</button>
+                                <button onclick="selectCategory('w2', 'نساء 2', 'women')" class="p-3 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-sm text-center transition">نساء 2</button>
+                                <button onclick="selectCategory('w3', 'نساء 3', 'women')" class="p-3 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-sm text-center transition">نساء 3</button>
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold text-indigo-700 mb-2">فئات الرجال 👨</label>
                             <div class="grid grid-cols-3 gap-2">
-                                <button onclick="setCategory('m1', 'رجال 1', 'men')" class="p-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-sm text-center transition">رجال 1</button>
-                                <button onclick="setCategory('m2', 'رجال 2', 'men')" class="p-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-sm text-center transition">رجال 2</button>
-                                <button onclick="setCategory('m3', 'رجال 3', 'men')" class="p-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-sm text-center transition">رجال 3</button>
+                                <button onclick="selectCategory('m1', 'رجال 1', 'men')" class="p-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-sm text-center transition">رجال 1</button>
+                                <button onclick="selectCategory('m2', 'رجال 2', 'men')" class="p-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-sm text-center transition">رجال 2</button>
+                                <button onclick="selectCategory('m3', 'رجال 3', 'men')" class="p-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-sm text-center transition">رجال 3</button>
                             </div>
                         </div>
                     </div>
@@ -187,87 +239,37 @@
             `;
         }
 
-        function setCategory(id, name, type) {
+        function selectCategory(id, name, type) {
             currentCategory = { id, name, type };
-            localStorage.setItem('family_quiz_category', JSON.stringify(currentCategory));
-            checkAndLoadQuiz();
-        }
 
-        function resetUserSelection() {
-            localStorage.removeItem('family_quiz_category');
-            currentCategory = null;
-            renderCategorySelector();
-        }
-
-        function checkAndLoadQuiz() {
-            if (typeof currentCategory === 'string') {
-                try { currentCategory = JSON.parse(currentCategory); } catch(e){}
-            }
-
-            if (currentCategory && hasAnsweredToday(currentCategory.id)) {
-                renderAlreadyAnsweredScreen();
+            if (hasCategoryAnsweredQuiz(id, CURRENT_QUIZ_ID)) {
+                renderBlockedScreen();
             } else {
-                loadQuizData();
-            }
-        }
-
-        async function loadQuizData() {
-            if (!QUESTIONS_CSV_URL) {
-                currentQuizData = DEFAULT_QUESTION;
                 renderQuizScreen();
-                return;
             }
-
-            try {
-                const response = await fetch(QUESTIONS_CSV_URL);
-                const csvText = await response.text();
-                const parsedData = parseSimpleCSV(csvText);
-
-                if (parsedData && parsedData.length > 0) {
-                    const row = parsedData[0];
-                    currentQuizData = {
-                        question: row['السؤال'] || row['Question'] || DEFAULT_QUESTION.question,
-                        options: [
-                            row['الخيار 1'] || row['Option 1'] || DEFAULT_QUESTION.options[0],
-                            row['الخيار 2'] || row['Option 2'] || DEFAULT_QUESTION.options[1],
-                            row['الخيار 3'] || row['Option 3'] || DEFAULT_QUESTION.options[2],
-                            row['الخيار 4'] || row['Option 4'] || DEFAULT_QUESTION.options[3]
-                        ],
-                        correctAnswer: row['الإجابة الصحيحة'] || row['الاجابة الصحيحة'] || row['Correct Answer'] || DEFAULT_QUESTION.correctAnswer
-                    };
-                } else {
-                    currentQuizData = DEFAULT_QUESTION;
-                }
-            } catch (err) {
-                currentQuizData = DEFAULT_QUESTION;
-            }
-
-            renderQuizScreen();
         }
 
-        function parseSimpleCSV(text) {
-            const lines = text.split('\n').filter(l => l.trim().length > 0);
-            if (lines.length < 2) return [];
-
-            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-            const result = [];
-
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-                const obj = {};
-                headers.forEach((h, idx) => {
-                    obj[h] = values[idx] || '';
-                });
-                result.push(obj);
-            }
-            return result;
+        function renderBlockedScreen() {
+            const appCard = document.getElementById('app-card');
+            appCard.innerHTML = `
+                <div class="text-center py-8 space-y-6">
+                    <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-4xl mx-auto shadow-sm">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h2 class="text-2xl font-extrabold text-slate-800">فئة (${currentCategory.name}) شاركت بفعالية!</h2>
+                        <p class="text-slate-500 font-medium">لقد تم تقديم إجابة هذه الفئة للمسابقة رقم #${CURRENT_QUIZ_ID} سابقاً. لا يمكن إعادتها حفاظاً على عدالة المنافسة.</p>
+                    </div>
+                    <button onclick="renderCategorySelector()" class="px-6 py-3 bg-slate-200 text-slate-700 rounded-xl font-bold transition hover:bg-slate-300">
+                        العودة لاختيار فئة أخرى
+                    </button>
+                </div>
+            `;
         }
 
         function renderQuizScreen() {
             selectedOptionIndex = null;
             timeLeft = 60;
-
-            const categoryName = currentCategory ? currentCategory.name : 'رجال 1';
 
             const appCard = document.getElementById('app-card');
             appCard.innerHTML = `
@@ -277,18 +279,18 @@
                 </div>
 
                 <div class="flex justify-between items-center text-xs font-bold text-indigo-600 mb-3">
-                    <span class="bg-indigo-50 text-indigo-800 px-3 py-1.5 rounded-lg border border-indigo-100 flex items-center gap-1">
-                        <i class="fas fa-user-check text-indigo-600"></i> الفئة: ${categoryName}
+                    <span class="bg-indigo-50 text-indigo-800 px-3 py-1.5 rounded-lg border border-indigo-100">
+                        الفئة: ${currentCategory.name}
                     </span>
-                    <span class="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">مسابقة اليوم</span>
+                    <span class="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">مسابقة رقم #${CURRENT_QUIZ_ID}</span>
                 </div>
 
                 <h2 class="text-xl md:text-2xl font-bold text-slate-800 text-center my-6 leading-relaxed">
-                    ${currentQuizData.question}
+                    ${DEFAULT_QUESTION.question}
                 </h2>
 
                 <div class="space-y-3 mb-6" id="options-container">
-                    ${currentQuizData.options.map((opt, idx) => `
+                    ${DEFAULT_QUESTION.options.map((opt, idx) => `
                         <button onclick="selectOption(${idx})" id="opt-btn-${idx}" 
                                 class="w-full text-right p-4 rounded-2xl border-2 border-slate-100 bg-white hover:border-indigo-200 transition-all font-semibold text-slate-700 flex items-center justify-between group">
                             <span>${opt}</span>
@@ -299,11 +301,9 @@
                     `).join('')}
                 </div>
 
-                <div id="feedback-box" class="hidden rounded-2xl p-4 text-center font-bold mb-6 transition-all duration-300"></div>
-
-                <button id="submit-btn" disabled onclick="evaluateAndSubmit()" 
+                <button id="submit-btn" disabled onclick="submitAndExit()" 
                         class="w-full py-4 bg-slate-300 text-slate-500 rounded-2xl font-bold text-lg shadow transition duration-200 flex items-center justify-center gap-2 cursor-not-allowed">
-                    <i class="fas fa-save"></i> حفظ والخروج من المسابقة
+                    <i class="fas fa-save"></i> حفظ والخروج
                 </button>
             `;
 
@@ -319,12 +319,12 @@
                 
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    evaluateAndSubmit();
+                    submitAndExit();
                 }
             }, 1000);
         }
 
-        window.selectOption = function(index) {
+        function selectOption(index) {
             selectedOptionIndex = index;
             const container = document.getElementById('options-container');
             const buttons = container.querySelectorAll('button');
@@ -332,84 +332,47 @@
             buttons.forEach((btn, idx) => {
                 const dot = document.getElementById(`radio-dot-${idx}`);
                 if (idx === index) {
-                    btn.className = "w-full text-right p-4 rounded-2xl border-2 border-indigo-600 bg-indigo-50/50 transition-all font-bold text-indigo-900 flex items-center justify-between shadow-sm";
+                    btn.className = "w-full text-right p-4 rounded-2xl border-2 border-indigo-600 bg-indigo-50/50 font-bold text-indigo-900 flex items-center justify-between shadow-sm";
                     if (dot) dot.classList.remove('hidden');
                 } else {
-                    btn.className = "w-full text-right p-4 rounded-2xl border-2 border-slate-100 bg-white hover:border-indigo-200 transition-all font-semibold text-slate-700 flex items-center justify-between";
+                    btn.className = "w-full text-right p-4 rounded-2xl border-2 border-slate-100 bg-white font-semibold text-slate-700 flex items-center justify-between";
                     if (dot) dot.classList.add('hidden');
                 }
             });
 
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = false;
-            submitBtn.className = "w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-lg shadow-lg transition duration-200 flex items-center justify-center gap-2 cursor-pointer";
-        };
+            submitBtn.className = "w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-lg shadow-lg transition duration-200 flex items-center justify-center gap-2 cursor-pointer";
+        }
 
-        window.evaluateAndSubmit = function() {
+        function submitAndExit() {
             clearInterval(timerInterval);
 
-            const rawCorrectVal = currentQuizData.correctAnswer;
             let isCorrect = false;
-            let displayAnswer = rawCorrectVal;
-
             if (selectedOptionIndex !== null) {
-                const selectedText = currentQuizData.options[selectedOptionIndex];
-
-                if (/^[1-4]$/.test(String(rawCorrectVal).trim())) {
-                    const correctIdx = parseInt(rawCorrectVal.trim()) - 1;
-                    displayAnswer = currentQuizData.options[correctIdx] || rawCorrectVal;
-                    if (selectedOptionIndex === correctIdx) isCorrect = true;
-                } else {
-                    const normSelected = normalizeText(selectedText);
-                    const normCorrect = normalizeText(rawCorrectVal);
-                    if (normSelected === normCorrect || normSelected.includes(normCorrect) || normCorrect.includes(normSelected)) {
-                        isCorrect = true;
-                    }
+                const selectedText = DEFAULT_QUESTION.options[selectedOptionIndex];
+                if (selectedText === DEFAULT_QUESTION.correctAnswer) {
+                    isCorrect = true;
                 }
             }
 
-            const feedbackBox = document.getElementById('feedback-box');
-            feedbackBox.classList.remove('hidden');
+            const pointsAwarded = isCorrect ? 10 : 0;
 
             if (isCorrect) {
-                feedbackBox.className = "rounded-2xl p-4 text-center font-bold mb-6 bg-emerald-50 text-emerald-700 border border-emerald-200";
-                feedbackBox.innerHTML = `<i class="fas fa-check-circle ml-1"></i> إجابة صحيحة! أحسنت صنعاً.`;
-                addPointsToCategory(10);
-            } else {
-                feedbackBox.className = "rounded-2xl p-4 text-center font-bold mb-6 bg-red-50 text-red-600 border border-red-200";
-                feedbackBox.innerHTML = `<i class="fas fa-times-circle ml-1"></i> إجابة غير صحيحة. الإجابة الصحيحة هي: (${displayAnswer})`;
+                const scores = getScores();
+                const target = scores[currentCategory.type].find(c => c.id === currentCategory.id);
+                if (target) {
+                    target.points += pointsAwarded;
+                    saveScores(scores);
+                }
             }
 
-            // Lock this category for today
-            if (currentCategory) {
-                markAsAnsweredToday(currentCategory.id);
-            }
-
-            sendToBackend(isCorrect ? 10 : 0);
-
-            const buttons = document.getElementById('options-container').querySelectorAll('button');
-            buttons.forEach(b => b.disabled = true);
-
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.onclick = renderSuccessScreen;
-            submitBtn.innerHTML = `<i class="fas fa-arrow-left"></i> المتابعة للنتيجة`;
-        };
-
-        function addPointsToCategory(pts) {
-            if (!currentCategory) return;
-            const scores = getScores();
-            const type = currentCategory.type;
-            const catId = currentCategory.id;
-
-            const categoryList = scores[type];
-            const target = categoryList.find(c => c.id === catId);
-            if (target) {
-                target.points += pts;
-                saveScores(scores);
-            }
+            markCategoryAnsweredQuiz(currentCategory.id, CURRENT_QUIZ_ID);
+            sendResultToGoogleSheets(pointsAwarded);
+            renderCompletionScreen(isCorrect, pointsAwarded);
         }
 
-        async function sendToBackend(pts) {
+        async function sendResultToGoogleSheets(points) {
             if (!SCRIPT_WEB_APP_URL) return;
             try {
                 await fetch(SCRIPT_WEB_APP_URL, {
@@ -417,53 +380,39 @@
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        category: currentCategory ? currentCategory.name : 'عام',
-                        points: pts,
+                        quiz_id: CURRENT_QUIZ_ID,
+                        category: currentCategory.name,
+                        points: points,
                         timestamp: new Date().toISOString()
                     })
                 });
-            } catch(e) {
-                console.warn("Could not log score:", e);
-            }
+            } catch(e) { console.warn(e); }
         }
 
-        function renderAlreadyAnsweredScreen() {
+        function renderCompletionScreen(isCorrect, points) {
             const appCard = document.getElementById('app-card');
             appCard.innerHTML = `
                 <div class="text-center py-8 space-y-6">
-                    <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-4xl mx-auto shadow-sm">
-                        <i class="fas fa-lock"></i>
+                    <div class="w-20 h-20 ${isCorrect ? 'bg-emerald-500' : 'bg-red-500'} text-white rounded-2xl flex items-center justify-center text-4xl mx-auto shadow-lg">
+                        <i class="fas ${isCorrect ? 'fa-check' : 'fa-times'}"></i>
                     </div>
                     <div class="space-y-2">
-                        <h2 class="text-2xl font-extrabold text-slate-800">لقد شاركت فئة (${currentCategory ? currentCategory.name : ''}) اليوم!</h2>
-                        <p class="text-slate-500 font-medium">تم تسجيل إجابة هذه الفئة سابقاً ولا يمكن إعادة الإجابة حتى المسابقة القادمة.</p>
+                        <h2 class="text-2xl font-extrabold text-slate-800">
+                            ${isCorrect ? 'إجابة صحيحة! أحسنت' : 'إجابة خاطئة!'}
+                        </h2>
+                        <p class="text-slate-600 font-medium">
+                            ${isCorrect ? `تمت إضافة +${points} نقاط لفئة (${currentCategory.name}) بنجاح.` : `الإجابة الصحيحة هي: (${DEFAULT_QUESTION.correctAnswer})`}
+                        </p>
                     </div>
-                    <button onclick="openLeaderboard()" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-bold text-lg shadow-lg transition duration-200 flex items-center justify-center gap-2">
-                        <i class="fas fa-trophy"></i> عرض لوحة الصدارة والترتيب
-                    </button>
-                </div>
-            `;
-        }
-
-        function renderSuccessScreen() {
-            const appCard = document.getElementById('app-card');
-            appCard.innerHTML = `
-                <div class="text-center py-8 space-y-6">
-                    <div class="w-20 h-20 bg-emerald-500 text-white rounded-2xl flex items-center justify-center text-4xl mx-auto shadow-lg shadow-emerald-200">
-                        <i class="fas fa-check"></i>
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-500">
+                        تم تسجيل خروجك وحفظ النتيجة تلقائياً. شكراً لمشاركتك!
                     </div>
-                    <div class="space-y-2">
-                        <h2 class="text-2xl font-extrabold text-slate-800">تم تسجيل إجابتك بنجاح!</h2>
-                        <p class="text-slate-500 font-medium">شكراً لمشاركتك. تم حفظ نقاط فئة (${currentCategory ? currentCategory.name : 'المشاركة'}) بنجاح.</p>
-                    </div>
-                    <button onclick="openLeaderboard()" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-bold text-lg shadow-lg transition duration-200 flex items-center justify-center gap-2">
-                        <i class="fas fa-trophy"></i> عرض لوحة الصدارة والترتيب
-                    </button>
                 </div>
             `;
         }
 
         function openLeaderboard() {
+            if (!isAdmin) return;
             renderLeaderboardList();
             document.getElementById('leaderboard-modal').classList.remove('hidden');
         }
@@ -492,7 +441,6 @@
             const listContainer = document.getElementById('leaderboard-list');
             const scores = getScores();
             const items = scores[activeTab] || [];
-
             const sortedItems = [...items].sort((a, b) => b.points - a.points);
 
             listContainer.innerHTML = sortedItems.map((item, index) => `
