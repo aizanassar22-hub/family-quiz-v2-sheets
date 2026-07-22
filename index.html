@@ -19,7 +19,7 @@
     <header class="bg-purple-900 text-white text-xs py-2 px-4 flex justify-between items-center shadow-md">
         <div>
             <span class="bg-purple-800 px-2 py-1 rounded text-purple-200 font-bold">
-                <i class="fas fa-tools ml-1"></i> وضع المشرف والاختبار نشط (تم إلغاء قيود الحظر)
+                <i class="fas fa-user-shield ml-1"></i> وضع المسابقة النشط
             </span>
         </div>
         <button id="exit-btn" onclick="resetUserSelection()" class="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 rounded transition font-medium">
@@ -86,18 +86,15 @@
 
     <!-- Application Script -->
     <script>
-        // Configuration
-        const QUESTIONS_CSV_URL = ''; // رابط الـ CSV المباشر من جاجل شيت عند التجهيز
-        const SCRIPT_WEB_APP_URL = ''; // رابط Google Apps Script لحفظ الاجابات
+        const QUESTIONS_CSV_URL = ''; 
+        const SCRIPT_WEB_APP_URL = ''; 
 
-        // Default Question Data
         const DEFAULT_QUESTION = {
             question: "ما هو أول مساجد الإسلام؟",
             options: ["المسجد الحرام", "مسجد قباء", "المسجد النبوي", "المسجد الأقصى"],
             correctAnswer: "مسجد قباء"
         };
 
-        // State Variables
         let currentQuizData = null;
         let selectedOptionIndex = null;
         let timerInterval = null;
@@ -105,21 +102,20 @@
         let activeTab = 'women';
         let currentCategory = localStorage.getItem('family_quiz_category') || null;
 
-        // Default Categories Initialization in LocalStorage
         function getScores() {
             const saved = localStorage.getItem('family_quiz_scores');
             if (saved) return JSON.parse(saved);
             
             const initial = {
                 women: [
-                    { id: 'w1', name: 'نساء 1', points: 0, rank: '#1' },
-                    { id: 'w2', name: 'نساء 2', points: 0, rank: '#2' },
-                    { id: 'w3', name: 'نساء 3', points: 0, rank: '#3' }
+                    { id: 'w1', name: 'نساء 1', points: 0 },
+                    { id: 'w2', name: 'نساء 2', points: 0 },
+                    { id: 'w3', name: 'نساء 3', points: 0 }
                 ],
                 men: [
-                    { id: 'm1', name: 'رجال 1', points: 0, rank: '#1' },
-                    { id: 'm2', name: 'رجال 2', points: 0, rank: '#2' },
-                    { id: 'm3', name: 'رجال 3', points: 0, rank: '#3' }
+                    { id: 'm1', name: 'رجال 1', points: 0 },
+                    { id: 'm2', name: 'رجال 2', points: 0 },
+                    { id: 'm3', name: 'رجال 3', points: 0 }
                 ]
             };
             localStorage.setItem('family_quiz_scores', JSON.stringify(initial));
@@ -130,28 +126,37 @@
             localStorage.setItem('family_quiz_scores', JSON.stringify(scores));
         }
 
-        // Text Normalization for String Matching
+        function hasAnsweredToday(catId) {
+            const answered = JSON.parse(localStorage.getItem('family_quiz_answered') || '{}');
+            const today = '2026-07-22';
+            return answered[catId] === today;
+        }
+
+        function markAsAnsweredToday(catId) {
+            const answered = JSON.parse(localStorage.getItem('family_quiz_answered') || '{}');
+            answered[catId] = '2026-07-22';
+            localStorage.setItem('family_quiz_answered', JSON.stringify(answered));
+        }
+
         function normalizeText(str) {
             if (!str) return '';
             return String(str)
                 .trim()
-                .replace(/[\u064B-\u0652]/g, '') // إزالة التشكيل
+                .replace(/[\u064B-\u0652]/g, '')
                 .replace(/[أإآ]/g, 'ا')
                 .replace(/ة/g, 'ه')
                 .replace(/ى/g, 'ي')
                 .toLowerCase();
         }
 
-        // App Init
         document.addEventListener('DOMContentLoaded', () => {
             if (!currentCategory) {
                 renderCategorySelector();
             } else {
-                loadQuizData();
+                checkAndLoadQuiz();
             }
         });
 
-        // Step 1: Render Category Selection Screen
         function renderCategorySelector() {
             const appCard = document.getElementById('app-card');
             appCard.innerHTML = `
@@ -185,7 +190,7 @@
         function setCategory(id, name, type) {
             currentCategory = { id, name, type };
             localStorage.setItem('family_quiz_category', JSON.stringify(currentCategory));
-            loadQuizData();
+            checkAndLoadQuiz();
         }
 
         function resetUserSelection() {
@@ -194,12 +199,19 @@
             renderCategorySelector();
         }
 
-        // Fetch / Load Quiz Data
-        async function loadQuizData() {
+        function checkAndLoadQuiz() {
             if (typeof currentCategory === 'string') {
                 try { currentCategory = JSON.parse(currentCategory); } catch(e){}
             }
 
+            if (currentCategory && hasAnsweredToday(currentCategory.id)) {
+                renderAlreadyAnsweredScreen();
+            } else {
+                loadQuizData();
+            }
+        }
+
+        async function loadQuizData() {
             if (!QUESTIONS_CSV_URL) {
                 currentQuizData = DEFAULT_QUESTION;
                 renderQuizScreen();
@@ -251,7 +263,6 @@
             return result;
         }
 
-        // Render Question Card
         function renderQuizScreen() {
             selectedOptionIndex = null;
             timeLeft = 60;
@@ -260,26 +271,22 @@
 
             const appCard = document.getElementById('app-card');
             appCard.innerHTML = `
-                <!-- Timer Bar -->
                 <div class="bg-amber-50 rounded-xl p-3 mb-6 flex justify-between items-center text-amber-800 font-bold text-sm border border-amber-200">
                     <span><i class="fas fa-clock text-amber-600 ml-1"></i> الوقت المتبقي:</span>
                     <span id="timer-display" class="text-lg font-extrabold text-amber-600">${timeLeft} ثانية</span>
                 </div>
 
-                <!-- Active Category Header -->
                 <div class="flex justify-between items-center text-xs font-bold text-indigo-600 mb-3">
                     <span class="bg-indigo-50 text-indigo-800 px-3 py-1.5 rounded-lg border border-indigo-100 flex items-center gap-1">
                         <i class="fas fa-user-check text-indigo-600"></i> الفئة: ${categoryName}
                     </span>
-                    <span class="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">مسابقة رقم #1</span>
+                    <span class="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">مسابقة اليوم</span>
                 </div>
 
-                <!-- Question Text -->
                 <h2 class="text-xl md:text-2xl font-bold text-slate-800 text-center my-6 leading-relaxed">
                     ${currentQuizData.question}
                 </h2>
 
-                <!-- Options Grid -->
                 <div class="space-y-3 mb-6" id="options-container">
                     ${currentQuizData.options.map((opt, idx) => `
                         <button onclick="selectOption(${idx})" id="opt-btn-${idx}" 
@@ -292,10 +299,8 @@
                     `).join('')}
                 </div>
 
-                <!-- Feedback Area -->
                 <div id="feedback-box" class="hidden rounded-2xl p-4 text-center font-bold mb-6 transition-all duration-300"></div>
 
-                <!-- Submit Button -->
                 <button id="submit-btn" disabled onclick="evaluateAndSubmit()" 
                         class="w-full py-4 bg-slate-300 text-slate-500 rounded-2xl font-bold text-lg shadow transition duration-200 flex items-center justify-center gap-2 cursor-not-allowed">
                     <i class="fas fa-save"></i> حفظ والخروج من المسابقة
@@ -337,10 +342,9 @@
 
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = false;
-            submitBtn.className = "w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-lg shadow-lg transition duration-200 flex items-center justify-center gap-2 cursor-pointer";
+            submitBtn.className = "w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-lg shadow-lg transition duration-200 flex items-center justify-center gap-2 cursor-pointer";
         };
 
-        // Evaluation & Persistent Score Recording
         window.evaluateAndSubmit = function() {
             clearInterval(timerInterval);
 
@@ -351,14 +355,11 @@
             if (selectedOptionIndex !== null) {
                 const selectedText = currentQuizData.options[selectedOptionIndex];
 
-                // Numeric match (1 to 4)
                 if (/^[1-4]$/.test(String(rawCorrectVal).trim())) {
                     const correctIdx = parseInt(rawCorrectVal.trim()) - 1;
                     displayAnswer = currentQuizData.options[correctIdx] || rawCorrectVal;
                     if (selectedOptionIndex === correctIdx) isCorrect = true;
-                } 
-                // String match
-                else {
+                } else {
                     const normSelected = normalizeText(selectedText);
                     const normCorrect = normalizeText(rawCorrectVal);
                     if (normSelected === normCorrect || normSelected.includes(normCorrect) || normCorrect.includes(normSelected)) {
@@ -373,18 +374,19 @@
             if (isCorrect) {
                 feedbackBox.className = "rounded-2xl p-4 text-center font-bold mb-6 bg-emerald-50 text-emerald-700 border border-emerald-200";
                 feedbackBox.innerHTML = `<i class="fas fa-check-circle ml-1"></i> إجابة صحيحة! أحسنت صنعاً.`;
-                
-                // Add 10 points to active selected category
                 addPointsToCategory(10);
             } else {
                 feedbackBox.className = "rounded-2xl p-4 text-center font-bold mb-6 bg-red-50 text-red-600 border border-red-200";
                 feedbackBox.innerHTML = `<i class="fas fa-times-circle ml-1"></i> إجابة غير صحيحة. الإجابة الصحيحة هي: (${displayAnswer})`;
             }
 
-            // Sync with backend if script url exists
+            // Lock this category for today
+            if (currentCategory) {
+                markAsAnsweredToday(currentCategory.id);
+            }
+
             sendToBackend(isCorrect ? 10 : 0);
 
-            // Disable options
             const buttons = document.getElementById('options-container').querySelectorAll('button');
             buttons.forEach(b => b.disabled = true);
 
@@ -396,7 +398,7 @@
         function addPointsToCategory(pts) {
             if (!currentCategory) return;
             const scores = getScores();
-            const type = currentCategory.type; // 'men' or 'women'
+            const type = currentCategory.type;
             const catId = currentCategory.id;
 
             const categoryList = scores[type];
@@ -421,8 +423,26 @@
                     })
                 });
             } catch(e) {
-                console.warn("Could not log score to Apps Script:", e);
+                console.warn("Could not log score:", e);
             }
+        }
+
+        function renderAlreadyAnsweredScreen() {
+            const appCard = document.getElementById('app-card');
+            appCard.innerHTML = `
+                <div class="text-center py-8 space-y-6">
+                    <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-4xl mx-auto shadow-sm">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h2 class="text-2xl font-extrabold text-slate-800">لقد شاركت فئة (${currentCategory ? currentCategory.name : ''}) اليوم!</h2>
+                        <p class="text-slate-500 font-medium">تم تسجيل إجابة هذه الفئة سابقاً ولا يمكن إعادة الإجابة حتى المسابقة القادمة.</p>
+                    </div>
+                    <button onclick="openLeaderboard()" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-bold text-lg shadow-lg transition duration-200 flex items-center justify-center gap-2">
+                        <i class="fas fa-trophy"></i> عرض لوحة الصدارة والترتيب
+                    </button>
+                </div>
+            `;
         }
 
         function renderSuccessScreen() {
@@ -443,7 +463,6 @@
             `;
         }
 
-        // Leaderboard Modal Rendering
         function openLeaderboard() {
             renderLeaderboardList();
             document.getElementById('leaderboard-modal').classList.remove('hidden');
@@ -474,7 +493,6 @@
             const scores = getScores();
             const items = scores[activeTab] || [];
 
-            // Sort by highest points
             const sortedItems = [...items].sort((a, b) => b.points - a.points);
 
             listContainer.innerHTML = sortedItems.map((item, index) => `
