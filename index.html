@@ -12,15 +12,21 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
+    <!-- شريط وضع المطور (يظهر ويختفي بتلقائية وبضغط زر) -->
+    <div id="dev-mode-banner" class="hidden bg-purple-900 text-purple-200 text-xs font-bold py-1.5 px-4 text-center flex items-center justify-between shadow-inner">
+        <span>🛠️ وضع المشرف والاختبار نشط (تم إلغاء قيود الحظر)</span>
+        <button onclick="toggleDevMode()" class="bg-purple-700 hover:bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded">الخروج لوضع المتسابق</button>
+    </div>
+
     <!-- الهيدر -->
     <header class="bg-white border-b border-slate-200 py-4 px-6 shadow-sm flex items-center justify-between">
         <div>
-            <h1 class="text-xl font-black text-indigo-700 flex items-center gap-2">
+            <!-- الضغط على الأيقونة 3 مرات يفعّل وضع المشرف تلقائياً دون روابط -->
+            <h1 class="text-xl font-black text-indigo-700 flex items-center gap-2 cursor-pointer select-none" onclick="handleHeaderClick()">
                 <span>🏆</span> المسابقة العائلية اليومية
             </h1>
             <div id="quiz-date" class="text-[10px] font-bold text-slate-500 mt-1 bg-slate-100 inline-block px-2.5 py-0.5 rounded-full">--</div>
         </div>
-        <!-- زر فتح لوحة الصدارة -->
         <button onclick="openLeaderboard()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-2 rounded-xl shadow transition flex items-center gap-1.5">
             <span>🏆</span> لوحة الصدارة
         </button>
@@ -32,34 +38,39 @@
         <!-- شاشة التحميل -->
         <div id="loading-screen" class="text-center py-12">
             <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div>
-            <p class="mt-4 text-slate-600 font-bold">جاري تحميل مسابقة اليوم...</p>
+            <p class="mt-4 text-slate-600 font-bold">جاري تحميل المسابقة...</p>
         </div>
 
-        <!-- شاشة لا توجد مسابقة / استراحة -->
+        <!-- شاشة لا توجد مسابقة -->
         <div id="rest-screen" class="hidden bg-white p-8 rounded-2xl shadow-xl border border-slate-100 text-center w-full">
             <div class="text-6xl mb-4">☕</div>
-            <h2 class="text-2xl font-bold text-slate-800 mb-2">استراحة اليوم</h2>
-            <p class="text-slate-500 mb-6">لا توجد مسابقة نشطة حالياً في جدول البيانات.</p>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">لا توجد مسابقات نشطة</h2>
+            <p class="text-slate-500 mb-6">لم يتم نشر أي مسابقة جديدة حالياً في الجدول.</p>
             <button onclick="openLeaderboard()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 px-6 rounded-xl shadow-lg transition">
                 عرض لوحة الصدارة 🏆
             </button>
         </div>
 
-        <!-- شاشة تمت المشاركة سابقاً -->
+        <!-- شاشة تمت مشاركة الفريق سابقاً -->
         <div id="already-played-screen" class="hidden bg-white p-8 rounded-2xl shadow-xl border border-slate-100 text-center w-full">
-            <div class="text-6xl mb-4">✋</div>
-            <h2 class="text-2xl font-bold text-slate-800 mb-2">لقد شاركت سابقاً!</h2>
-            <p class="text-slate-500 text-sm mb-6">عذراً، تسمح سياسة المسابقة بمحاولة واحدة فقط لكل يوم، وقد قمت برفع إجابتك بنجاح مسبقاً.</p>
-            <button onclick="openLeaderboard()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+            <div class="text-6xl mb-4">🔒</div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">تمت مشاركة فريقك!</h2>
+            <p id="already-played-msg" class="text-slate-500 text-sm mb-6 leading-relaxed">
+                عذراً، تمت المشاركة في هذه المسابقة سابقاً من قبل ممثل فريقكم.
+            </p>
+            <button onclick="openLeaderboard()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2 mb-3">
                 <span>استعراض نتائج ولوحة الصدارة</span> 📊
+            </button>
+            <button onclick="toggleDevMode()" class="text-xs text-indigo-600 underline font-bold">
+                (خاص بالمشرف): التبديل لوضع الاختبار للتجربة
             </button>
         </div>
 
         <!-- شاشة اختيار الفئة -->
         <div id="category-screen" class="hidden bg-white p-8 rounded-2xl shadow-xl border border-slate-100 w-full text-center">
             <div class="text-5xl mb-4">👋</div>
-            <h2 class="text-2xl font-bold text-slate-800 mb-1">مسابقة اليوم</h2>
-            <p class="text-slate-500 text-sm mb-6">يرجى تحديد الفئة الخاصة بك لبدء التحدي:</p>
+            <h2 id="quiz-header-title" class="text-2xl font-bold text-slate-800 mb-1">المسابقة العائلية</h2>
+            <p class="text-slate-500 text-sm mb-6">حدّد الفئة الخاصة بك لبدء التحدي:</p>
             
             <div class="mb-6 text-right">
                 <label class="block text-xs font-bold text-slate-600 mb-2">اختر الفئة:</label>
@@ -81,7 +92,6 @@
 
         <!-- شاشة السؤال -->
         <div id="quiz-screen" class="hidden bg-white p-6 rounded-2xl shadow-xl border border-slate-100 w-full">
-            
             <div class="mb-4 bg-amber-50 border border-amber-200 p-2 rounded-xl flex items-center justify-between px-4">
                 <span class="text-xs font-bold text-amber-800 flex items-center gap-1">⏱️ الوقت المتبقي:</span>
                 <span id="timer-display" class="text-lg font-black text-amber-600">60 ثانية</span>
@@ -107,19 +117,16 @@
             </button>
         </div>
 
-        <!-- شاشة النهاية والخروج للمتسابق -->
+        <!-- شاشة النجاح -->
         <div id="success-screen" class="hidden bg-white p-8 rounded-2xl shadow-xl border border-slate-100 text-center w-full">
             <div class="text-6xl mb-4">✅</div>
             <h2 class="text-2xl font-black text-slate-800 mb-2">تم تسجيل إجابتك بنجاح!</h2>
             <p class="text-slate-600 text-sm mb-6 leading-relaxed">
-                شكراً لمشاركتك. تم إرسال إجابتك للمشرف، وسوف تُعلن النتائج النهائية لاحقاً.
+                شكراً لمشاركتك. تم حفظ نتيجتك ونقاط فريقك بنجاح.
             </p>
             <button onclick="openLeaderboard()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 px-6 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 mb-3">
                 <span>عرض لوحة الصدارة والترتيب</span> 🏆
             </button>
-            <div class="p-3 bg-slate-100 text-slate-500 rounded-xl text-xs font-bold">
-                🔒 تم إغلاق المسابقة لهذا اليوم.
-            </div>
         </div>
 
         <!-- شاشة لوحة الصدارة -->
@@ -133,19 +140,16 @@
                 </button>
             </div>
 
-            <!-- مؤشر التحميل -->
             <div id="lb-loading" class="text-center py-8">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-amber-500 border-t-transparent"></div>
                 <p class="text-xs font-bold text-slate-500 mt-2">جاري جلب لوحة الصدارة...</p>
             </div>
 
-            <!-- محتوى اللوحة -->
             <div id="lb-content" class="hidden space-y-4">
                 <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
                     <button id="tab-men" onclick="filterLeaderboard('men')" class="flex-1 py-2 rounded-lg bg-indigo-600 text-white transition">فئات الرجال 👨</button>
                     <button id="tab-women" onclick="filterLeaderboard('women')" class="flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition">فئات النساء 👩</button>
                 </div>
-
                 <div id="lb-list" class="space-y-2 pt-2"></div>
             </div>
         </div>
@@ -158,6 +162,27 @@
 
     <script>
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-lampsS01cnHG_rPEmjthiUTAxi4Zfs86Ft7mRWoN4ROIvL39yhkPq6orQGLfC_J_/exec';
+
+        let isDevMode = localStorage.getItem('admin_dev_mode') === 'true';
+        let headerClickCount = 0;
+
+        if (isDevMode) {
+            document.getElementById('dev-mode-banner').classList.remove('hidden');
+        }
+
+        function handleHeaderClick() {
+            headerClickCount++;
+            if (headerClickCount >= 3) {
+                toggleDevMode();
+                headerClickCount = 0;
+            }
+        }
+
+        function toggleDevMode() {
+            isDevMode = !isDevMode;
+            localStorage.setItem('admin_dev_mode', isDevMode ? 'true' : 'false');
+            location.reload();
+        }
 
         let currentQuizData = null;
         let selectedOptionText = null;
@@ -173,32 +198,19 @@
         document.getElementById('current-year').innerText = new Date().getFullYear();
 
         const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const todayStr = `${year}-${month}-${day}`;
-        
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         document.getElementById('quiz-date').innerText = todayStr;
 
-        if (localStorage.getItem('played_' + todayStr)) {
-            showScreen('already-played-screen');
-        } else {
-            fetchQuizData();
-        }
+        fetchQuizData();
 
         function parseCSVLine(text) {
             let p = '', c = '', r = [];
             let q = false;
             for (let i = 0; i < text.length; i++) {
                 c = text[i];
-                if (c === '"') {
-                    q = !q;
-                } else if (c === ',' && !q) {
-                    r.push(p.trim().replace(/^"|"$/g, ''));
-                    p = '';
-                } else {
-                    p += c;
-                }
+                if (c === '"') { q = !q; } 
+                else if (c === ',' && !q) { r.push(p.trim().replace(/^"|"$/g, '')); p = ''; } 
+                else { p += c; }
             }
             r.push(p.trim().replace(/^"|"$/g, ''));
             return r;
@@ -211,36 +223,33 @@
                 .then(res => res.text())
                 .then(text => {
                     const lines = text.split(/\r?\n/);
-                    let quizToUse = null;
-
                     for (let i = 1; i < lines.length; i++) {
                         if (!lines[i].trim()) continue;
                         const cols = parseCSVLine(lines[i]);
-                        
                         if (cols.length >= 7 && cols[2]) {
-                            quizToUse = {
+                            currentQuizData = {
                                 quizId: cols[0] || '1',
-                                date: cols[1] || '',
+                                date: cols[1] || todayStr,
                                 question: cols[2],
                                 opt1: cols[3] || '',
                                 opt2: cols[4] || '',
                                 opt3: cols[5] || '',
                                 opt4: cols[6] || '',
-                                correctIndex: String(cols[7] || '').trim() // رقم الخيار الصحيح (1, 2, 3, 4)
+                                correctIndex: String(cols[7] || '').trim()
                             };
                             break;
                         }
                     }
 
-                    if (quizToUse && quizToUse.question) {
-                        currentQuizData = quizToUse;
+                    if (currentQuizData && currentQuizData.question) {
+                        document.getElementById('quiz-header-title').innerText = "المسابقة رقم #" + currentQuizData.quizId;
                         showScreen('category-screen');
                     } else {
                         showScreen('rest-screen');
                     }
                 })
                 .catch(err => {
-                    console.error("خطأ جلب CSV:", err);
+                    console.error("خطأ جلب البيانات:", err);
                     showScreen('rest-screen');
                 });
         }
@@ -257,6 +266,16 @@
             selectedCategory = select.value;
             if (!selectedCategory) {
                 alert("يرجى اختيار الفئة أولاً!");
+                return;
+            }
+
+            const teamGroup = selectedCategory.includes('رجال') ? 'men' : 'women';
+            const lockKey = `played_quiz_${currentQuizData.quizId}_${teamGroup}`;
+
+            if (!isDevMode && localStorage.getItem(lockKey)) {
+                document.getElementById('already-played-msg').innerText = 
+                    `عذراً، تمت مشاركة فريق (${teamGroup === 'men' ? 'الرجال' : 'النساء'}) في المسابقة رقم #${currentQuizData.quizId} سابقاً.`;
+                showScreen('already-played-screen');
                 return;
             }
 
@@ -321,7 +340,6 @@
             const targetIndex = currentQuizData.correctIndex;
             isCorrectAnswer = (selectedOptionIndex === targetIndex);
 
-            // معرفة النص الصحيح للعرض للمستخدم عند الخطأ
             let correctText = "";
             if (targetIndex === "1") correctText = currentQuizData.opt1;
             else if (targetIndex === "2") correctText = currentQuizData.opt2;
@@ -344,11 +362,14 @@
         }
 
         function saveAndExit() {
+            const teamGroup = selectedCategory.includes('رجال') ? 'men' : 'women';
+            const lockKey = `played_quiz_${currentQuizData.quizId}_${teamGroup}`;
+
             const payload = {
                 quizId: currentQuizData.quizId,
                 date: todayStr,
                 category: selectedCategory,
-                answer: selectedOptionText || "لم يجّب (انتهى الوقت)",
+                answer: selectedOptionText || "لم يجّب",
                 isCorrect: isCorrectAnswer,
                 timeTaken: timeTaken
             };
@@ -360,11 +381,13 @@
                 body: JSON.stringify(payload)
             }).catch(err => console.error("خطأ إرسال الإجابة:", err));
 
-            localStorage.setItem('played_' + todayStr, 'true');
+            if (!isDevMode) {
+                localStorage.setItem(lockKey, 'true');
+            }
+
             showScreen('success-screen');
         }
 
-        /* --- وظائف لوحة الصدارة --- */
         function openLeaderboard() {
             showScreen('leaderboard-screen');
             document.getElementById('lb-loading').classList.remove('hidden');
@@ -378,21 +401,15 @@
                         document.getElementById('lb-loading').classList.add('hidden');
                         document.getElementById('lb-content').classList.remove('hidden');
                         filterLeaderboard(currentFilter);
-                    } else {
-                        alert("تعذر جلب لوحة الصدارة حالياً.");
                     }
                 })
                 .catch(err => {
-                    console.error("خطأ لوحة الصدارة:", err);
                     document.getElementById('lb-loading').classList.add('hidden');
-                    alert("حدث خطأ في الاتصال بالخادم.");
                 });
         }
 
         function closeLeaderboard() {
-            if (localStorage.getItem('played_' + todayStr)) {
-                showScreen('already-played-screen');
-            } else if (currentQuizData) {
+            if (currentQuizData) {
                 showScreen('category-screen');
             } else {
                 showScreen('rest-screen');
@@ -406,10 +423,10 @@
 
             if (gender === 'men') {
                 btnMen.className = "flex-1 py-2 rounded-lg bg-indigo-600 text-white font-bold transition";
-                btnWomen.className = "flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 font-bold transition";
+                btnWomen.className = "flex-1 py-2 rounded-lg text-slate-600 font-bold transition";
             } else {
                 btnWomen.className = "flex-1 py-2 rounded-lg bg-pink-600 text-white font-bold transition";
-                btnMen.className = "flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 font-bold transition";
+                btnMen.className = "flex-1 py-2 rounded-lg text-slate-600 font-bold transition";
             }
 
             const listContainer = document.getElementById('lb-list');
@@ -421,14 +438,12 @@
             });
 
             if (filtered.length === 0) {
-                listContainer.innerHTML = `<p class="text-center text-xs text-slate-400 py-4">لا توجد بيانات متاحة لهذه الفئة حالياً.</p>`;
+                listContainer.innerHTML = `<p class="text-center text-xs text-slate-400 py-4">لا توجد بيانات متاحة حالياً.</p>`;
                 return;
             }
 
             filtered.forEach((item, index) => {
-                const rankColor = index === 0 ? 'bg-amber-100 text-amber-800 border-amber-300' :
-                                  index === 1 ? 'bg-slate-100 text-slate-800 border-slate-300' : 'bg-orange-50 text-orange-800 border-orange-200';
-                
+                const rankColor = index === 0 ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-slate-100 text-slate-800 border-slate-300';
                 listContainer.innerHTML += `
                     <div class="flex items-center justify-between p-3 rounded-xl border ${rankColor} font-bold shadow-sm">
                         <div class="flex items-center gap-3">
