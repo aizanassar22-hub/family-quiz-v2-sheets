@@ -26,7 +26,7 @@
                 <i class="fas fa-user-shield ml-1"></i> لوحة التحكم
             </span>
             <span id="quiz-id-badge" class="bg-purple-950 text-amber-300 px-2 py-1 rounded font-mono font-bold">
-                مسابقة رقم #1
+                مسابقة رقم #001
             </span>
         </div>
         
@@ -110,7 +110,7 @@
     <!-- Application Logic -->
     <script>
         const ADMIN_PIN = "1234554321";
-        const CURRENT_QUIZ_ID = "1";
+        const CURRENT_QUIZ_ID = "001";
         const SCRIPT_WEB_APP_URL = "";
 
         const DEFAULT_QUESTION = {
@@ -193,22 +193,24 @@
             }
         }
 
+        // Initialize 10 Categories for Women and 10 Categories for Men
         function getScores() {
             const saved = localStorage.getItem('family_quiz_scores');
             if (saved) return JSON.parse(saved);
             
-            return {
-                women: [
-                    { id: 'w1', name: 'نساء 1', points: 0 },
-                    { id: 'w2', name: 'نساء 2', points: 0 },
-                    { id: 'w3', name: 'نساء 3', points: 0 }
-                ],
-                men: [
-                    { id: 'm1', name: 'رجال 1', points: 0 },
-                    { id: 'm2', name: 'رجال 2', points: 0 },
-                    { id: 'm3', name: 'رجال 3', points: 0 }
-                ]
-            };
+            const initialWomen = Array.from({ length: 10 }, (_, i) => ({
+                id: `w${i + 1}`,
+                name: `نساء ${i + 1}`,
+                points: 0
+            }));
+
+            const initialMen = Array.from({ length: 10 }, (_, i) => ({
+                id: `m${i + 1}`,
+                name: `رجال ${i + 1}`,
+                points: 0
+            }));
+
+            return { women: initialWomen, men: initialMen };
         }
 
         function saveScores(scores) {
@@ -229,6 +231,27 @@
         function renderCategorySelector() {
             currentCategory = null;
             const appCard = document.getElementById('app-card');
+            
+            // Build 10 Women Buttons
+            let womenButtonsHtml = '';
+            for (let i = 1; i <= 10; i++) {
+                womenButtonsHtml += `
+                    <button onclick="selectCategory('w${i}', 'نساء ${i}', 'women')" 
+                            class="p-2.5 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-xs text-center transition shadow-sm">
+                        نساء ${i}
+                    </button>`;
+            }
+
+            // Build 10 Men Buttons
+            let menButtonsHtml = '';
+            for (let i = 1; i <= 10; i++) {
+                menButtonsHtml += `
+                    <button onclick="selectCategory('m${i}', 'رجال ${i}', 'men')" 
+                            class="p-2.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-xs text-center transition shadow-sm">
+                        رجال ${i}
+                    </button>`;
+            }
+
             appCard.innerHTML = `
                 <div class="text-center space-y-6 py-2">
                     <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl">
@@ -237,22 +260,22 @@
                         <p class="text-slate-500 text-xs mt-1">اختر الفئة المشاركة الخاصة بك للبدء في الإجابة</p>
                     </div>
                     
-                    <div class="space-y-4 max-w-md mx-auto text-right">
+                    <div class="space-y-5 max-w-md mx-auto text-right">
                         <div>
-                            <label class="block text-xs font-bold text-pink-700 mb-2">فئات النساء 👩</label>
-                            <div class="grid grid-cols-3 gap-2">
-                                <button onclick="selectCategory('w1', 'نساء 1', 'women')" class="p-3 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-sm text-center transition">نساء 1</button>
-                                <button onclick="selectCategory('w2', 'نساء 2', 'women')" class="p-3 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-sm text-center transition">نساء 2</button>
-                                <button onclick="selectCategory('w3', 'نساء 3', 'women')" class="p-3 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-sm text-center transition">نساء 3</button>
+                            <label class="block text-xs font-bold text-pink-700 mb-2 flex items-center justify-between">
+                                <span>فئات النساء 👩 (10 فئات)</span>
+                            </label>
+                            <div class="grid grid-cols-5 gap-1.5">
+                                ${womenButtonsHtml}
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-indigo-700 mb-2">فئات الرجال 👨</label>
-                            <div class="grid grid-cols-3 gap-2">
-                                <button onclick="selectCategory('m1', 'رجال 1', 'men')" class="p-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-sm text-center transition">رجال 1</button>
-                                <button onclick="selectCategory('m2', 'رجال 2', 'men')" class="p-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-sm text-center transition">رجال 2</button>
-                                <button onclick="selectCategory('m3', 'رجال 3', 'men')" class="p-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-sm text-center transition">رجال 3</button>
+                            <label class="block text-xs font-bold text-indigo-700 mb-2 flex items-center justify-between">
+                                <span>فئات الرجال 👨 (10 فئات)</span>
+                            </label>
+                            <div class="grid grid-cols-5 gap-1.5">
+                                ${menButtonsHtml}
                             </div>
                         </div>
                     </div>
@@ -478,14 +501,14 @@
             const sortedItems = [...items].sort((a, b) => b.points - a.points);
 
             listContainer.innerHTML = sortedItems.map((item, index) => `
-                <div class="flex items-center justify-between p-4 rounded-2xl ${index === 0 ? 'bg-amber-50 border border-amber-200' : 'bg-slate-50 border border-slate-100'}">
+                <div class="flex items-center justify-between p-3.5 rounded-2xl ${index === 0 ? 'bg-amber-50 border border-amber-200' : 'bg-slate-50 border border-slate-100'}">
                     <div class="flex items-center gap-3">
                         <span class="text-xs font-extrabold ${index === 0 ? 'text-amber-800 bg-amber-200' : 'text-slate-600 bg-slate-200'} px-2 py-1 rounded-md">#${index + 1}</span>
-                        <span class="font-bold text-slate-800">${item.name}</span>
+                        <span class="font-bold text-slate-800 text-sm">${item.name}</span>
                     </div>
                     <div class="text-left">
-                        <span class="text-lg font-black text-indigo-900">${item.points}</span>
-                        <span class="text-xs text-slate-400 block">نقاط</span>
+                        <span class="text-base font-black text-indigo-900">${item.points}</span>
+                        <span class="text-[10px] text-slate-400 block">نقاط</span>
                     </div>
                 </div>
             `).join('');
