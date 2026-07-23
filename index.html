@@ -4,300 +4,724 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المسابقة العائلية اليومية</title>
-    <!-- Tailwind CSS CDN -->
+    <!-- Open Graph Meta Tags for WhatsApp Card Preview -->
+    <meta property="og:title" content="المسابقة العائلية اليومية 🏆">
+    <meta property="og:description" content="كل يوم فائدة ومعلومة جديدة! اضغط لدخول المسابقة والمشاركة.">
+    <meta property="og:type" content="website">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#4f46e5',
-                        secondary: '#312e81',
-                        accent: '#f59e0b',
-                    },
-                    animation: {
-                        'soft-pulse': 'softPulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    },
-                    keyframes: {
-                        softPulse: {
-                            '0%, 100%': { opacity: '1' },
-                            '50%': { opacity: '0.85' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: #f8fafc;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+        body { font-family: 'Tajawal', sans-serif; }
     </style>
 </head>
-<body class="min-h-screen text-slate-800 flex flex-col justify-between">
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
-    <!-- Header / Navbar -->
-    <header class="bg-gradient-to-r from-secondary to-primary text-white py-4 shadow-md">
-        <div class="container mx-auto px-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2 space-x-reverse">
-                <span class="text-2xl">🏆</span>
-                <h1 class="text-xl font-bold">المسابقة العائلية اليومية</h1>
-            </div>
-            <div class="text-xs bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm" id="current-date">
-                2026-07-23
-            </div>
+    <!-- Admin Header Bar (Only visible to Admin) -->
+    <header id="admin-header" class="bg-purple-900 text-white text-xs py-2 px-4 flex flex-wrap justify-between items-center gap-2 shadow-md hidden">
+        <div class="flex items-center gap-2">
+            <span class="bg-purple-800 px-2 py-1 rounded text-purple-200 font-bold">
+                <i class="fas fa-user-shield ml-1"></i> لوحة التحكم
+            </span>
+            <span id="quiz-id-badge" class="bg-purple-950 text-amber-300 px-2 py-1 rounded font-mono font-bold">
+                مسابقة رقم #001
+            </span>
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <button onclick="shareQuizLink()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded transition font-bold flex items-center gap-1">
+                <i class="fab fa-whatsapp"></i> مشاركة رابط المتسابقين
+            </button>
+            <button onclick="openLeaderboard()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1 rounded transition font-bold">
+                <i class="fas fa-trophy ml-1"></i> لوحة الصدارة
+            </button>
+            <button onclick="adminLogout()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition font-medium">
+                خروج
+            </button>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="container mx-auto px-4 py-6 flex-grow max-w-2xl">
+    <!-- Top Admin Bar Trigger (When not logged in) -->
+    <div id="admin-login-bar" class="p-2 text-left bg-slate-100 border-b border-slate-200">
+        <button onclick="promptAdminLogin()" class="text-xs text-slate-500 hover:text-indigo-600 font-bold flex items-center gap-1 mr-auto">
+            <i class="fas fa-lock"></i> دخول المشرف
+        </button>
+    </div>
 
-        <!-- Global Timer Banner -->
-        <div class="bg-secondary text-white rounded-2xl p-4 shadow-lg mb-6 flex justify-between items-center">
-            <div>
-                <span class="text-xs text-indigo-200 block">المؤقت الرئيسي للمسابقة (#001)</span>
-                <span class="text-sm font-semibold">الوقت المتبقي لإغلاق جميع إجابات الجولة</span>
+    <!-- Main Container -->
+    <main class="container mx-auto px-4 py-6 max-w-2xl flex-grow">
+        
+        <!-- App Header & Encouragement Banner -->
+        <div class="text-center mb-6 space-y-3">
+            <div class="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-1.5 rounded-full shadow-md text-xs font-bold">
+                <i class="fas fa-lightbulb"></i>
+                <span>كل يوم فائدة ومعلومة جديدة!</span>
             </div>
-            <div class="bg-primary/80 px-4 py-2 rounded-xl text-xl font-mono font-bold tracking-wider text-accent shadow-inner" id="main-timer">
-                23:47:41
+            <h1 class="text-2xl md:text-3xl font-extrabold text-indigo-900 flex items-center justify-center gap-2">
+                <i class="fas fa-trophy text-amber-500"></i> المسابقة العائلية اليومية
+            </h1>
+            <span id="current-date-badge" class="inline-block bg-slate-200 text-slate-600 text-xs px-3 py-1 rounded-full font-mono">
+                2026-07-23
+            </span>
+        </div>
+
+        <!-- Global 24-Hour Timer Banner -->
+        <div id="main-timer-banner" class="bg-indigo-950 text-white p-4 rounded-2xl shadow-lg mb-6 border border-indigo-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-right">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-800 text-amber-400 rounded-xl flex items-center justify-center text-xl shadow-inner">
+                    <i class="fas fa-hourglass-half animate-pulse"></i>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-indigo-300">المؤقت الرئيسي للمسابقة (#001)</h4>
+                    <p class="text-xs text-slate-300">الوقت المتبقي لإغلاق جميع إجابات الجولة</p>
+                </div>
+            </div>
+            <div class="bg-indigo-900 px-4 py-2 rounded-xl border border-indigo-700">
+                <span id="main-timer-display" class="font-mono text-xl font-extrabold text-amber-400 tracking-wider">
+                    24:00:00
+                </span>
             </div>
         </div>
 
-        <!-- Dynamic Content View Area -->
-        <div id="app-view">
-            <!-- الواجهات الديناميكية -->
+        <!-- Dynamic Content Card -->
+        <div id="app-card" class="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 md:p-8 transition-all duration-300">
+            <!-- Dynamic Content -->
         </div>
 
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500">
-        جميع الحقوق محفوظة - المسابقة العائلية اليومية &copy; 2026
+    <footer class="text-center py-4 text-xs text-slate-400 border-t border-slate-100 bg-white">
+        منصة المسابقة العائلية اليومية © 2026
     </footer>
 
-    <!-- App Logic Script -->
+    <!-- Leaderboard Modal (Admin Only) -->
+    <div id="leaderboard-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 relative border border-slate-100">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
+                <h3 class="text-xl font-bold text-indigo-950 flex items-center gap-2">
+                    <i class="fas fa-medal text-amber-500 text-2xl"></i> لوحة الصدارة والنتائج
+                </h3>
+                <button onclick="closeLeaderboard()" class="text-slate-400 hover:text-slate-600 bg-slate-100 px-3 py-1 rounded-lg text-sm font-bold">
+                    إغلاق <i class="fas fa-times mr-1"></i>
+                </button>
+            </div>
+
+            <!-- Gender Tabs -->
+            <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
+                <button id="tab-women" onclick="switchTab('women')" class="flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-pink-600 text-white shadow-md">
+                    فئات النساء 👩
+                </button>
+                <button id="tab-men" onclick="switchTab('men')" class="flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600">
+                    فئات الرجال 👨
+                </button>
+            </div>
+
+            <!-- Leaderboard Items Container -->
+            <div id="leaderboard-list" class="space-y-3 max-h-80 overflow-y-auto pr-1"></div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
     <script>
-        const state = {
-            currentScreen: 'home', // home, questions, quiz, finished
-            selectedCategory: null,
-            participantId: '001',
-            categoryStatus: {}
-        };
+        const ADMIN_PIN = "1234554321";
+        const CURRENT_QUIZ_ID = "001";
+        const SCRIPT_WEB_APP_URL = "";
 
-        function render() {
-            const appView = document.getElementById('app-view');
-            appView.innerHTML = '';
+        // 10 Questions Array with Categories/Subjects
+        const QUIZ_QUESTIONS = [
+            {
+                id: 1,
+                subject: "علوم القرآن",
+                question: "ما هي السورة التي تسمى عروس القرآن؟",
+                options: ["سورة يس", "سورة الرحمن", "سورة الواقعة", "سورة الملك"],
+                correctAnswer: "سورة الرحمن"
+            },
+            {
+                id: 2,
+                subject: "اللغة العربية",
+                question: "ما هو الفاعل في جملة: (كتب الطالبُ الدرسَ)؟",
+                options: ["كتب", "الطالبُ", "الدرسَ", "ضمير مستتر"],
+                correctAnswer: "الطالبُ"
+            },
+            {
+                id: 3,
+                subject: "الرياضيات",
+                question: "ما حاصل ضرب العددين 12 في 11؟",
+                options: ["122", "132", "142", "152"],
+                correctAnswer: "132"
+            },
+            {
+                id: 4,
+                subject: "العلوم",
+                question: "ما هو العنصر الكيميائي الذي رمزه (O)؟",
+                options: ["الذهب", "الحديد", "الأكسجين", "الهيدروجين"],
+                correctAnswer: "الأكسجين"
+            },
+            {
+                id: 5,
+                subject: "التاريخ الإسلامي",
+                question: "في أي عام هجري وقعت غزوة بدر الكبرى؟",
+                options: ["السنة الأولى", "السنة الثانية", "السنة الثالثة", "السنة الخامسة"],
+                correctAnswer: "السنة الثانية"
+            },
+            {
+                id: 6,
+                subject: "الجغرافيا",
+                question: "ما هي أطول أنهار العالم؟",
+                options: ["نهر الأمازون", "نهر النيل", "نهر الدانوب", "نهر الفرات"],
+                correctAnswer: "نهر النيل"
+            },
+            {
+                id: 7,
+                subject: "السيرة النبوية",
+                question: "من هو أول مرسل في الإسلام للتعليم في المدينة؟",
+                options: ["مصعب بن عمير", "علي بن أبي طالب", "أبو بكر الصديق", "عثمان بن عفان"],
+                correctAnswer: "مصعب بن عمير"
+            },
+            {
+                id: 8,
+                subject: "معلومات عامة",
+                question: "ما هي أسرع الكائنات الحية برياً؟",
+                options: ["الأسد", "الفهد", "الغزال", "الحصان"],
+                correctAnswer: "الفهد"
+            },
+            {
+                id: 9,
+                subject: "الفقه والإسلاميات",
+                question: "كم عدد أركان الإسلام؟",
+                options: ["4 أركان", "5 أركان", "6 أركان", "7 أركان"],
+                correctAnswer: "5 أركان"
+            },
+            {
+                id: 10,
+                subject: "الذكاء والألغاز",
+                question: "ما هو الشيء الذي كلما أخذت منه كَبُر؟",
+                options: ["الحفرة", "العمر", "المال", "العلم"],
+                correctAnswer: "الحفرة"
+            }
+        ];
 
-            switch (state.currentScreen) {
-                case 'home':
-                    appView.innerHTML = renderHomeScreen();
-                    break;
-                case 'questions':
-                    appView.innerHTML = renderQuestionsScreen();
-                    break;
-                case 'quiz':
-                    appView.innerHTML = renderQuizScreen();
-                    break;
-                case 'finished':
-                    appView.innerHTML = renderFinishedScreen();
-                    break;
+        let isAdmin = localStorage.getItem('family_quiz_admin_logged') === 'true';
+        let currentCategory = null;
+        let selectedQuestion = null;
+        let selectedOptionIndex = null;
+        let questionTimerInterval = null;
+        let questionTimeLeft = 60;
+        let mainTimerInterval = null;
+        let activeTab = 'women';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUrlMode();
+            updateAdminUI();
+            initMainTimer();
+            renderCategorySelector();
+        });
+
+        // 24-Hour Main Quiz Timer Logic
+        function initMainTimer() {
+            let startTime = localStorage.getItem('family_quiz_start_time');
+            if (!startTime) {
+                startTime = new Date().getTime();
+                localStorage.setItem('family_quiz_start_time', startTime);
+            }
+
+            const duration = 24 * 60 * 60 * 1000; // 24 hours in ms
+
+            clearInterval(mainTimerInterval);
+            mainTimerInterval = setInterval(() => {
+                const now = new Date().getTime();
+                const elapsed = now - parseInt(startTime);
+                const remaining = duration - elapsed;
+
+                if (remaining <= 0) {
+                    clearInterval(mainTimerInterval);
+                    document.getElementById('main-timer-display').textContent = "00:00:00 (انتهت المسابقة)";
+                    localStorage.setItem('family_quiz_expired', 'true');
+                } else {
+                    const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+                    const hStr = String(hours).padStart(2, '0');
+                    const mStr = String(minutes).padStart(2, '0');
+                    const sStr = String(seconds).padStart(2, '0');
+
+                    document.getElementById('main-timer-display').textContent = `${hStr}:${mStr}:${sStr}`;
+                }
+            }, 1000);
+        }
+
+        function isMainTimerExpired() {
+            return localStorage.getItem('family_quiz_expired') === 'true';
+        }
+
+        function checkUrlMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('mode') === 'player') {
+                const loginBar = document.getElementById('admin-login-bar');
+                if (loginBar) loginBar.classList.add('hidden');
+                isAdmin = false;
             }
         }
 
-        // 1. الشاشة الرئيسية المعتمدة تماماً كما في الصورة الأخيرة
-        function renderHomeScreen() {
-            return `
-                <!-- الشريط التربوي الجمالي المطابق تماماً للصورة الأخيرة -->
-                <div class="mb-6 bg-amber-50/90 border border-amber-200/80 rounded-2xl p-3 text-center shadow-sm animate-soft-pulse">
-                    <p class="text-amber-800 font-bold text-sm flex items-center justify-center gap-2">
-                        <span>💡</span> الفوز جميل... لكن التعلّم أجمل. <span>🏆</span>
-                    </p>
-                </div>
-
-                <!-- بطاقة الدخول الرئيسية المطابقة تماماً لـ image.png -->
-                <div class="bg-white rounded-3xl shadow-xl p-6 border border-slate-100 text-center relative overflow-hidden">
-                    
-                    <div class="bg-indigo-50 text-indigo-600 text-[11px] font-bold px-4 py-1 rounded-xl inline-block mb-3">
-                        دعوة للمشاركة
-                    </div>
-                    
-                    <h2 class="text-2xl font-extrabold text-slate-800 mb-1">مرحباً بكم في مسابقة رقم #${state.participantId}</h2>
-                    <p class="text-slate-400 text-xs mb-6 font-semibold">اختر الفئة المشاركة الخاصة بك للبدء في الإجابة</p>
-
-                    <!-- فئات النساء -->
-                    <div class="mb-6 text-right">
-                        <div class="text-xs font-bold text-slate-600 mb-2">
-                            <span>فئات النساء 👩 (10 فئات)</span>
-                        </div>
-                        <div class="grid grid-cols-5 gap-2">
-                            ${Array.from({length: 10}, (_, i) => `
-                                <button onclick="selectCategory('نساء ${i+1}')" class="bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-semibold py-2.5 rounded-xl border border-pink-100 transition shadow-sm">
-                                    نساء ${i+1}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <!-- فئات الرجال -->
-                    <div class="text-right">
-                        <div class="text-xs font-bold text-slate-600 mb-2">
-                            <span>فئات الرجال 👨 (10 فئات)</span>
-                        </div>
-                        <div class="grid grid-cols-5 gap-2">
-                            ${Array.from({length: 10}, (_, i) => `
-                                <button onclick="selectCategory('رجال ${i+1}')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold py-2.5 rounded-xl border border-blue-100 transition shadow-sm">
-                                    رجال ${i+1}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
+        function promptAdminLogin() {
+            const pin = prompt("رجاءً أدخل الرقم السري للمشرف:");
+            if (pin === ADMIN_PIN) {
+                isAdmin = true;
+                localStorage.setItem('family_quiz_admin_logged', 'true');
+                updateAdminUI();
+                alert("تم تسجيل دخول المشرف بنجاح.");
+            } else if (pin !== null) {
+                alert("الرقم السري غير صحيح!");
+            }
         }
 
-        function selectCategory(catName) {
-            state.selectedCategory = catName;
-            if (state.categoryStatus[catName]) {
-                state.currentScreen = 'finished';
+        function adminLogout() {
+            isAdmin = false;
+            localStorage.removeItem('family_quiz_admin_logged');
+            updateAdminUI();
+            renderCategorySelector();
+        }
+
+        function updateAdminUI() {
+            const adminHeader = document.getElementById('admin-header');
+            const adminLoginBar = document.getElementById('admin-login-bar');
+
+            if (isAdmin) {
+                if (adminHeader) adminHeader.classList.remove('hidden');
+                if (adminLoginBar) adminLoginBar.classList.add('hidden');
             } else {
-                state.currentScreen = 'questions';
+                if (adminHeader) adminHeader.classList.add('hidden');
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('mode') !== 'player' && adminLoginBar) {
+                    adminLoginBar.classList.remove('hidden');
+                }
             }
-            render();
         }
 
-        // 2. شاشة الأسئلة (متضمنة زر العودة المعتمد)
-        function renderQuestionsScreen() {
-            const questionsList = [
-                { id: 1, subject: 'علوم القرآن', title: 'ما هي السورة التي تسمى عروس القرآن؟' },
-                { id: 2, subject: 'اللغة العربية', title: 'ما هو الفاعل في جملة: (كتب الطالب الدرس)؟' },
-                { id: 3, subject: 'الرياضيات', title: 'ما حاصل ضرب العددين 12 في 11؟' },
-                { id: 4, subject: 'العلوم', title: 'ما هو العنصر الكيميائي الذي رمزه (O)؟' },
-                { id: 5, subject: 'التاريخ الإسلامي', title: 'في أي عام هجري وقعت غزوة بدر الكبرى؟' }
-            ];
+        function shareQuizLink() {
+            const playerUrl = window.location.origin + window.location.pathname + "?mode=player";
+            const message = `🏆 *المسابقة العائلية اليومية* 🏆\n✨ _"كل يوم فائدة ومعلومة جديدة!"_\n\nاضغط على الرابط التالي لدخول المسابقة رقم (#${CURRENT_QUIZ_ID}) والمشاركة مع الفئة الخاصة بك:\n\n👇 *اضغط هنا للدخول والتنافس:*\n${playerUrl}`;
 
-            return `
-                <div class="bg-white rounded-3xl shadow-xl p-6 border border-slate-100 relative">
-                    <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
-                        <button onclick="goBackToHome()" class="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded-xl transition font-semibold">
-                            <span>←</span> العودة للفئات
-                        </button>
-                        <span class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-bold">
-                            الفئة: ${state.selectedCategory}
-                        </span>
+            if (navigator.share) {
+                navigator.share({
+                    title: 'المسابقة العائلية اليومية',
+                    text: message
+                }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(message).then(() => {
+                    alert("تم نسخ نص الدعوة والرابط بنجاح! يمكنك الآن لصقه في الواتساب.");
+                });
+            }
+        }
+
+        function getScores() {
+            const saved = localStorage.getItem('family_quiz_scores');
+            if (saved) return JSON.parse(saved);
+            
+            const initialWomen = Array.from({ length: 10 }, (_, i) => ({
+                id: `w${i + 1}`,
+                name: `نساء ${i + 1}`,
+                points: 0
+            }));
+
+            const initialMen = Array.from({ length: 10 }, (_, i) => ({
+                id: `m${i + 1}`,
+                name: `رجال ${i + 1}`,
+                points: 0
+            }));
+
+            return { women: initialWomen, men: initialMen };
+        }
+
+        function saveScores(scores) {
+            localStorage.setItem('family_quiz_scores', JSON.stringify(scores));
+        }
+
+        function hasCategoryAnsweredQuiz(catId, quizId) {
+            const history = JSON.parse(localStorage.getItem('family_quiz_history') || '{}');
+            return history[`q_${quizId}_cat_${catId}`] === true;
+        }
+
+        function markCategoryAnsweredQuiz(catId, quizId, qId) {
+            const history = JSON.parse(localStorage.getItem('family_quiz_history') || '{}');
+            history[`q_${quizId}_cat_${catId}`] = true;
+            history[`q_${quizId}_q_${qId}_cat_${catId}`] = true;
+            localStorage.setItem('family_quiz_history', JSON.stringify(history));
+        }
+
+        function isQuestionAnsweredByCat(qId, catId) {
+            const history = JSON.parse(localStorage.getItem('family_quiz_history') || '{}');
+            return history[`q_${CURRENT_QUIZ_ID}_q_${qId}_cat_${catId}`] === true;
+        }
+
+        function renderCategorySelector() {
+            currentCategory = null;
+            selectedQuestion = null;
+            const appCard = document.getElementById('app-card');
+            
+            let womenButtonsHtml = '';
+            for (let i = 1; i <= 10; i++) {
+                womenButtonsHtml += `
+                    <button onclick="selectCategory('w${i}', 'نساء ${i}', 'women')" 
+                            class="p-2.5 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-xs text-center transition shadow-sm">
+                        نساء ${i}
+                    </button>`;
+            }
+
+            let menButtonsHtml = '';
+            for (let i = 1; i <= 10; i++) {
+                menButtonsHtml += `
+                    <button onclick="selectCategory('m${i}', 'رجال ${i}', 'men')" 
+                            class="p-2.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-xs text-center transition shadow-sm">
+                        رجال ${i}
+                    </button>`;
+            }
+
+            appCard.innerHTML = `
+                <div class="text-center space-y-6 py-2">
+                    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl">
+                        <span class="text-xs font-bold text-indigo-600 block mb-1">دعوة للمشاركة</span>
+                        <h2 class="text-xl md:text-2xl font-extrabold text-indigo-950">مرحباً بكم في مسابقة رقم #${CURRENT_QUIZ_ID}</h2>
+                        <p class="text-slate-500 text-xs mt-1">اختر الفئة المشاركة الخاصة بك للبدء في الإجابة</p>
                     </div>
-
-                    <h3 class="font-bold text-slate-800 text-sm mb-1">اختر السؤال المناسب لك (10 أسئلة متوفرة):</h3>
-                    <p class="text-slate-400 text-xs mb-4">يسمح لك بالإجابة على سؤال واحد فقط لحساب فئتك.</p>
-
-                    <div class="space-y-3">
-                        ${questionsList.map(q => `
-                            <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition">
-                                <div class="text-right">
-                                    <span class="text-[10px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md font-bold">${q.subject}</span>
-                                    <h4 class="text-xs font-bold text-slate-800 mt-1">${q.title}</h4>
-                                </div>
-                                <button onclick="startQuiz(${q.id})" class="bg-primary hover:bg-indigo-700 text-white text-xs px-4 py-2 rounded-xl transition shadow-sm font-semibold flex items-center gap-1">
-                                    <span>اختر السؤال</span> <span>›</span>
-                                </button>
+                    
+                    <div class="space-y-5 max-w-md mx-auto text-right">
+                        <div>
+                            <label class="block text-xs font-bold text-pink-700 mb-2 flex items-center justify-between">
+                                <span>فئات النساء 👩 (10 فئات)</span>
+                            </label>
+                            <div class="grid grid-cols-5 gap-1.5">
+                                ${womenButtonsHtml}
                             </div>
-                        `).join('')}
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-indigo-700 mb-2 flex items-center justify-between">
+                                <span>فئات الرجال 👨 (10 فئات)</span>
+                            </label>
+                            <div class="grid grid-cols-5 gap-1.5">
+                                ${menButtonsHtml}
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
         }
 
-        function goBackToHome() {
-            state.currentScreen = 'home';
-            render();
+        function selectCategory(id, name, type) {
+            if (isMainTimerExpired()) {
+                renderExpiredQuizScreen();
+                return;
+            }
+
+            currentCategory = { id, name, type };
+
+            if (hasCategoryAnsweredQuiz(id, CURRENT_QUIZ_ID)) {
+                renderBlockedScreen();
+            } else {
+                renderQuestionListScreen();
+            }
         }
 
-        // 3. شاشة حل السؤال (متضمنة زر العودة لقائمة الأسئلة)
-        function renderQuizScreen() {
-            return `
-                <div class="bg-white rounded-3xl shadow-xl p-6 border border-slate-100 relative">
-                    <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
-                        <button onclick="goBackToQuestions()" class="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded-xl transition font-semibold">
-                            <span>←</span> العودة للأسئلة
-                        </button>
-                        <span class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-bold">
-                            ${state.selectedCategory}
-                        </span>
+        function renderExpiredQuizScreen() {
+            const appCard = document.getElementById('app-card');
+            appCard.innerHTML = `
+                <div class="text-center py-8 space-y-6">
+                    <div class="w-20 h-20 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-4xl mx-auto shadow-sm">
+                        <i class="fas fa-hourglass-end"></i>
                     </div>
-
-                    <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-2.5 mb-4 flex justify-between items-center text-xs text-amber-800 font-semibold">
-                        <span>⏱️ المؤقت الفرعي للسؤال:</span>
-                        <span class="font-bold">13 ثانية</span>
+                    <div class="space-y-2">
+                        <h2 class="text-2xl font-extrabold text-slate-800">انتهى الوقت الرئيسي للمسابقة!</h2>
+                        <p class="text-slate-500 font-medium text-sm">عذراً، لقد مضت 24 ساعة على إطلاق هذه المسابقة وتم إغلاق استقبال الإجابات رسمياً.</p>
                     </div>
-
-                    <div class="text-right mb-6">
-                        <span class="text-[10px] bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-lg font-bold">التخصص: علوم القرآن</span>
-                        <h3 class="text-base font-bold text-slate-800 mt-2">ما هي السورة التي تسمى عروس القرآن؟</h3>
-                    </div>
-
-                    <div class="space-y-2.5 mb-6">
-                        ${['سورة يس', 'سورة الرحمن', 'سورة الواقعة', 'سورة الملك'].map((opt) => `
-                            <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:border-primary cursor-pointer transition bg-white">
-                                <span class="text-xs font-semibold text-slate-700">${opt}</span>
-                                <input type="radio" name="quiz_answer" class="text-primary focus:ring-primary">
-                            </label>
-                        `).join('')}
-                    </div>
-
-                    <button onclick="submitAnswer()" class="w-full bg-primary hover:bg-indigo-700 text-white text-xs py-3 rounded-xl font-bold shadow-md transition">
-                        📥 إرسال الإجابة وحفظ النتيجة
+                    <button onclick="renderCategorySelector()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-md">
+                        <i class="fas fa-arrow-right ml-1"></i> العودة
                     </button>
                 </div>
             `;
         }
 
-        function startQuiz(qId) {
-            state.currentScreen = 'quiz';
-            render();
+        function renderBlockedScreen() {
+            const appCard = document.getElementById('app-card');
+            appCard.innerHTML = `
+                <div class="text-center py-8 space-y-6">
+                    <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-4xl mx-auto shadow-sm">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h2 class="text-2xl font-extrabold text-slate-800">فئة (${currentCategory.name}) شاركت بفعالية!</h2>
+                        <p class="text-slate-500 font-medium text-sm">لقد تم تقديم إجابة هذه الفئة للمسابقة رقم #${CURRENT_QUIZ_ID} سابقاً. يسمح لكل متسابق بإجابة سؤال واحد فقط.</p>
+                    </div>
+                    <button onclick="renderCategorySelector()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-md">
+                        <i class="fas fa-arrow-right ml-1"></i> العودة لاختيار فئة أخرى
+                    </button>
+                </div>
+            `;
         }
 
-        function goBackToQuestions() {
-            state.currentScreen = 'questions';
-            render();
+        // Display List of 10 Questions to Pick From
+        function renderQuestionListScreen() {
+            const appCard = document.getElementById('app-card');
+
+            let questionsListHtml = QUIZ_QUESTIONS.map((q) => {
+                const answered = isQuestionAnsweredByCat(q.id, currentCategory.id);
+                return `
+                    <div class="p-4 rounded-2xl border ${answered ? 'bg-slate-100 border-slate-200 opacity-60 cursor-not-allowed' : 'bg-white border-indigo-100 hover:border-indigo-400 hover:shadow-md cursor-pointer'} transition flex items-center justify-between"
+                         onclick="${answered ? '' : `startQuestion(${q.id})`}">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-xl ${answered ? 'bg-slate-200 text-slate-500' : 'bg-indigo-100 text-indigo-700'} font-bold text-sm flex items-center justify-center font-mono">
+                                #${q.id}
+                            </span>
+                            <div class="text-right">
+                                <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider block">${q.subject}</span>
+                                <h4 class="font-bold text-slate-800 text-sm">${q.question}</h4>
+                            </div>
+                        </div>
+                        <div>
+                            ${answered ? 
+                                `<span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-lg flex items-center gap-1"><i class="fas fa-check-circle"></i> مُجاب</span>` : 
+                                `<span class="text-xs bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-lg">اختر السؤال <i class="fas fa-chevron-left mr-1"></i></span>`}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            appCard.innerHTML = `
+                <div class="space-y-5">
+                    <div class="flex justify-between items-center text-xs font-bold text-indigo-600 border-b border-slate-100 pb-3">
+                        <span class="bg-indigo-50 text-indigo-800 px-3 py-1.5 rounded-lg border border-indigo-100">
+                            الفئة: ${currentCategory.name}
+                        </span>
+                        <button onclick="renderCategorySelector()" class="text-slate-400 hover:text-slate-600">
+                            تغيير الفئة <i class="fas fa-exchange-alt mr-1"></i>
+                        </button>
+                    </div>
+
+                    <div class="text-right">
+                        <h3 class="text-lg font-extrabold text-indigo-950">اختر السؤال المناسب لك (10 أسئلة متوفرة):</h3>
+                        <p class="text-slate-500 text-xs mt-1">يُسمح لك بالإجابة على سؤال واحد فقط لحساب فئتك.</p>
+                    </div>
+
+                    <div class="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
+                        ${questionsListHtml}
+                    </div>
+                </div>
+            `;
         }
 
-        function submitAnswer() {
-            state.categoryStatus[state.selectedCategory] = true;
-            state.currentScreen = 'finished';
-            render();
+        function startQuestion(questionId) {
+            selectedQuestion = QUIZ_QUESTIONS.find(q => q.id === questionId);
+            renderQuizScreen();
         }
 
-        // 4. شاشة الانتهاء (تتضمن أزرار الخروج والعودة)
-        function renderFinishedScreen() {
-            return `
-                <div class="bg-white rounded-3xl shadow-xl p-8 border border-slate-100 text-center">
-                    <div class="w-16 h-16 bg-amber-50 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-sm mb-4">
-                        🔒
+        function renderQuizScreen() {
+            selectedOptionIndex = null;
+            questionTimeLeft = 60;
+
+            const appCard = document.getElementById('app-card');
+            appCard.innerHTML = `
+                <div class="bg-amber-50 rounded-xl p-3 mb-6 flex justify-between items-center text-amber-800 font-bold text-sm border border-amber-200">
+                    <span><i class="fas fa-clock text-amber-600 ml-1"></i> المؤقت الفرعي للسؤال:</span>
+                    <span id="timer-display" class="text-lg font-extrabold text-amber-600">${questionTimeLeft} ثانية</span>
+                </div>
+
+                <div class="flex justify-between items-center text-xs font-bold text-indigo-600 mb-3">
+                    <span class="bg-indigo-50 text-indigo-800 px-3 py-1.5 rounded-lg border border-indigo-100">
+                        الفئة: ${currentCategory.name}
+                    </span>
+                    <span class="bg-amber-100 text-amber-800 px-3 py-1.5 rounded-lg font-bold">التخصص: ${selectedQuestion.subject}</span>
+                </div>
+
+                <h2 class="text-xl md:text-2xl font-bold text-slate-800 text-center my-6 leading-relaxed">
+                    ${selectedQuestion.question}
+                </h2>
+
+                <div class="space-y-3 mb-6" id="options-container">
+                    ${selectedQuestion.options.map((opt, idx) => `
+                        <button onclick="selectOption(${idx})" id="opt-btn-${idx}" 
+                                class="w-full text-right p-4 rounded-2xl border-2 border-slate-100 bg-white hover:border-indigo-200 transition-all font-semibold text-slate-700 flex items-center justify-between group">
+                            <span>${opt}</span>
+                            <div class="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-indigo-500 flex items-center justify-center">
+                                <div class="w-2.5 h-2.5 rounded-full bg-indigo-600 hidden" id="radio-dot-${idx}"></div>
+                            </div>
+                        </button>
+                    `).join('')}
+                </div>
+
+                <button id="submit-btn" disabled onclick="submitAndExit()" 
+                        class="w-full py-4 bg-slate-300 text-slate-500 rounded-2xl font-bold text-lg shadow transition duration-200 flex items-center justify-center gap-2 cursor-not-allowed">
+                    <i class="fas fa-save"></i> إرسال الإجابة وحفظ النتيجة
+                </button>
+            `;
+
+            startQuestionTimer();
+        }
+
+        function startQuestionTimer() {
+            clearInterval(questionTimerInterval);
+            questionTimerInterval = setInterval(() => {
+                questionTimeLeft--;
+                const timerEl = document.getElementById('timer-display');
+                if (timerEl) timerEl.textContent = `${questionTimeLeft} ثانية`;
+                
+                if (questionTimeLeft <= 0) {
+                    clearInterval(questionTimerInterval);
+                    submitAndExit();
+                }
+            }, 1000);
+        }
+
+        function selectOption(index) {
+            selectedOptionIndex = index;
+            const container = document.getElementById('options-container');
+            const buttons = container.querySelectorAll('button');
+            
+            buttons.forEach((btn, idx) => {
+                const dot = document.getElementById(`radio-dot-${idx}`);
+                if (idx === index) {
+                    btn.className = "w-full text-right p-4 rounded-2xl border-2 border-indigo-600 bg-indigo-50/50 font-bold text-indigo-900 flex items-center justify-between shadow-sm";
+                    if (dot) dot.classList.remove('hidden');
+                } else {
+                    btn.className = "w-full text-right p-4 rounded-2xl border-2 border-slate-100 bg-white font-semibold text-slate-700 flex items-center justify-between";
+                    if (dot) dot.classList.add('hidden');
+                }
+            });
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = false;
+            submitBtn.className = "w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-lg shadow-lg transition duration-200 flex items-center justify-center gap-2 cursor-pointer";
+        }
+
+        function submitAndExit() {
+            clearInterval(questionTimerInterval);
+
+            let isCorrect = false;
+            if (selectedOptionIndex !== null) {
+                const selectedText = selectedQuestion.options[selectedOptionIndex];
+                if (selectedText === selectedQuestion.correctAnswer) {
+                    isCorrect = true;
+                }
+            }
+
+            const pointsAwarded = isCorrect ? 10 : 0;
+
+            if (isCorrect) {
+                const scores = getScores();
+                const target = scores[currentCategory.type].find(c => c.id === currentCategory.id);
+                if (target) {
+                    target.points += pointsAwarded;
+                    saveScores(scores);
+                }
+            }
+
+            markCategoryAnsweredQuiz(currentCategory.id, CURRENT_QUIZ_ID, selectedQuestion.id);
+            sendResultToGoogleSheets(pointsAwarded);
+            renderCompletionScreen(isCorrect, pointsAwarded);
+        }
+
+        async function sendResultToGoogleSheets(points) {
+            if (!SCRIPT_WEB_APP_URL) return;
+            try {
+                await fetch(SCRIPT_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        quiz_id: CURRENT_QUIZ_ID,
+                        category: currentCategory.name,
+                        question_id: selectedQuestion.id,
+                        subject: selectedQuestion.subject,
+                        points: points,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+            } catch(e) { console.warn(e); }
+        }
+
+        function renderCompletionScreen(isCorrect, points) {
+            const appCard = document.getElementById('app-card');
+            appCard.innerHTML = `
+                <div class="text-center py-6 space-y-6">
+                    <div class="w-20 h-20 ${isCorrect ? 'bg-emerald-500' : 'bg-red-500'} text-white rounded-2xl flex items-center justify-center text-4xl mx-auto shadow-lg">
+                        <i class="fas ${isCorrect ? 'fa-check' : 'fa-times'}"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h2 class="text-2xl font-extrabold text-slate-800">
+                            ${isCorrect ? 'إجابة صحيحة! أحسنت' : 'إجابة خاطئة!'}
+                        </h2>
+                        <p class="text-slate-600 font-medium">
+                            ${isCorrect ? `تمت إضافة +${points} نقاط لفئة (${currentCategory.name}) بنجاح.` : `الإجابة الصحيحة هي: (${selectedQuestion.correctAnswer})`}
+                        </p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-500">
+                        تم تسجيل وحفظ النتيجة تلقائياً لسؤال تخصص (${selectedQuestion.subject}). شكراً لمشاركتك!
                     </div>
                     
-                    <h3 class="text-lg font-bold text-slate-800 mb-1">فئة (${state.selectedCategory}) شاركت بفعالية!</h3>
-                    <p class="text-slate-500 text-xs mb-6">لقد تم تقديم إجابة هذه الفئة للمسابقة رقم #${state.participantId} سابقاً. يسمح لكل متسابق بإجابة سؤال واحد فقط.</p>
-
-                    <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                        <button onclick="goBackToHome()" class="flex-1 bg-primary hover:bg-indigo-700 text-white text-xs py-3 px-4 rounded-xl font-bold transition shadow-md flex items-center justify-center gap-1">
-                            <span>←</span> العودة لاختيار فئة أخرى
-                        </button>
-                        <button onclick="exitSession()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-3 px-4 rounded-xl font-bold transition border border-slate-200 flex items-center justify-center gap-1">
-                            <span>🚪</span> اضغط للخروج (خروج نهائي)
+                    <div class="pt-2">
+                        <button onclick="playerExit()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-base shadow-md transition duration-200 flex items-center justify-center gap-2">
+                            <i class="fas fa-sign-out-alt"></i> إنهاء وخروج المتسابق
                         </button>
                     </div>
                 </div>
             `;
         }
 
-        function exitSession() {
-            state.selectedCategory = null;
-            state.currentScreen = 'home';
-            render();
+        function playerExit() {
+            currentCategory = null;
+            selectedQuestion = null;
+            selectedOptionIndex = null;
+            renderCategorySelector();
         }
 
-        render();
+        function openLeaderboard() {
+            if (!isAdmin) return;
+            renderLeaderboardList();
+            document.getElementById('leaderboard-modal').classList.remove('hidden');
+        }
+
+        function closeLeaderboard() {
+            document.getElementById('leaderboard-modal').classList.add('hidden');
+        }
+
+        function switchTab(gender) {
+            activeTab = gender;
+            const tabMen = document.getElementById('tab-men');
+            const tabWomen = document.getElementById('tab-women');
+
+            if (gender === 'men') {
+                tabMen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-indigo-600 text-white shadow-md";
+                tabWomen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600";
+            } else {
+                tabWomen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-pink-600 text-white shadow-md";
+                tabMen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600";
+            }
+
+            renderLeaderboardList();
+        }
+
+        function renderLeaderboardList() {
+            const listContainer = document.getElementById('leaderboard-list');
+            const scores = getScores();
+            const items = scores[activeTab] || [];
+            const sortedItems = [...items].sort((a, b) => b.points - a.points);
+
+            listContainer.innerHTML = sortedItems.map((item, index) => `
+                <div class="flex items-center justify-between p-3.5 rounded-2xl ${index === 0 ? 'bg-amber-50 border border-amber-200' : 'bg-slate-50 border border-slate-100'}">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-extrabold ${index === 0 ? 'text-amber-800 bg-amber-200' : 'text-slate-600 bg-slate-200'} px-2 py-1 rounded-md">#${index + 1}</span>
+                        <span class="font-bold text-slate-800 text-sm">${item.name}</span>
+                    </div>
+                    <div class="text-left">
+                        <span class="text-base font-black text-indigo-900">${item.points}</span>
+                        <span class="text-[10px] text-slate-400 block">نقاط</span>
+                    </div>
+                </div>
+            `).join('');
+        }
     </script>
 </body>
 </html>
