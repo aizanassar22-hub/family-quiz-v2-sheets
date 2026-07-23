@@ -658,69 +658,73 @@
                         </p>
                     </div>
                     <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-500">
-                        تم تسجيل وحفظ النتيجة تلقائياً لسؤال تخصص (${selectedQuestion.subject}). شكراً لمشاركتك!
+                        شكرًا لمشاركتك في المسابقة رقم #${CURRENT_QUIZ_ID}. انتظرونا في الجولة القادمة!
                     </div>
-                    
-                    <div class="pt-2">
-                        <button onclick="playerExit()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-base shadow-md transition duration-200 flex items-center justify-center gap-2">
-                            <i class="fas fa-sign-out-alt"></i> إنهاء وخروج المتسابق
-                        </button>
-                    </div>
+                    <button onclick="renderCategorySelector()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-md">
+                        <i class="fas fa-home ml-1"></i> العودة للرئيسية
+                    </button>
                 </div>
             `;
         }
 
-        function playerExit() {
-            currentCategory = null;
-            selectedQuestion = null;
-            selectedOptionIndex = null;
-            renderCategorySelector();
-        }
-
+        // Leaderboard Functions
         function openLeaderboard() {
             if (!isAdmin) return;
-            renderLeaderboardList();
             document.getElementById('leaderboard-modal').classList.remove('hidden');
+            renderLeaderboardList();
         }
 
         function closeLeaderboard() {
             document.getElementById('leaderboard-modal').classList.add('hidden');
         }
 
-        function switchTab(gender) {
-            activeTab = gender;
-            const tabMen = document.getElementById('tab-men');
-            const tabWomen = document.getElementById('tab-women');
+        function switchTab(tab) {
+            activeTab = tab;
+            const btnWomen = document.getElementById('tab-women');
+            const btnMen = document.getElementById('tab-men');
 
-            if (gender === 'men') {
-                tabMen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-indigo-600 text-white shadow-md";
-                tabWomen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600";
+            if (tab === 'women') {
+                btnWomen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-pink-600 text-white shadow-md";
+                btnMen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600";
             } else {
-                tabWomen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-pink-600 text-white shadow-md";
-                tabMen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600";
+                btnMen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-indigo-600 text-white shadow-md";
+                btnWomen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600";
             }
 
             renderLeaderboardList();
         }
 
         function renderLeaderboardList() {
-            const listContainer = document.getElementById('leaderboard-list');
             const scores = getScores();
-            const items = scores[activeTab] || [];
-            const sortedItems = [...items].sort((a, b) => b.points - a.points);
+            const list = scores[activeTab] || [];
+            
+            // Sort by points descending
+            const sortedList = [...list].sort((a, b) => b.points - a.points);
+            const container = document.getElementById('leaderboard-list');
 
-            listContainer.innerHTML = sortedItems.map((item, index) => `
-                <div class="flex items-center justify-between p-3.5 rounded-2xl ${index === 0 ? 'bg-amber-50 border border-amber-200' : 'bg-slate-50 border border-slate-100'}">
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs font-extrabold ${index === 0 ? 'text-amber-800 bg-amber-200' : 'text-slate-600 bg-slate-200'} px-2 py-1 rounded-md">#${index + 1}</span>
-                        <span class="font-bold text-slate-800 text-sm">${item.name}</span>
+            if (sortedList.length === 0) {
+                container.innerHTML = `<div class="text-center text-slate-400 text-sm py-4">لا توجد نتائج مسجلة حتى الآن</div>`;
+                return;
+            }
+
+            container.innerHTML = sortedList.map((item, index) => {
+                let badgeClass = "bg-slate-100 text-slate-600";
+                if (index === 0) badgeClass = "bg-amber-100 text-amber-700 font-extrabold";
+                else if (index === 1) badgeClass = "bg-slate-200 text-slate-700 font-bold";
+                else if (index === 2) badgeClass = "bg-amber-800/10 text-amber-800 font-bold";
+
+                return `
+                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <span class="w-7 h-7 rounded-lg ${badgeClass} text-xs flex items-center justify-center font-mono">
+                                ${index + 1}
+                            </span>
+                            <span class="font-bold text-slate-800 text-sm">${item.name}</span>
+                        </div>
+                        <span class="font-bold text-indigo-600 text-sm">${item.points} نقطة</span>
                     </div>
-                    <div class="text-left">
-                        <span class="text-base font-black text-indigo-900">${item.points}</span>
-                        <span class="text-[10px] text-slate-400 block">نقاط</span>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
     </script>
 </body>
