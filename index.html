@@ -3,329 +3,724 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المسابقة العائلية اليومية - Daily Family Quiz</title>
+    <title>المسابقة العائلية اليومية</title>
+    <!-- Open Graph Meta Tags for WhatsApp Card Preview -->
+    <meta property="og:title" content="المسابقة العائلية اليومية 🏆">
+    <meta property="og:description" content="كل يوم فائدة ومعلومة جديدة! اضغط لدخول المسابقة والمشاركة.">
+    <meta property="og:type" content="website">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
         body { font-family: 'Tajawal', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col justify-between">
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
-    <!-- Header & Main Timer -->
-    <header class="bg-indigo-900 text-white shadow-lg p-4 sticky top-0 z-50">
-        <div class="max-w-3xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
-            <div>
-                <h1 class="text-xl font-bold text-amber-400">🏆 المسابقة العائلية اليومية (#001)</h1>
-                <p class="text-xs text-indigo-200">كل يوم فائدة ومعلومة جديدة</p>
-            </div>
-            <!-- Main 24h Countdown -->
-            <div class="bg-indigo-950/80 border border-indigo-700 px-4 py-2 rounded-xl text-center">
-                <span class="text-xs text-indigo-300 block">الوقت المتبقي لإغلاق المسابقة</span>
-                <span id="main-timer" class="text-lg font-black text-amber-300 tracking-wider">24:00:00</span>
-            </div>
+    <!-- Admin Header Bar (Only visible to Admin) -->
+    <header id="admin-header" class="bg-purple-900 text-white text-xs py-2 px-4 flex flex-wrap justify-between items-center gap-2 shadow-md hidden">
+        <div class="flex items-center gap-2">
+            <span class="bg-purple-800 px-2 py-1 rounded text-purple-200 font-bold">
+                <i class="fas fa-user-shield ml-1"></i> لوحة التحكم
+            </span>
+            <span id="quiz-id-badge" class="bg-purple-950 text-amber-300 px-2 py-1 rounded font-mono font-bold">
+                مسابقة رقم #001
+            </span>
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <button onclick="shareQuizLink()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded transition font-bold flex items-center gap-1">
+                <i class="fab fa-whatsapp"></i> مشاركة رابط المتسابقين
+            </button>
+            <button onclick="openLeaderboard()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1 rounded transition font-bold">
+                <i class="fas fa-trophy ml-1"></i> لوحة الصدارة
+            </button>
+            <button onclick="adminLogout()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition font-medium">
+                خروج
+            </button>
         </div>
     </header>
 
-    <!-- Main Content Container -->
-    <main class="max-w-3xl mx-auto w-full p-4 flex-grow">
+    <!-- Top Admin Bar Trigger (When not logged in) -->
+    <div id="admin-login-bar" class="p-2 text-left bg-slate-100 border-b border-slate-200">
+        <button onclick="promptAdminLogin()" class="text-xs text-slate-500 hover:text-indigo-600 font-bold flex items-center gap-1 mr-auto">
+            <i class="fas fa-lock"></i> دخول المشرف
+        </button>
+    </div>
+
+    <!-- Main Container -->
+    <main class="container mx-auto px-4 py-6 max-w-2xl flex-grow">
         
-        <!-- Tab Navigation -->
-        <div class="flex bg-white rounded-xl shadow-sm p-1 mb-6 border border-slate-200">
-            <button onclick="switchTab('quiz')" id="tab-quiz-btn" class="flex-1 py-2.5 font-bold rounded-lg text-sm transition bg-indigo-600 text-white shadow">
-                📝 الأسئلة والتحدي
-            </button>
-            <button onclick="switchTab('leaderboard')" id="tab-lb-btn" class="flex-1 py-2.5 font-bold rounded-lg text-sm transition text-slate-600 hover:bg-slate-50">
-                📊 لوحة الصدارة
-            </button>
-            <button onclick="switchTab('admin')" id="tab-admin-btn" class="flex-1 py-2.5 font-bold rounded-lg text-sm transition text-slate-600 hover:bg-slate-50">
-                ⚙️ لوحة المشرف
-            </button>
+        <!-- App Header & Encouragement Banner -->
+        <div class="text-center mb-6 space-y-3">
+            <div class="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-1.5 rounded-full shadow-md text-xs font-bold">
+                <i class="fas fa-lightbulb"></i>
+                <span>كل يوم فائدة ومعلومة جديدة!</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-indigo-900 flex items-center justify-center gap-2">
+                <i class="fas fa-trophy text-amber-500"></i> المسابقة العائلية اليومية
+            </h1>
+            <span id="current-date-badge" class="inline-block bg-slate-200 text-slate-600 text-xs px-3 py-1 rounded-full font-mono">
+                2026-07-23
+            </span>
         </div>
 
-        <!-- Section 1: Quiz View -->
-        <section id="sec-quiz" class="space-y-6">
-            
-            <!-- User Registration / Selection -->
-            <div id="user-setup-card" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <h2 class="text-base font-bold text-slate-700 mb-3">اختر الفئة للاشتراك:</h2>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">الفئة / الفريق</label>
-                        <select id="user-group" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <option value="رجال 1">رجال 1</option>
-                            <option value="رجال 2">رجال 2</option>
-                            <option value="رجال 3">رجال 3</option>
-                            <option value="نساء 1">نساء 1</option>
-                            <option value="نساء 2">نساء 2</option>
-                            <option value="نساء 3">نساء 3</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">اسم المشارك</label>
-                        <input type="text" id="user-name" placeholder="اكتب اسمك..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
-                    </div>
+        <!-- Global 24-Hour Timer Banner -->
+        <div id="main-timer-banner" class="bg-indigo-950 text-white p-4 rounded-2xl shadow-lg mb-6 border border-indigo-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-right">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-800 text-amber-400 rounded-xl flex items-center justify-center text-xl shadow-inner">
+                    <i class="fas fa-hourglass-half animate-pulse"></i>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-indigo-300">المؤقت الرئيسي للمسابقة (#001)</h4>
+                    <p class="text-xs text-slate-300">الوقت المتبقي لإغلاق جميع إجابات الجولة</p>
                 </div>
             </div>
-
-            <!-- Question Selector Grid (10 Questions) -->
-            <div id="questions-grid-card" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <h2 class="text-base font-bold text-slate-700 mb-3">اختر سؤالاً للإجابة عليه (سؤال واحد لكل فئة):</h2>
-                <div id="questions-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- Dynamic Question Buttons Inserted via JS -->
-                </div>
+            <div class="bg-indigo-900 px-4 py-2 rounded-xl border border-indigo-700">
+                <span id="main-timer-display" class="font-mono text-xl font-extrabold text-amber-400 tracking-wider">
+                    24:00:00
+                </span>
             </div>
+        </div>
 
-            <!-- Question Active Box -->
-            <div id="active-question-card" class="hidden bg-white p-6 rounded-2xl shadow-md border-2 border-indigo-500">
-                <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-                    <span id="active-q-category" class="bg-indigo-100 text-indigo-700 font-bold text-xs px-3 py-1 rounded-full">التخصص</span>
-                    <div class="flex items-center gap-1 text-rose-600 font-bold bg-rose-50 px-3 py-1 rounded-full text-xs">
-                        ⏱️ المتبقي: <span id="question-timer" class="text-sm">60</span> ثانية
-                    </div>
-                </div>
-                
-                <h3 id="active-q-text" class="text-lg font-bold text-slate-800 mb-6">نص السؤال هنا...</h3>
-
-                <div id="active-q-options" class="space-y-3">
-                    <!-- Dynamic Options -->
-                </div>
-            </div>
-
-        </section>
-
-        <!-- Section 2: Leaderboard View -->
-        <section id="sec-leaderboard" class="hidden space-y-6">
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-bold text-slate-800 mb-4 text-center">🏆 جدول الترتيب والنقاط</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Men Table -->
-                    <div class="border border-blue-200 rounded-xl p-4 bg-blue-50/50">
-                        <h3 class="font-bold text-blue-900 border-b border-blue-200 pb-2 mb-3 text-center">👨 فئة الرجال</h3>
-                        <div id="lb-men-list" class="space-y-2">
-                            <!-- Dynamic Men Scores -->
-                        </div>
-                    </div>
-                    <!-- Women Table -->
-                    <div class="border border-pink-200 rounded-xl p-4 bg-pink-50/50">
-                        <h3 class="font-bold text-pink-900 border-b border-pink-200 pb-2 mb-3 text-center">👩 فئة النساء</h3>
-                        <div id="lb-women-list" class="space-y-2">
-                            <!-- Dynamic Women Scores -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Section 3: Admin View -->
-        <section id="sec-admin" class="hidden space-y-6">
-            <div id="admin-login-box" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-sm mx-auto text-center">
-                <h2 class="text-base font-bold text-slate-700 mb-3">تسجيل دخول المشرف</h2>
-                <input type="password" id="admin-pin-input" placeholder="أدخل الرمز السري..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-center text-sm font-bold mb-3 focus:ring-2 focus:ring-indigo-500 outline-none">
-                <button onclick="checkAdminLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg text-sm transition">دخول</button>
-            </div>
-
-            <div id="admin-panel" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-                <h2 class="text-lg font-bold text-slate-800 border-b pb-2">🛠️ لوحة تحكم المشرف</h2>
-                
-                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                    <h3 class="font-bold text-sm text-slate-700 mb-2">مشاركة رابط المسابقة:</h3>
-                    <button onclick="shareWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
-                        📱 مشاركة المسابقة عبر الواتساب
-                    </button>
-                </div>
-            </div>
-        </section>
+        <!-- Dynamic Content Card -->
+        <div id="app-card" class="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 md:p-8 transition-all duration-300">
+            <!-- Dynamic Content -->
+        </div>
 
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 p-4 text-center text-xs text-slate-500">
-        المسابقة العائلية Daily Family Quiz &copy; 2026 - جميع الحقوق محفوظة
+    <footer class="text-center py-4 text-xs text-slate-400 border-t border-slate-100 bg-white">
+        منصة المسابقة العائلية اليومية © 2026
     </footer>
 
-    <!-- Logic JavaScript -->
+    <!-- Leaderboard Modal (Admin Only) -->
+    <div id="leaderboard-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 relative border border-slate-100">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
+                <h3 class="text-xl font-bold text-indigo-950 flex items-center gap-2">
+                    <i class="fas fa-medal text-amber-500 text-2xl"></i> لوحة الصدارة والنتائج
+                </h3>
+                <button onclick="closeLeaderboard()" class="text-slate-400 hover:text-slate-600 bg-slate-100 px-3 py-1 rounded-lg text-sm font-bold">
+                    إغلاق <i class="fas fa-times mr-1"></i>
+                </button>
+            </div>
+
+            <!-- Gender Tabs -->
+            <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
+                <button id="tab-women" onclick="switchTab('women')" class="flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-pink-600 text-white shadow-md">
+                    فئات النساء 👩
+                </button>
+                <button id="tab-men" onclick="switchTab('men')" class="flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600">
+                    فئات الرجال 👨
+                </button>
+            </div>
+
+            <!-- Leaderboard Items Container -->
+            <div id="leaderboard-list" class="space-y-3 max-h-80 overflow-y-auto pr-1"></div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
     <script>
         const ADMIN_PIN = "1234554321";
+        const CURRENT_QUIZ_ID = "001";
+        const SCRIPT_WEB_APP_URL = "";
 
-        // 10 Diverse Questions
-        const questionsData = [
-            { id: 1, cat: "علوم قرآن", text: "ما هي أعظم سورة في القرآن الكريم؟", options: ["سورة البقرة", "سورة الفاتحة", "سورة يس", "سورة الإخلاص"], correct: 1 },
-            { id: 2, cat: "لغة عربية", text: "ما هو الفعل المبني دائماً من الأفعال التالية؟", options: ["الفعل المضارع", "الفعل الماضي", "اسم الفاعل", "المفعول لأجله"], correct: 1 },
-            { id: 3, cat: "سيرة نبوية", text: "في أي سنة هجرية كانت غزوة بدر الكبرى؟", options: ["السنة الأولى", "السنة الثانية", "السنة الثالثة", "السنة الخامس"], correct: 1 },
-            { id: 4, cat: "تاريخ إسلامي", text: "من هو الصحابي الجليل الملقب بـ 'صارم الله المسلول'؟", options: ["عمر بن الخطاب", "خالد بن الوليد", "علي بن أبي طالب", "حمزة بن عبد المطلب"], correct: 1 },
-            { id: 5, cat: "علوم وثقافة", text: "ما هو أكبر عضو في جسم الإنسان؟", options: ["الكبد", "الجلد", "القلب", "الدماغ"], correct: 1 },
-            { id: 6, cat: "رياضيات", text: "ما هو الحاصل من ضرب العدد 7 في 8؟", options: ["54", "56", "64", "48"], correct: 1 },
-            { id: 7, cat: "علوم قرآن", text: "كم عدد سور القرآن الكريم؟", options: ["110 سورة", "114 سورة", "120 سورة", "108 سور"], correct: 1 },
-            { id: 8, cat: "جغرافيا", text: "ما هي أطول أنهار العالم؟", options: ["نهر الأمازون", "نهر النيل", "نهر الميسيسيبي", "نهر الدانوب"], correct: 1 },
-            { id: 9, cat: "لغة عربية", text: "ما هو جمع كلمة 'حسام'؟", options: ["أحسمة", "حسامون", "أحسام", "حسوم"], correct: 2 },
-            { id: 10, cat: "ثقافة عامة", text: "ما هي عاصمة المملكة الأردنية الهاشمية؟", options: ["إربد", "عمان", "الزرقاء", "العقبة"], correct: 1 }
+        // 10 Questions Array with Categories/Subjects
+        const QUIZ_QUESTIONS = [
+            {
+                id: 1,
+                subject: "علوم القرآن",
+                question: "ما هي السورة التي تسمى عروس القرآن؟",
+                options: ["سورة يس", "سورة الرحمن", "سورة الواقعة", "سورة الملك"],
+                correctAnswer: "سورة الرحمن"
+            },
+            {
+                id: 2,
+                subject: "اللغة العربية",
+                question: "ما هو الفاعل في جملة: (كتب الطالبُ الدرسَ)؟",
+                options: ["كتب", "الطالبُ", "الدرسَ", "ضمير مستتر"],
+                correctAnswer: "الطالبُ"
+            },
+            {
+                id: 3,
+                subject: "الرياضيات",
+                question: "ما حاصل ضرب العددين 12 في 11؟",
+                options: ["122", "132", "142", "152"],
+                correctAnswer: "132"
+            },
+            {
+                id: 4,
+                subject: "العلوم",
+                question: "ما هو العنصر الكيميائي الذي رمزه (O)؟",
+                options: ["الذهب", "الحديد", "الأكسجين", "الهيدروجين"],
+                correctAnswer: "الأكسجين"
+            },
+            {
+                id: 5,
+                subject: "التاريخ الإسلامي",
+                question: "في أي عام هجري وقعت غزوة بدر الكبرى؟",
+                options: ["السنة الأولى", "السنة الثانية", "السنة الثالثة", "السنة الخامسة"],
+                correctAnswer: "السنة الثانية"
+            },
+            {
+                id: 6,
+                subject: "الجغرافيا",
+                question: "ما هي أطول أنهار العالم؟",
+                options: ["نهر الأمازون", "نهر النيل", "نهر الدانوب", "نهر الفرات"],
+                correctAnswer: "نهر النيل"
+            },
+            {
+                id: 7,
+                subject: "السيرة النبوية",
+                question: "من هو أول مرسل في الإسلام للتعليم في المدينة؟",
+                options: ["مصعب بن عمير", "علي بن أبي طالب", "أبو بكر الصديق", "عثمان بن عفان"],
+                correctAnswer: "مصعب بن عمير"
+            },
+            {
+                id: 8,
+                subject: "معلومات عامة",
+                question: "ما هي أسرع الكائنات الحية برياً؟",
+                options: ["الأسد", "الفهد", "الغزال", "الحصان"],
+                correctAnswer: "الفهد"
+            },
+            {
+                id: 9,
+                subject: "الفقه والإسلاميات",
+                question: "كم عدد أركان الإسلام؟",
+                options: ["4 أركان", "5 أركان", "6 أركان", "7 أركان"],
+                correctAnswer: "5 أركان"
+            },
+            {
+                id: 10,
+                subject: "الذكاء والألغاز",
+                question: "ما هو الشيء الذي كلما أخذت منه كَبُر؟",
+                options: ["الحفرة", "العمر", "المال", "العلم"],
+                correctAnswer: "الحفرة"
+            }
         ];
 
-        let activeQuestionTimer = null;
-        let timeLeft = 60;
+        let isAdmin = localStorage.getItem('family_quiz_admin_logged') === 'true';
+        let currentCategory = null;
+        let selectedQuestion = null;
+        let selectedOptionIndex = null;
+        let questionTimerInterval = null;
+        let questionTimeLeft = 60;
+        let mainTimerInterval = null;
+        let activeTab = 'women';
 
-        // Init App
-        window.onload = function() {
-            start24hTimer();
-            renderQuestionsGrid();
-            renderLeaderboard();
-        };
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUrlMode();
+            updateAdminUI();
+            initMainTimer();
+            renderCategorySelector();
+        });
 
-        // 24h Main Countdown Timer
-        function start24hTimer() {
-            let totalSeconds = 24 * 60 * 60;
-            const timerDisplay = document.getElementById('main-timer');
+        // 24-Hour Main Quiz Timer Logic
+        function initMainTimer() {
+            let startTime = localStorage.getItem('family_quiz_start_time');
+            if (!startTime) {
+                startTime = new Date().getTime();
+                localStorage.setItem('family_quiz_start_time', startTime);
+            }
 
-            setInterval(() => {
-                if (totalSeconds <= 0) {
-                    timerDisplay.textContent = "انتهت المسابقة";
-                    return;
+            const duration = 24 * 60 * 60 * 1000; // 24 hours in ms
+
+            clearInterval(mainTimerInterval);
+            mainTimerInterval = setInterval(() => {
+                const now = new Date().getTime();
+                const elapsed = now - parseInt(startTime);
+                const remaining = duration - elapsed;
+
+                if (remaining <= 0) {
+                    clearInterval(mainTimerInterval);
+                    document.getElementById('main-timer-display').textContent = "00:00:00 (انتهت المسابقة)";
+                    localStorage.setItem('family_quiz_expired', 'true');
+                } else {
+                    const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+                    const hStr = String(hours).padStart(2, '0');
+                    const mStr = String(minutes).padStart(2, '0');
+                    const sStr = String(seconds).padStart(2, '0');
+
+                    document.getElementById('main-timer-display').textContent = `${hStr}:${mStr}:${sStr}`;
                 }
-                totalSeconds--;
-                let h = Math.floor(totalSeconds / 3600);
-                let m = Math.floor((totalSeconds % 3600) / 60);
-                let s = totalSeconds % 60;
-                timerDisplay.textContent = 
-                    `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
             }, 1000);
         }
 
-        // Render Questions Selection Grid
-        function renderQuestionsGrid() {
-            const listContainer = document.getElementById('questions-list');
-            listContainer.innerHTML = '';
-
-            questionsData.forEach(q => {
-                const btn = document.createElement('button');
-                btn.className = "p-4 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-xl text-right transition flex justify-between items-center";
-                btn.onclick = () => openQuestion(q);
-                btn.innerHTML = `
-                    <div>
-                        <span class="text-xs font-bold text-indigo-600 block">${q.cat}</span>
-                        <span class="text-sm font-bold text-slate-800">السؤال رقم #${q.id}</span>
-                    </div>
-                    <span class="text-xs bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-full font-bold">بدء ➔</span>
-                `;
-                listContainer.appendChild(btn);
-            });
+        function isMainTimerExpired() {
+            return localStorage.getItem('family_quiz_expired') === 'true';
         }
 
-        // Open Question & Start 60s Timer
-        function openQuestion(q) {
-            const userName = document.getElementById('user-name').value.trim();
-            if (!userName) {
-                alert("يرجى كتابة اسم المشارك أولاً قبل بدء السؤال!");
+        function checkUrlMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('mode') === 'player') {
+                const loginBar = document.getElementById('admin-login-bar');
+                if (loginBar) loginBar.classList.add('hidden');
+                isAdmin = false;
+            }
+        }
+
+        function promptAdminLogin() {
+            const pin = prompt("رجاءً أدخل الرقم السري للمشرف:");
+            if (pin === ADMIN_PIN) {
+                isAdmin = true;
+                localStorage.setItem('family_quiz_admin_logged', 'true');
+                updateAdminUI();
+                alert("تم تسجيل دخول المشرف بنجاح.");
+            } else if (pin !== null) {
+                alert("الرقم السري غير صحيح!");
+            }
+        }
+
+        function adminLogout() {
+            isAdmin = false;
+            localStorage.removeItem('family_quiz_admin_logged');
+            updateAdminUI();
+            renderCategorySelector();
+        }
+
+        function updateAdminUI() {
+            const adminHeader = document.getElementById('admin-header');
+            const adminLoginBar = document.getElementById('admin-login-bar');
+
+            if (isAdmin) {
+                if (adminHeader) adminHeader.classList.remove('hidden');
+                if (adminLoginBar) adminLoginBar.classList.add('hidden');
+            } else {
+                if (adminHeader) adminHeader.classList.add('hidden');
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('mode') !== 'player' && adminLoginBar) {
+                    adminLoginBar.classList.remove('hidden');
+                }
+            }
+        }
+
+        function shareQuizLink() {
+            const playerUrl = window.location.origin + window.location.pathname + "?mode=player";
+            const message = `🏆 *المسابقة العائلية اليومية* 🏆\n✨ _"كل يوم فائدة ومعلومة جديدة!"_\n\nاضغط على الرابط التالي لدخول المسابقة رقم (#${CURRENT_QUIZ_ID}) والمشاركة مع الفئة الخاصة بك:\n\n👇 *اضغط هنا للدخول والتنافس:*\n${playerUrl}`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'المسابقة العائلية اليومية',
+                    text: message
+                }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(message).then(() => {
+                    alert("تم نسخ نص الدعوة والرابط بنجاح! يمكنك الآن لصقه في الواتساب.");
+                });
+            }
+        }
+
+        function getScores() {
+            const saved = localStorage.getItem('family_quiz_scores');
+            if (saved) return JSON.parse(saved);
+            
+            const initialWomen = Array.from({ length: 10 }, (_, i) => ({
+                id: `w${i + 1}`,
+                name: `نساء ${i + 1}`,
+                points: 0
+            }));
+
+            const initialMen = Array.from({ length: 10 }, (_, i) => ({
+                id: `m${i + 1}`,
+                name: `رجال ${i + 1}`,
+                points: 0
+            }));
+
+            return { women: initialWomen, men: initialMen };
+        }
+
+        function saveScores(scores) {
+            localStorage.setItem('family_quiz_scores', JSON.stringify(scores));
+        }
+
+        function hasCategoryAnsweredQuiz(catId, quizId) {
+            const history = JSON.parse(localStorage.getItem('family_quiz_history') || '{}');
+            return history[`q_${quizId}_cat_${catId}`] === true;
+        }
+
+        function markCategoryAnsweredQuiz(catId, quizId, qId) {
+            const history = JSON.parse(localStorage.getItem('family_quiz_history') || '{}');
+            history[`q_${quizId}_cat_${catId}`] = true;
+            history[`q_${quizId}_q_${qId}_cat_${catId}`] = true;
+            localStorage.setItem('family_quiz_history', JSON.stringify(history));
+        }
+
+        function isQuestionAnsweredByCat(qId, catId) {
+            const history = JSON.parse(localStorage.getItem('family_quiz_history') || '{}');
+            return history[`q_${CURRENT_QUIZ_ID}_q_${qId}_cat_${catId}`] === true;
+        }
+
+        function renderCategorySelector() {
+            currentCategory = null;
+            selectedQuestion = null;
+            const appCard = document.getElementById('app-card');
+            
+            let womenButtonsHtml = '';
+            for (let i = 1; i <= 10; i++) {
+                womenButtonsHtml += `
+                    <button onclick="selectCategory('w${i}', 'نساء ${i}', 'women')" 
+                            class="p-2.5 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-xl font-bold text-pink-900 text-xs text-center transition shadow-sm">
+                        نساء ${i}
+                    </button>`;
+            }
+
+            let menButtonsHtml = '';
+            for (let i = 1; i <= 10; i++) {
+                menButtonsHtml += `
+                    <button onclick="selectCategory('m${i}', 'رجال ${i}', 'men')" 
+                            class="p-2.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold text-indigo-900 text-xs text-center transition shadow-sm">
+                        رجال ${i}
+                    </button>`;
+            }
+
+            appCard.innerHTML = `
+                <div class="text-center space-y-6 py-2">
+                    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl">
+                        <span class="text-xs font-bold text-indigo-600 block mb-1">دعوة للمشاركة</span>
+                        <h2 class="text-xl md:text-2xl font-extrabold text-indigo-950">مرحباً بكم في مسابقة رقم #${CURRENT_QUIZ_ID}</h2>
+                        <p class="text-slate-500 text-xs mt-1">اختر الفئة المشاركة الخاصة بك للبدء في الإجابة</p>
+                    </div>
+                    
+                    <div class="space-y-5 max-w-md mx-auto text-right">
+                        <div>
+                            <label class="block text-xs font-bold text-pink-700 mb-2 flex items-center justify-between">
+                                <span>فئات النساء 👩 (10 فئات)</span>
+                            </label>
+                            <div class="grid grid-cols-5 gap-1.5">
+                                ${womenButtonsHtml}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-indigo-700 mb-2 flex items-center justify-between">
+                                <span>فئات الرجال 👨 (10 فئات)</span>
+                            </label>
+                            <div class="grid grid-cols-5 gap-1.5">
+                                ${menButtonsHtml}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectCategory(id, name, type) {
+            if (isMainTimerExpired()) {
+                renderExpiredQuizScreen();
                 return;
             }
 
-            document.getElementById('questions-grid-card').classList.add('hidden');
-            const activeCard = document.getElementById('active-question-card');
-            activeCard.classList.remove('hidden');
+            currentCategory = { id, name, type };
 
-            document.getElementById('active-q-category').textContent = q.cat;
-            document.getElementById('active-q-text').textContent = q.text;
+            if (hasCategoryAnsweredQuiz(id, CURRENT_QUIZ_ID)) {
+                renderBlockedScreen();
+            } else {
+                renderQuestionListScreen();
+            }
+        }
 
-            const optionsContainer = document.getElementById('active-q-options');
-            optionsContainer.innerHTML = '';
+        function renderExpiredQuizScreen() {
+            const appCard = document.getElementById('app-card');
+            appCard.innerHTML = `
+                <div class="text-center py-8 space-y-6">
+                    <div class="w-20 h-20 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-4xl mx-auto shadow-sm">
+                        <i class="fas fa-hourglass-end"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h2 class="text-2xl font-extrabold text-slate-800">انتهى الوقت الرئيسي للمسابقة!</h2>
+                        <p class="text-slate-500 font-medium text-sm">عذراً، لقد مضت 24 ساعة على إطلاق هذه المسابقة وتم إغلاق استقبال الإجابات رسمياً.</p>
+                    </div>
+                    <button onclick="renderCategorySelector()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-md">
+                        <i class="fas fa-arrow-right ml-1"></i> العودة
+                    </button>
+                </div>
+            `;
+        }
 
-            q.options.forEach((opt, idx) => {
-                const optBtn = document.createElement('button');
-                optBtn.className = "w-full text-right p-3.5 bg-slate-50 hover:bg-indigo-600 hover:text-white border border-slate-200 rounded-xl font-bold transition text-sm";
-                optBtn.textContent = `${idx + 1}. ${opt}`;
-                optBtn.onclick = () => submitAnswer(q, idx);
-                optionsContainer.appendChild(optBtn);
-            });
+        function renderBlockedScreen() {
+            const appCard = document.getElementById('app-card');
+            appCard.innerHTML = `
+                <div class="text-center py-8 space-y-6">
+                    <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-4xl mx-auto shadow-sm">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h2 class="text-2xl font-extrabold text-slate-800">فئة (${currentCategory.name}) شاركت بفعالية!</h2>
+                        <p class="text-slate-500 font-medium text-sm">لقد تم تقديم إجابة هذه الفئة للمسابقة رقم #${CURRENT_QUIZ_ID} سابقاً. يسمح لكل متسابق بإجابة سؤال واحد فقط.</p>
+                    </div>
+                    <button onclick="renderCategorySelector()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-md">
+                        <i class="fas fa-arrow-right ml-1"></i> العودة لاختيار فئة أخرى
+                    </button>
+                </div>
+            `;
+        }
 
-            // Timer 60 Seconds
-            timeLeft = 60;
-            document.getElementById('question-timer').textContent = timeLeft;
-            clearInterval(activeQuestionTimer);
-            activeQuestionTimer = setInterval(() => {
-                timeLeft--;
-                document.getElementById('question-timer').textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(activeQuestionTimer);
-                    alert("انتهى وقت السؤال!");
-                    resetQuizView();
+        // Display List of 10 Questions to Pick From
+        function renderQuestionListScreen() {
+            const appCard = document.getElementById('app-card');
+
+            let questionsListHtml = QUIZ_QUESTIONS.map((q) => {
+                const answered = isQuestionAnsweredByCat(q.id, currentCategory.id);
+                return `
+                    <div class="p-4 rounded-2xl border ${answered ? 'bg-slate-100 border-slate-200 opacity-60 cursor-not-allowed' : 'bg-white border-indigo-100 hover:border-indigo-400 hover:shadow-md cursor-pointer'} transition flex items-center justify-between"
+                         onclick="${answered ? '' : `startQuestion(${q.id})`}">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-xl ${answered ? 'bg-slate-200 text-slate-500' : 'bg-indigo-100 text-indigo-700'} font-bold text-sm flex items-center justify-center font-mono">
+                                #${q.id}
+                            </span>
+                            <div class="text-right">
+                                <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider block">${q.subject}</span>
+                                <h4 class="font-bold text-slate-800 text-sm">${q.question}</h4>
+                            </div>
+                        </div>
+                        <div>
+                            ${answered ? 
+                                `<span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-lg flex items-center gap-1"><i class="fas fa-check-circle"></i> مُجاب</span>` : 
+                                `<span class="text-xs bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-lg">اختر السؤال <i class="fas fa-chevron-left mr-1"></i></span>`}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            appCard.innerHTML = `
+                <div class="space-y-5">
+                    <div class="flex justify-between items-center text-xs font-bold text-indigo-600 border-b border-slate-100 pb-3">
+                        <span class="bg-indigo-50 text-indigo-800 px-3 py-1.5 rounded-lg border border-indigo-100">
+                            الفئة: ${currentCategory.name}
+                        </span>
+                        <button onclick="renderCategorySelector()" class="text-slate-400 hover:text-slate-600">
+                            تغيير الفئة <i class="fas fa-exchange-alt mr-1"></i>
+                        </button>
+                    </div>
+
+                    <div class="text-right">
+                        <h3 class="text-lg font-extrabold text-indigo-950">اختر السؤال المناسب لك (10 أسئلة متوفرة):</h3>
+                        <p class="text-slate-500 text-xs mt-1">يُسمح لك بالإجابة على سؤال واحد فقط لحساب فئتك.</p>
+                    </div>
+
+                    <div class="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
+                        ${questionsListHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function startQuestion(questionId) {
+            selectedQuestion = QUIZ_QUESTIONS.find(q => q.id === questionId);
+            renderQuizScreen();
+        }
+
+        function renderQuizScreen() {
+            selectedOptionIndex = null;
+            questionTimeLeft = 60;
+
+            const appCard = document.getElementById('app-card');
+            appCard.innerHTML = `
+                <div class="bg-amber-50 rounded-xl p-3 mb-6 flex justify-between items-center text-amber-800 font-bold text-sm border border-amber-200">
+                    <span><i class="fas fa-clock text-amber-600 ml-1"></i> المؤقت الفرعي للسؤال:</span>
+                    <span id="timer-display" class="text-lg font-extrabold text-amber-600">${questionTimeLeft} ثانية</span>
+                </div>
+
+                <div class="flex justify-between items-center text-xs font-bold text-indigo-600 mb-3">
+                    <span class="bg-indigo-50 text-indigo-800 px-3 py-1.5 rounded-lg border border-indigo-100">
+                        الفئة: ${currentCategory.name}
+                    </span>
+                    <span class="bg-amber-100 text-amber-800 px-3 py-1.5 rounded-lg font-bold">التخصص: ${selectedQuestion.subject}</span>
+                </div>
+
+                <h2 class="text-xl md:text-2xl font-bold text-slate-800 text-center my-6 leading-relaxed">
+                    ${selectedQuestion.question}
+                </h2>
+
+                <div class="space-y-3 mb-6" id="options-container">
+                    ${selectedQuestion.options.map((opt, idx) => `
+                        <button onclick="selectOption(${idx})" id="opt-btn-${idx}" 
+                                class="w-full text-right p-4 rounded-2xl border-2 border-slate-100 bg-white hover:border-indigo-200 transition-all font-semibold text-slate-700 flex items-center justify-between group">
+                            <span>${opt}</span>
+                            <div class="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-indigo-500 flex items-center justify-center">
+                                <div class="w-2.5 h-2.5 rounded-full bg-indigo-600 hidden" id="radio-dot-${idx}"></div>
+                            </div>
+                        </button>
+                    `).join('')}
+                </div>
+
+                <button id="submit-btn" disabled onclick="submitAndExit()" 
+                        class="w-full py-4 bg-slate-300 text-slate-500 rounded-2xl font-bold text-lg shadow transition duration-200 flex items-center justify-center gap-2 cursor-not-allowed">
+                    <i class="fas fa-save"></i> إرسال الإجابة وحفظ النتيجة
+                </button>
+            `;
+
+            startQuestionTimer();
+        }
+
+        function startQuestionTimer() {
+            clearInterval(questionTimerInterval);
+            questionTimerInterval = setInterval(() => {
+                questionTimeLeft--;
+                const timerEl = document.getElementById('timer-display');
+                if (timerEl) timerEl.textContent = `${questionTimeLeft} ثانية`;
+                
+                if (questionTimeLeft <= 0) {
+                    clearInterval(questionTimerInterval);
+                    submitAndExit();
                 }
             }, 1000);
         }
 
-        function submitAnswer(q, selectedIdx) {
-            clearInterval(activeQuestionTimer);
-            const isCorrect = selectedIdx === q.correct;
+        function selectOption(index) {
+            selectedOptionIndex = index;
+            const container = document.getElementById('options-container');
+            const buttons = container.querySelectorAll('button');
+            
+            buttons.forEach((btn, idx) => {
+                const dot = document.getElementById(`radio-dot-${idx}`);
+                if (idx === index) {
+                    btn.className = "w-full text-right p-4 rounded-2xl border-2 border-indigo-600 bg-indigo-50/50 font-bold text-indigo-900 flex items-center justify-between shadow-sm";
+                    if (dot) dot.classList.remove('hidden');
+                } else {
+                    btn.className = "w-full text-right p-4 rounded-2xl border-2 border-slate-100 bg-white font-semibold text-slate-700 flex items-center justify-between";
+                    if (dot) dot.classList.add('hidden');
+                }
+            });
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = false;
+            submitBtn.className = "w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-lg shadow-lg transition duration-200 flex items-center justify-center gap-2 cursor-pointer";
+        }
+
+        function submitAndExit() {
+            clearInterval(questionTimerInterval);
+
+            let isCorrect = false;
+            if (selectedOptionIndex !== null) {
+                const selectedText = selectedQuestion.options[selectedOptionIndex];
+                if (selectedText === selectedQuestion.correctAnswer) {
+                    isCorrect = true;
+                }
+            }
+
+            const pointsAwarded = isCorrect ? 10 : 0;
+
             if (isCorrect) {
-                alert("إجابة صحيحة! احسنت 🎉");
-            } else {
-                alert("إجابة خاطئة، حظاً موفقاً في المرات القادمة!");
+                const scores = getScores();
+                const target = scores[currentCategory.type].find(c => c.id === currentCategory.id);
+                if (target) {
+                    target.points += pointsAwarded;
+                    saveScores(scores);
+                }
             }
-            resetQuizView();
+
+            markCategoryAnsweredQuiz(currentCategory.id, CURRENT_QUIZ_ID, selectedQuestion.id);
+            sendResultToGoogleSheets(pointsAwarded);
+            renderCompletionScreen(isCorrect, pointsAwarded);
         }
 
-        function resetQuizView() {
-            document.getElementById('active-question-card').classList.add('hidden');
-            document.getElementById('questions-grid-card').classList.remove('hidden');
+        async function sendResultToGoogleSheets(points) {
+            if (!SCRIPT_WEB_APP_URL) return;
+            try {
+                await fetch(SCRIPT_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        quiz_id: CURRENT_QUIZ_ID,
+                        category: currentCategory.name,
+                        question_id: selectedQuestion.id,
+                        subject: selectedQuestion.subject,
+                        points: points,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+            } catch(e) { console.warn(e); }
         }
 
-        // Leaderboard Render
-        function renderLeaderboard() {
-            const menList = document.getElementById('lb-men-list');
-            const womenList = document.getElementById('lb-women-list');
-
-            menList.innerHTML = `
-                <div class="flex justify-between items-center p-2 bg-white rounded-lg text-xs font-bold text-slate-700">
-                    <span>1. رجال 1</span>
-                    <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded">10 نقاط</span>
+        function renderCompletionScreen(isCorrect, points) {
+            const appCard = document.getElementById('app-card');
+            appCard.innerHTML = `
+                <div class="text-center py-6 space-y-6">
+                    <div class="w-20 h-20 ${isCorrect ? 'bg-emerald-500' : 'bg-red-500'} text-white rounded-2xl flex items-center justify-center text-4xl mx-auto shadow-lg">
+                        <i class="fas ${isCorrect ? 'fa-check' : 'fa-times'}"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h2 class="text-2xl font-extrabold text-slate-800">
+                            ${isCorrect ? 'إجابة صحيحة! أحسنت' : 'إجابة خاطئة!'}
+                        </h2>
+                        <p class="text-slate-600 font-medium">
+                            ${isCorrect ? `تمت إضافة +${points} نقاط لفئة (${currentCategory.name}) بنجاح.` : `الإجابة الصحيحة هي: (${selectedQuestion.correctAnswer})`}
+                        </p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-500">
+                        تم تسجيل وحفظ النتيجة تلقائياً لسؤال تخصص (${selectedQuestion.subject}). شكراً لمشاركتك!
+                    </div>
+                    
+                    <div class="pt-2">
+                        <button onclick="playerExit()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-base shadow-md transition duration-200 flex items-center justify-center gap-2">
+                            <i class="fas fa-sign-out-alt"></i> إنهاء وخروج المتسابق
+                        </button>
+                    </div>
                 </div>
             `;
-
-            womenList.innerHTML = `
-                <div class="flex justify-between items-center p-2 bg-white rounded-lg text-xs font-bold text-slate-700">
-                    <span>1. نساء 1</span>
-                    <span class="bg-pink-100 text-pink-800 px-2 py-0.5 rounded">10 نقاط</span>
-                </div>
-            `;
         }
 
-        // Navigation Tabs
-        function switchTab(tab) {
-            document.getElementById('sec-quiz').classList.add('hidden');
-            document.getElementById('sec-leaderboard').classList.add('hidden');
-            document.getElementById('sec-admin').classList.add('hidden');
-
-            document.getElementById('tab-quiz-btn').className = "flex-1 py-2.5 font-bold rounded-lg text-sm transition text-slate-600 hover:bg-slate-50";
-            document.getElementById('tab-lb-btn').className = "flex-1 py-2.5 font-bold rounded-lg text-sm transition text-slate-600 hover:bg-slate-50";
-            document.getElementById('tab-admin-btn').className = "flex-1 py-2.5 font-bold rounded-lg text-sm transition text-slate-600 hover:bg-slate-50";
-
-            if (tab === 'quiz') {
-                document.getElementById('sec-quiz').classList.remove('hidden');
-                document.getElementById('tab-quiz-btn').className = "flex-1 py-2.5 font-bold rounded-lg text-sm transition bg-indigo-600 text-white shadow";
-            } else if (tab === 'leaderboard') {
-                document.getElementById('sec-leaderboard').classList.remove('hidden');
-                document.getElementById('tab-lb-btn').className = "flex-1 py-2.5 font-bold rounded-lg text-sm transition bg-indigo-600 text-white shadow";
-            } else if (tab === 'admin') {
-                document.getElementById('sec-admin').classList.remove('hidden');
-                document.getElementById('tab-admin-btn').className = "flex-1 py-2.5 font-bold rounded-lg text-sm transition bg-indigo-600 text-white shadow";
-            }
+        function playerExit() {
+            currentCategory = null;
+            selectedQuestion = null;
+            selectedOptionIndex = null;
+            renderCategorySelector();
         }
 
-        // Admin Auth
-        function checkAdminLogin() {
-            const pin = document.getElementById('admin-pin-input').value;
-            if (pin === ADMIN_PIN) {
-                document.getElementById('admin-login-box').classList.add('hidden');
-                document.getElementById('admin-panel').classList.remove('hidden');
+        function openLeaderboard() {
+            if (!isAdmin) return;
+            renderLeaderboardList();
+            document.getElementById('leaderboard-modal').classList.remove('hidden');
+        }
+
+        function closeLeaderboard() {
+            document.getElementById('leaderboard-modal').classList.add('hidden');
+        }
+
+        function switchTab(gender) {
+            activeTab = gender;
+            const tabMen = document.getElementById('tab-men');
+            const tabWomen = document.getElementById('tab-women');
+
+            if (gender === 'men') {
+                tabMen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-indigo-600 text-white shadow-md";
+                tabWomen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600";
             } else {
-                alert("الرمز السري غير صحيح!");
+                tabWomen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 bg-pink-600 text-white shadow-md";
+                tabMen.className = "flex-1 py-2.5 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600";
             }
+
+            renderLeaderboardList();
         }
 
-        // WhatsApp Sharing
-        function shareWhatsApp() {
-            const text = encodeURIComponent("🏆 المسابقة العائلية اليومية (#001)!\nكل يوم فائدة ومعلومة جديدة، شارك معنا الآن واختبر معلوماتك!");
-            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+        function renderLeaderboardList() {
+            const listContainer = document.getElementById('leaderboard-list');
+            const scores = getScores();
+            const items = scores[activeTab] || [];
+            const sortedItems = [...items].sort((a, b) => b.points - a.points);
+
+            listContainer.innerHTML = sortedItems.map((item, index) => `
+                <div class="flex items-center justify-between p-3.5 rounded-2xl ${index === 0 ? 'bg-amber-50 border border-amber-200' : 'bg-slate-50 border border-slate-100'}">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-extrabold ${index === 0 ? 'text-amber-800 bg-amber-200' : 'text-slate-600 bg-slate-200'} px-2 py-1 rounded-md">#${index + 1}</span>
+                        <span class="font-bold text-slate-800 text-sm">${item.name}</span>
+                    </div>
+                    <div class="text-left">
+                        <span class="text-base font-black text-indigo-900">${item.points}</span>
+                        <span class="text-[10px] text-slate-400 block">نقاط</span>
+                    </div>
+                </div>
+            `).join('');
         }
     </script>
 </body>
