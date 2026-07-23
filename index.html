@@ -21,7 +21,7 @@
                     keyframes: {
                         softPulse: {
                             '0%, 100%': { opacity: '1' },
-                            '50%': { opacity: '0.75' },
+                            '50%': { opacity: '0.85' },
                         }
                     }
                 }
@@ -67,7 +67,7 @@
 
         <!-- Dynamic Content View Area -->
         <div id="app-view">
-            <!-- سيتم حقن الواجهات هنا برمجياً (الصفحة الأولى، اختيار الفئات، الأسئلة، إلخ) -->
+            <!-- سيتم حقن الواجهات هنا برمجياً -->
         </div>
 
     </main>
@@ -83,9 +83,8 @@
         const state = {
             currentScreen: 'home', // home, categories, questions, quiz, finished
             selectedCategory: null,
-            selectedSubCategory: null,
             participantId: '001',
-            categoryStatus: {} // لتتبع الفئات التي تم مشاركتها
+            categoryStatus: {}
         };
 
         // دالة العرض الرئيسية
@@ -96,9 +95,6 @@
             switch (state.currentScreen) {
                 case 'home':
                     appView.innerHTML = renderHomeScreen();
-                    break;
-                case 'categories':
-                    appView.innerHTML = renderCategoriesScreen();
                     break;
                 case 'questions':
                     appView.innerHTML = renderQuestionsScreen();
@@ -112,47 +108,49 @@
             }
         }
 
-        // 1. الشاشة الرئيسية (تتضمن الشريط التربوي الجديد وبطاقة الدخول)
+        // 1. الشاشة الرئيسية (إعادة التصميم الأصلي الدقيق + الشريط التربوي فقط)
         function renderHomeScreen() {
             return `
                 <!-- الشريط التربوي الجمالي الجديد -->
-                <div class="mb-4 bg-gradient-to-r from-amber-500/10 via-amber-500/20 to-amber-500/10 border border-amber-300/50 rounded-xl p-3 text-center shadow-sm animate-soft-pulse">
+                <div class="mb-4 bg-amber-50 border border-amber-200/80 rounded-2xl p-3 text-center shadow-sm animate-soft-pulse">
                     <p class="text-amber-800 font-bold text-sm flex items-center justify-center gap-2">
                         <span>🏆</span> الفوز جميل... لكن التعلّم أجمل. <span>💡</span>
                     </p>
                 </div>
 
-                <!-- بطاقة الدخول الرئيسية -->
+                <!-- بطاقة الدخول الرئيسية المطابقة للتصميم الأصلي تماماً -->
                 <div class="bg-white rounded-3xl shadow-xl p-6 border border-slate-100 text-center relative overflow-hidden">
-                    <div class="w-16 h-16 bg-amber-50 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-sm mb-4">
-                        🔓
+                    
+                    <!-- شارة دعوة للمشاركة الأصلية -->
+                    <div class="bg-indigo-50 text-indigo-600 text-[11px] font-bold px-4 py-1 rounded-xl inline-block mb-3">
+                        دعوة للمشاركة
                     </div>
                     
-                    <h2 class="text-xl font-bold text-slate-800 mb-1">مرحباً بكم في مسابقة رقم #${state.participantId}</h2>
-                    <p class="text-slate-500 text-xs mb-6">اختر الفئة المشاركة الخاصة بك للبدء في الإجابة</p>
+                    <h2 class="text-xl font-extrabold text-slate-800 mb-1">مرحباً بكم في مسابقة رقم #${state.participantId}</h2>
+                    <p class="text-slate-400 text-xs mb-6 font-semibold">اختر الفئة المشاركة الخاصة بك للبدء في الإجابة</p>
 
-                    <!-- فئة النساء -->
+                    <!-- فئات النساء -->
                     <div class="mb-6 text-right">
-                        <div class="text-xs font-bold text-slate-600 mb-2 flex justify-between items-center">
+                        <div class="text-xs font-bold text-slate-600 mb-2">
                             <span>فئات النساء 👩 (10 فئات)</span>
                         </div>
                         <div class="grid grid-cols-5 gap-2">
                             ${Array.from({length: 10}, (_, i) => `
-                                <button onclick="selectCategory('نساء ${i+1}')" class="bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-semibold py-2.5 rounded-xl border border-pink-200 transition shadow-sm">
+                                <button onclick="selectCategory('نساء ${i+1}')" class="bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-semibold py-2.5 rounded-xl border border-pink-100 transition shadow-sm">
                                     نساء ${i+1}
                                 </button>
                             `).join('')}
                         </div>
                     </div>
 
-                    <!-- فئة الرجال -->
+                    <!-- فئات الرجال -->
                     <div class="text-right">
                         <div class="text-xs font-bold text-slate-600 mb-2">
                             <span>فئات الرجال 👨 (10 فئات)</span>
                         </div>
                         <div class="grid grid-cols-5 gap-2">
                             ${Array.from({length: 10}, (_, i) => `
-                                <button onclick="selectCategory('رجال ${i+1}')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold py-2.5 rounded-xl border border-blue-200 transition shadow-sm">
+                                <button onclick="selectCategory('رجال ${i+1}')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold py-2.5 rounded-xl border border-blue-100 transition shadow-sm">
                                     رجال ${i+1}
                                 </button>
                             `).join('')}
@@ -165,7 +163,6 @@
         // اختيار فئة والانتقال لصفحة الأسئلة
         function selectCategory(catName) {
             state.selectedCategory = catName;
-            // فحص هل شاركت هذه الفئة من قبل أم لا (محاكاة)
             if (state.categoryStatus[catName]) {
                 state.currentScreen = 'finished';
             } else {
@@ -174,7 +171,7 @@
             render();
         }
 
-        // 2. شاشة الأسئلة (متضمنة زر العودة للفئات)
+        // 2. شاشة الأسئلة (متضمنة زر العودة المعتمد)
         function renderQuestionsScreen() {
             const questionsList = [
                 { id: 1, subject: 'علوم القرآن', title: 'ما هي السورة التي تسمى عروس القرآن؟' },
@@ -186,7 +183,6 @@
 
             return `
                 <div class="bg-white rounded-3xl shadow-xl p-6 border border-slate-100 relative">
-                    <!-- شريط العنوان وأزرار التنقل -->
                     <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
                         <button onclick="goBackToHome()" class="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded-xl transition font-semibold">
                             <span>←</span> العودة للفئات
@@ -216,17 +212,15 @@
             `;
         }
 
-        // العودة للصفحة الرئيسية
         function goBackToHome() {
             state.currentScreen = 'home';
             render();
         }
 
-        // 3. شاشة حل السؤال (متضمنة زر العودة لقائمة الأسئلة)
+        // 3. شاشة حل السؤال
         function renderQuizScreen() {
             return `
                 <div class="bg-white rounded-3xl shadow-xl p-6 border border-slate-100 relative">
-                    <!-- شريط التنقل العلوي -->
                     <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
                         <button onclick="goBackToQuestions()" class="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded-xl transition font-semibold">
                             <span>←</span> العودة للأسئلة
@@ -236,7 +230,6 @@
                         </span>
                     </div>
 
-                    <!-- مؤقت فرعي -->
                     <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-2.5 mb-4 flex justify-between items-center text-xs text-amber-800 font-semibold">
                         <span>⏱️ المؤقت الفرعي للسؤال:</span>
                         <span class="font-bold">13 ثانية</span>
@@ -247,9 +240,8 @@
                         <h3 class="text-base font-bold text-slate-800 mt-2">ما هي السورة التي تسمى عروس القرآن؟</h3>
                     </div>
 
-                    <!-- خيارات الإجابة -->
                     <div class="space-y-2.5 mb-6">
-                        ${['سورة يس', 'سورة الرحمن', 'سورة الواقعة', 'سورة الملك'].map((opt, idx) => `
+                        ${['سورة يس', 'سورة الرحمن', 'سورة الواقعة', 'سورة الملك'].map((opt) => `
                             <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:border-primary cursor-pointer transition bg-white">
                                 <span class="text-xs font-semibold text-slate-700">${opt}</span>
                                 <input type="radio" name="quiz_answer" class="text-primary focus:ring-primary">
@@ -275,13 +267,12 @@
         }
 
         function submitAnswer() {
-            // تسجيل أن هذه الفئة قد شاركت
             state.categoryStatus[state.selectedCategory] = true;
             state.currentScreen = 'finished';
             render();
         }
 
-        // 4. شاشة الانتهاء (متضمنة خيار "اضغط للخروج" بجانب العودة لاختيار فئة أخرى)
+        // 4. شاشة الانتهاء (تتضمن القفل المخصص لانتهاء المشاركة فقط + أزرار الخروج والعودة)
         function renderFinishedScreen() {
             return `
                 <div class="bg-white rounded-3xl shadow-xl p-8 border border-slate-100 text-center">
@@ -292,7 +283,6 @@
                     <h3 class="text-lg font-bold text-slate-800 mb-1">فئة (${state.selectedCategory}) شاركت بفعالية!</h3>
                     <p class="text-slate-500 text-xs mb-6">لقد تم تقديم إجابة هذه الفئة للمسابقة رقم #${state.participantId} سابقاً. يسمح لكل متسابق بإجابة سؤال واحد فقط.</p>
 
-                    <!-- الأزرار المطلوبة: العودة لفئة أخرى + زر الخروج النهائي -->
                     <div class="flex flex-col sm:flex-row gap-3 justify-center">
                         <button onclick="goBackToHome()" class="flex-1 bg-primary hover:bg-indigo-700 text-white text-xs py-3 px-4 rounded-xl font-bold transition shadow-md flex items-center justify-center gap-1">
                             <span>←</span> العودة لاختيار فئة أخرى
@@ -305,14 +295,12 @@
             `;
         }
 
-        // الخروج النهائي (مسح الجلسة والعودة للبداية)
         function exitSession() {
             state.selectedCategory = null;
             state.currentScreen = 'home';
             render();
         }
 
-        // بدء تشغيل التطبيق لأول مرة
         render();
     </script>
 </body>
