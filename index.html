@@ -67,7 +67,7 @@
 
         <!-- Dynamic Content View Area -->
         <div id="app-view">
-            <!-- سيتم حقن الواجهات هنا برمجياً -->
+            <!-- الواجهات الديناميكية -->
         </div>
 
     </main>
@@ -79,15 +79,13 @@
 
     <!-- App Logic Script -->
     <script>
-        // الحالة العامة للتطبيق
         const state = {
-            currentScreen: 'home', // home, categories, questions, quiz, finished
+            currentScreen: 'home', // home, questions, quiz, finished
             selectedCategory: null,
             participantId: '001',
             categoryStatus: {}
         };
 
-        // دالة العرض الرئيسية
         function render() {
             const appView = document.getElementById('app-view');
             appView.innerHTML = '';
@@ -108,25 +106,24 @@
             }
         }
 
-        // 1. الشاشة الرئيسية (إعادة التصميم الأصلي الدقيق + الشريط التربوي فقط)
+        // 1. الشاشة الرئيسية المعتمدة تماماً كما في الصورة الأخيرة
         function renderHomeScreen() {
             return `
-                <!-- الشريط التربوي الجمالي الجديد -->
-                <div class="mb-4 bg-amber-50 border border-amber-200/80 rounded-2xl p-3 text-center shadow-sm animate-soft-pulse">
+                <!-- الشريط التربوي الجمالي المطابق تماماً للصورة الأخيرة -->
+                <div class="mb-6 bg-amber-50/90 border border-amber-200/80 rounded-2xl p-3 text-center shadow-sm animate-soft-pulse">
                     <p class="text-amber-800 font-bold text-sm flex items-center justify-center gap-2">
-                        <span>🏆</span> الفوز جميل... لكن التعلّم أجمل. <span>💡</span>
+                        <span>💡</span> الفوز جميل... لكن التعلّم أجمل. <span>🏆</span>
                     </p>
                 </div>
 
-                <!-- بطاقة الدخول الرئيسية المطابقة للتصميم الأصلي تماماً -->
+                <!-- بطاقة الدخول الرئيسية المطابقة تماماً لـ image.png -->
                 <div class="bg-white rounded-3xl shadow-xl p-6 border border-slate-100 text-center relative overflow-hidden">
                     
-                    <!-- شارة دعوة للمشاركة الأصلية -->
                     <div class="bg-indigo-50 text-indigo-600 text-[11px] font-bold px-4 py-1 rounded-xl inline-block mb-3">
                         دعوة للمشاركة
                     </div>
                     
-                    <h2 class="text-xl font-extrabold text-slate-800 mb-1">مرحباً بكم في مسابقة رقم #${state.participantId}</h2>
+                    <h2 class="text-2xl font-extrabold text-slate-800 mb-1">مرحباً بكم في مسابقة رقم #${state.participantId}</h2>
                     <p class="text-slate-400 text-xs mb-6 font-semibold">اختر الفئة المشاركة الخاصة بك للبدء في الإجابة</p>
 
                     <!-- فئات النساء -->
@@ -160,7 +157,6 @@
             `;
         }
 
-        // اختيار فئة والانتقال لصفحة الأسئلة
         function selectCategory(catName) {
             state.selectedCategory = catName;
             if (state.categoryStatus[catName]) {
@@ -217,7 +213,7 @@
             render();
         }
 
-        // 3. شاشة حل السؤال
+        // 3. شاشة حل السؤال (متضمنة زر العودة لقائمة الأسئلة)
         function renderQuizScreen() {
             return `
                 <div class="bg-white rounded-3xl shadow-xl p-6 border border-slate-100 relative">
@@ -272,7 +268,7 @@
             render();
         }
 
-        // 4. شاشة الانتهاء (تتضمن القفل المخصص لانتهاء المشاركة فقط + أزرار الخروج والعودة)
+        // 4. شاشة الانتهاء (تتضمن أزرار الخروج والعودة)
         function renderFinishedScreen() {
             return `
                 <div class="bg-white rounded-3xl shadow-xl p-8 border border-slate-100 text-center">
