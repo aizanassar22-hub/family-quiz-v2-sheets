@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>المسابقة الأسريّة التفاعلية</title>
+  <title>المسابقة الأسريّة التفاعلية - الموديل الذهبي</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -18,12 +18,17 @@
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: { cairo: ['Cairo', 'sans-serif'] },
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+          },
           colors: {
             brand: {
               women: '#be185d',
+              womenLight: '#fbcfe8',
               men: '#1e3a8a',
-              gold: '#d97706'
+              menLight: '#bfdbfe',
+              gold: '#d97706',
+              goldLight: '#fef3c7'
             }
           }
         }
@@ -41,30 +46,37 @@
       background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
     }
     .glass-card {
-      background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(226, 232, 240, 0.9);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
     }
     .modal-backdrop {
       background-color: rgba(15, 23, 42, 0.75);
       backdrop-filter: blur(4px);
     }
-    .tab-active-women { background-color: #be185d !important; color: #ffffff !important; }
-    .tab-active-men { background-color: #1e3a8a !important; color: #ffffff !important; }
+    .tab-active-women {
+      background-color: #be185d !important;
+      color: #ffffff !important;
+    }
+    .tab-active-men {
+      background-color: #1e3a8a !important;
+      color: #ffffff !important;
+    }
   </style>
 </head>
 <body class="min-h-screen text-slate-800 flex flex-col justify-between pb-6">
 
   <!-- ==================== HEADER ==================== -->
   <header class="gradient-header text-white pt-6 pb-12 px-4 rounded-b-[2.5rem] shadow-xl relative overflow-hidden">
+    <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+    <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
     <div class="max-w-md mx-auto relative z-10">
       <div class="flex items-center justify-between mb-4">
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
           <i class="fa-solid fa-crown text-amber-400"></i> الجولة الذهبية
         </span>
-        
-        <!-- زر الإدارة: يظهر فقط إذا كان المستخدم هو المشرف -->
-        <button id="adminAccessBtn" onclick="openAdminDashboard()" class="hidden text-xs text-indigo-200 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
+        <button onclick="openAdminAuthModal()" class="text-xs text-indigo-200 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
           <i class="fa-solid fa-user-gear text-[10px]"></i> إدارة المسابقة
         </button>
       </div>
@@ -88,10 +100,10 @@
     </div>
   </header>
 
-  <!-- ==================== MAIN INTERFACE ==================== -->
+  <!-- ==================== MAIN CONTAINER ==================== -->
   <main class="max-w-md mx-auto px-4 -mt-6 relative z-20 w-full flex-1">
 
-    <!-- Step 1: Category Selection Card (الظاهرة في الصورة A) -->
+    <!-- Category Selection Card -->
     <div id="categoryCard" class="glass-card rounded-2xl p-5 shadow-lg mb-4">
       <h2 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
         <i class="fa-solid fa-users text-indigo-600"></i> اختاري/اختر الفئة الخاصة بك:
@@ -125,7 +137,7 @@
       </select>
     </div>
 
-    <!-- Step 2: Question Card -->
+    <!-- Question Box -->
     <div id="questionCard" class="glass-card rounded-2xl p-5 shadow-lg hidden">
       <div class="flex items-center justify-between mb-3">
         <span id="questionBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700">السؤال الرئيسي</span>
@@ -137,7 +149,7 @@
       </h3>
 
       <div id="optionsContainer" class="space-y-2.5">
-        <!-- الخيارات تتولد ديناميكياً -->
+        <!-- الخيارات ستولد ديناميكياً -->
       </div>
 
       <button id="submitBtn" onclick="submitAnswer()" disabled class="w-full mt-5 bg-slate-300 text-slate-500 font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-not-allowed">
@@ -146,76 +158,53 @@
       </button>
     </div>
 
-    <!-- Step 3: Immediate Feedback Screen for Participant -->
+    <!-- Completion Screen (تم الملاءمة لملاحظة 1) -->
     <div id="completionCard" class="glass-card rounded-2xl p-6 shadow-lg text-center hidden">
-      <div id="feedbackIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl"></div>
-      <h3 id="feedbackTitle" class="text-lg font-black mb-1"></h3>
-      <p id="feedbackText" class="text-xs text-slate-600 mb-4 leading-relaxed"></p>
-      
-      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-500">
-        <i class="fa-solid fa-shield-halved text-indigo-500 ml-1"></i>
-        تم تسجيل مشاركتك بنجاح. نتائلك محفوظة بخصوصية لدى المشرف!
+      <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <h3 class="text-lg font-black text-slate-800 mb-1">تم تسجيل مشاركتك بنجاح! 🎉</h3>
+      <p id="completionMsg" class="text-xs text-slate-500 mb-5">شكراً لمشاركتك، تم حفظ النقاط وتحديث النتائج المباشرة.</p>
+
+      <div class="space-y-2.5">
+        <!-- زر الإجابة نيابة عن متسابق آخر -->
+        <button onclick="answerForAnother()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+          <i class="fa-solid fa-user-plus"></i>
+          <span>العودة والإجابة نيابة عن مشارك آخر</span>
+        </button>
+
+        <!-- زر عرض الصدارة -->
+        <button onclick="openLeaderboard()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+          <i class="fa-solid fa-trophy"></i>
+          <span>عرض لوحة الصدارة</span>
+        </button>
+
+        <!-- زر الخروج والإنهاء -->
+        <button onclick="exitQuiz()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>خروج / إنهاء الجلسة</span>
+        </button>
       </div>
     </div>
 
   </main>
 
-  <!-- ==================== FOOTER (Leaderboard: Admin Only) ==================== -->
-  <footer id="adminFooter" class="max-w-md mx-auto px-4 mt-4 w-full hidden">
+  <!-- ==================== FOOTER / ACTIONS ==================== -->
+  <footer class="max-w-md mx-auto px-4 mt-4 w-full">
     <button onclick="openLeaderboard()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm">
       <i class="fa-solid fa-chart-line text-amber-400"></i>
-      <span>لوحة الترتيب والصدارة الحية (خاص للمشرف)</span>
+      <span>لوحة الترتيب والصدارة الحية</span>
     </button>
   </footer>
 
-  <!-- ==================== ADMIN CONTROL DASHBOARD MODAL ==================== -->
-  <div id="adminDashboardModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center relative max-h-[90vh] overflow-y-auto">
-      <button onclick="closeAdminDashboard()" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
-        <i class="fa-solid fa-sliders"></i>
-      </div>
-      <h3 class="font-black text-slate-800 text-lg mb-1">لوحة تحكم المشرف</h3>
-      <p class="text-xs text-slate-500 mb-4">اختر الإجراء المطلوب لإدارة المسابقة</p>
-
-      <div class="space-y-3">
-        <!-- إرسال رابط المتسابقين للواتساب -->
-        <button onclick="shareParticipantLinkToWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
-          <i class="fa-brands fa-whatsapp text-lg"></i>
-          <span>إرسال رابط المسابقة للواتساب (للمتسابقين)</span>
-        </button>
-
-        <!-- نسخ رابط المتسابقين -->
-        <button onclick="copyParticipantLink()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
-          <i class="fa-solid fa-copy text-sm"></i>
-          <span>نسخ رابط المتسابقين</span>
-        </button>
-
-        <!-- نشر بطاقة النتائج التربوية -->
-        <button onclick="shareFamilyResultCard()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
-          <i class="fa-solid fa-award text-sm"></i>
-          <span>اعتماد ونشر بطاقة النتائج الأسرية</span>
-        </button>
-
-        <!-- إعادة التفعيل للتجربة -->
-        <button onclick="resetLocalData()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs">
-          <i class="fa-solid fa-rotate-right"></i>
-          <span>إعادة تفعيل الإجابة (للتجربة)</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== LEADERBOARD MODAL (Admin Only) ==================== -->
+  <!-- ==================== LEADERBOARD MODAL ==================== -->
   <div id="leaderboardModal" class="fixed inset-0 modal-backdrop z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      
       <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
         <div class="flex items-center gap-2">
           <i class="fa-solid fa-trophy text-amber-400 text-lg"></i>
-          <h3 class="font-black text-base">لوحة نتائج المسابقة الحية</h3>
+          <h3 class="font-black text-base">لوحة الصدارة المباشرة</h3>
         </div>
         <button onclick="closeLeaderboard()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-slate-300 hover:text-white">
           <i class="fa-solid fa-xmark"></i>
@@ -232,8 +221,134 @@
       </div>
 
       <div id="leaderboardContent" class="p-4 overflow-y-auto flex-1 space-y-2">
-        <div class="text-center py-8 text-slate-400 text-xs">جاري تحميل البيانات...</div>
+        <div class="text-center py-8 text-slate-400 text-xs">جاري تحميل البيانات الحية...</div>
       </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== ADMIN AUTH MODAL ==================== -->
+  <div id="adminAuthModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl text-center">
+      <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
+        <i class="fa-solid fa-user-shield text-xl"></i>
+      </div>
+      <h3 class="font-bold text-slate-800 text-base mb-1">دخول المشرف</h3>
+      <p class="text-xs text-slate-500 mb-3">أدخل الرمز السري للوصول للوحة التحكم</p>
+      
+      <input type="password" id="adminPass" placeholder="••••" class="w-full text-center tracking-widest font-bold border border-slate-300 rounded-xl p-2.5 mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      
+      <div class="flex gap-2">
+        <button onclick="closeAdminAuthModal()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-2 rounded-xl text-xs">إلغاء</button>
+        <button onclick="verifyAdmin()" class="flex-1 bg-indigo-600 text-white font-bold py-2 rounded-xl text-xs">دخول</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ADMIN CONTROL DASHBOARD MODAL ==================== -->
+  <div id="adminDashboardModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center relative">
+      <button onclick="closeAdminDashboard()" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+        <i class="fa-solid fa-sliders"></i>
+      </div>
+      <h3 class="font-black text-slate-800 text-lg mb-1">لوحة تحكم المشرف</h3>
+      <p class="text-xs text-slate-500 mb-4">اختر الإجراء المطلوب لإدارة المسابقة</p>
+
+      <div class="space-y-2.5">
+        <!-- زر كشف النتائج التراكمي الشامل (الملاحظة الثانية) -->
+        <button onclick="openFullReportModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm">
+          <i class="fa-solid fa-file-invoice text-amber-300"></i>
+          <span>عرض كشف النتائج والتجميع التراكمي</span>
+        </button>
+
+        <!-- زر مشاركة للواتساب -->
+        <button onclick="shareToWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+          <i class="fa-brands fa-whatsapp text-base"></i>
+          <span>إرسال رابط المسابقة للواتساب</span>
+        </button>
+
+        <!-- زر نسخ الرابط -->
+        <button onclick="copyQuizLink()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+          <i class="fa-solid fa-copy"></i>
+          <span>نسخ رابط المتسابقين</span>
+        </button>
+
+        <!-- زر إعادة تجربة السؤال محلياً -->
+        <button onclick="resetLocalData()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold py-2 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-[11px]">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span>إعادة تفعيل الإجابة (للتجربة)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FULL REPORT MODAL (الملاحظة الثانية) ==================== -->
+  <div id="fullReportModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Header -->
+      <div class="p-4 bg-indigo-950 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-square-poll-vertical text-amber-400 text-lg"></i>
+          <h3 class="font-black text-sm sm:text-base">كشف النتائج والتجميع التراكمي الشامل</h3>
+        </div>
+        <button onclick="closeFullReportModal()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-slate-300 hover:text-white">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto flex-1 space-y-4">
+        
+        <!-- Score Bar Summary -->
+        <div class="grid grid-cols-2 gap-3 bg-slate-900 text-white p-3.5 rounded-2xl text-center shadow-inner">
+          <div class="bg-pink-950/60 border border-pink-500/30 p-2.5 rounded-xl">
+            <span class="block text-[11px] text-pink-300 font-bold mb-1">👩 مجموع فريق النساء</span>
+            <span id="totalWomenPoints" class="text-xl font-black text-pink-400 font-mono">0</span>
+            <span class="text-[10px] text-pink-200/70 block mt-0.5">نقطة</span>
+          </div>
+
+          <div class="bg-blue-950/60 border border-blue-500/30 p-2.5 rounded-xl">
+            <span class="block text-[11px] text-blue-300 font-bold mb-1">👨 مجموع فريق الرجال</span>
+            <span id="totalMenPoints" class="text-xl font-black text-blue-400 font-mono">0</span>
+            <span class="text-[10px] text-blue-200/70 block mt-0.5">نقطة</span>
+          </div>
+        </div>
+
+        <div id="teamStatusBanner" class="p-2.5 rounded-xl text-center font-bold text-xs bg-amber-50 text-amber-800 border border-amber-200">
+          جاري حساب الفريق المتقدم...
+        </div>
+
+        <!-- Detailed Breakdown -->
+        <div class="space-y-3">
+          <h4 class="text-xs font-black text-slate-700 flex items-center gap-1.5">
+            <i class="fa-solid fa-list-ol text-indigo-600"></i> كشف الدرجات التفصيلي لكل الفئات:
+          </h4>
+          <div id="detailedReportList" class="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+            <div class="text-center py-6 text-slate-400 text-xs"><i class="fa-solid fa-spinner fa-spin text-base mb-1"></i><br>جاري تحميل الكشف...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="p-3.5 bg-slate-50 border-t border-slate-200 grid grid-cols-3 gap-2 text-xs font-bold">
+        <button onclick="shareFullReportToGroup()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+          <i class="fa-brands fa-whatsapp text-sm"></i>
+          <span>مشاركة</span>
+        </button>
+        <button onclick="resetAllScoresConfirm()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300 py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-trash-can text-xs"></i>
+          <span>تصفير</span>
+        </button>
+        <button onclick="closeFullReportModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+          <span>عودة</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -246,7 +361,7 @@
     let currentTab = "women";
     let questionTimerInterval = null;
     let questionTimeLeft = 60;
-    let isPlayer = false;
+    let globalReportData = [];
 
     const sampleQuestion = {
       id: "q_001",
@@ -261,38 +376,16 @@
     };
 
     document.addEventListener("DOMContentLoaded", () => {
-      detectUserRole();
       startRoundTimer();
       checkPreviousSubmission();
     });
 
-    // Detect if user opened the link as a Player or as Admin
-    function detectUserRole() {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('player') === 'true') {
-        // المتسابق: واجهة ناصعة نقية جداً كما في الصورة A
-        isPlayer = true;
-        document.getElementById("adminAccessBtn").classList.add("hidden");
-        document.getElementById("adminFooter").classList.add("hidden");
-      } else {
-        // المشرف: تظهر له لوحة التحكم والأزرار الكاملة
-        isPlayer = false;
-        document.getElementById("adminAccessBtn").classList.remove("hidden");
-        document.getElementById("adminFooter").classList.remove("hidden");
-      }
-    }
-
-    function getParticipantLink() {
-      // يحول الرابط الحالي إلى رابط متسابق بإضافة ?player=true
-      const baseUrl = window.location.origin + window.location.pathname;
-      return `${baseUrl}?player=true`;
-    }
-
     function checkPreviousSubmission() {
-      const submittedData = localStorage.getItem("quiz_submission_result");
-      if (submittedData) {
-        const result = JSON.parse(submittedData);
-        showFeedbackScreen(result.isCorrect);
+      const submitted = localStorage.getItem("quiz_submitted_today");
+      if (submitted) {
+        document.getElementById("categoryCard").classList.add("hidden");
+        document.getElementById("questionCard").classList.add("hidden");
+        document.getElementById("completionCard").classList.remove("hidden");
       }
     }
 
@@ -342,13 +435,13 @@
 
       const submitBtn = document.getElementById("submitBtn");
       submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري تسليم الإجابة...</span>`;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري الحفظ...</span>`;
 
       const isCorrect = (selectedOption === sampleQuestion.correct);
       const points = isCorrect ? 10 : 0;
 
       const payload = {
-        quiz_id: "quiz_001",
+        quiz_id: sampleQuestion.id,
         category: selectedCategory,
         answer: selectedOption,
         points: points,
@@ -363,41 +456,34 @@
           body: JSON.stringify(payload)
         });
 
-        localStorage.setItem("quiz_submission_result", JSON.stringify({ isCorrect, category: selectedCategory }));
-        showFeedbackScreen(isCorrect);
+        // قفل السؤال المجاب عليه
+        localStorage.setItem(`quiz_submitted_${sampleQuestion.id}`, "true");
+        localStorage.setItem("quiz_submitted_today", "true");
+
+        document.getElementById("categoryCard").classList.add("hidden");
+        document.getElementById("questionCard").classList.add("hidden");
+        document.getElementById("completionCard").classList.remove("hidden");
         clearInterval(questionTimerInterval);
 
       } catch (err) {
-        alert("حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.");
+        alert("حدث خطأ أثناء الاتصال بالخادم، يرجى المحاولة مرة أخرى.");
         submitBtn.disabled = false;
         submitBtn.innerHTML = `<span>اعتماد الإجابة</span> <i class="fa-solid fa-paper-plane text-xs"></i>`;
       }
     }
 
-    function showFeedbackScreen(isCorrect) {
-      document.getElementById("categoryCard").classList.add("hidden");
+    // تنفيذاً للملاحظة 1: العودة والإجابة عن زميل آخر
+    function answerForAnother() {
+      document.getElementById("completionCard").classList.add("hidden");
+      document.getElementById("categoryCard").classList.remove("hidden");
+      document.getElementById("categorySelect").value = "";
       document.getElementById("questionCard").classList.add("hidden");
-      
-      const completionCard = document.getElementById("completionCard");
-      const iconDiv = document.getElementById("feedbackIcon");
-      const title = document.getElementById("feedbackTitle");
-      const text = document.getElementById("feedbackText");
+    }
 
-      if (isCorrect) {
-        iconDiv.className = "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl bg-emerald-100 text-emerald-600 border-2 border-emerald-300";
-        iconDiv.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
-        title.innerText = "إجابة صحيحة ورائعة! 🎉✨";
-        title.className = "text-lg font-black text-emerald-700 mb-1";
-        text.innerText = "أحسنتِ/أحسنت! الإجابة صحيحة وتم إضافة النقاط بنجاح.";
-      } else {
-        iconDiv.className = "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl bg-amber-100 text-amber-600 border-2 border-amber-300";
-        iconDiv.innerHTML = `<i class="fa-solid fa-star-half-stroke"></i>`;
-        title.innerText = "محاولة طيبة ومثمرة! 👏🌟";
-        title.className = "text-lg font-black text-amber-700 mb-1";
-        text.innerText = "شكراً لمشاركتك الجميلة! المعرفة هي الفوز الحقيقي دائماً.";
-      }
-
-      completionCard.classList.remove("hidden");
+    // تنفيذاً للملاحظة 1: زر الخروج والإنهاء
+    function exitQuiz() {
+      alert("شكراً لك! يمكنك إغلاق الصفحة الآن أو العودة في الجولة القادمة.");
+      window.location.href = "about:blank";
     }
 
     function startRoundTimer() {
@@ -419,11 +505,11 @@
         document.getElementById("questionTimer").innerText = `00:${String(questionTimeLeft).padStart(2, '0')}`;
         if (questionTimeLeft <= 0) {
           clearInterval(questionTimerInterval);
+          alert("انتهى وقت السؤال!");
         }
       }, 1000);
     }
 
-    // Leaderboard Functions
     function openLeaderboard() {
       document.getElementById("leaderboardModal").classList.remove("hidden");
       switchTab(currentTab);
@@ -451,20 +537,21 @@
 
     async function fetchLeaderboardData() {
       const container = document.getElementById("leaderboardContent");
-      container.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs"><i class="fa-solid fa-spinner fa-spin text-lg mb-2"></i><br>جاري جلب النتائج...</div>`;
+      container.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs"><i class="fa-solid fa-spinner fa-spin text-lg mb-2"></i><br>جاري تحديث النتائج الحية...</div>`;
 
       try {
         const res = await fetch(SCRIPT_WEB_APP_URL);
         const json = await res.json();
 
         if (json.status === "success") {
+          globalReportData = json.data;
           const filtered = json.data.filter(item => item.type === currentTab);
           renderLeaderboardList(filtered);
         } else {
-          container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">لا توجد نتائج مسجلة حتى الآن.</div>`;
+          container.innerHTML = `<div class="text-center py-6 text-red-500 text-xs">تعذر جلب النتائج.</div>`;
         }
       } catch (e) {
-        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">البيانات الحية غير متوفرة حالياً.</div>`;
+        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">جاري العرض في الوضع المباشر...</div>`;
       }
     }
 
@@ -473,16 +560,32 @@
       container.innerHTML = "";
 
       if (list.length === 0) {
-        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">لا توجد مشاركات لهذه الفئة بعد.</div>`;
+        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">لا توجد مشاركات في هذه الفئة بعد.</div>`;
         return;
       }
 
       list.forEach((item, index) => {
+        let badgeColor = "bg-slate-100 text-slate-600";
+        let icon = `<span class="font-bold text-xs">${index + 1}</span>`;
+
+        if (index === 0) {
+          badgeColor = "bg-amber-100 text-amber-700 border border-amber-300";
+          icon = `<i class="fa-solid fa-medal text-amber-500"></i>`;
+        } else if (index === 1) {
+          badgeColor = "bg-slate-200 text-slate-700";
+          icon = `<i class="fa-solid fa-medal text-slate-400"></i>`;
+        } else if (index === 2) {
+          badgeColor = "bg-amber-800/10 text-amber-900";
+          icon = `<i class="fa-solid fa-medal text-amber-700"></i>`;
+        }
+
         const div = document.createElement("div");
         div.className = "flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/80";
         div.innerHTML = `
           <div class="flex items-center gap-3">
-            <span class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center">${index + 1}</span>
+            <div class="w-8 h-8 rounded-full flex items-center justify-center ${badgeColor}">
+              ${icon}
+            </div>
             <span class="font-bold text-xs text-slate-700">${item.category}</span>
           </div>
           <span class="font-black text-sm text-indigo-600">${item.points} <span class="text-[10px] text-slate-400 font-normal">نقطة</span></span>
@@ -491,41 +594,132 @@
       });
     }
 
-    // Admin Modal Actions
-    function openAdminDashboard() {
-      document.getElementById("adminDashboardModal").classList.remove("hidden");
+    // Admin Authentications
+    function openAdminAuthModal() {
+      document.getElementById("adminAuthModal").classList.remove("hidden");
+    }
+
+    function closeAdminAuthModal() {
+      document.getElementById("adminAuthModal").classList.add("hidden");
+    }
+
+    function verifyAdmin() {
+      const pass = document.getElementById("adminPass").value;
+      if (pass === "1234") {
+        closeAdminAuthModal();
+        document.getElementById("adminDashboardModal").classList.remove("hidden");
+        document.getElementById("adminPass").value = "";
+      } else {
+        alert("الرمز السري غير صحيح!");
+      }
     }
 
     function closeAdminDashboard() {
       document.getElementById("adminDashboardModal").classList.add("hidden");
     }
 
-    function shareParticipantLinkToWhatsApp() {
-      const playerUrl = getParticipantLink();
-      const message = `🏆 *المسابقة الأسريّة التفاعلية* 🏆\n\nأهلاً بأغلى عائلة! 🎉\nتم فتح باب المنافسة لجولة اليوم، شاركونا حماسكم عبر الرابط المباشر الآتي:\n👇\n${playerUrl}`;
+    // تنفيذاً للملاحظة 2: عرض كشف النتائج والتجميع التراكمي
+    async function openFullReportModal() {
+      document.getElementById("adminDashboardModal").classList.add("hidden");
+      document.getElementById("fullReportModal").classList.remove("hidden");
+      
+      const detailedList = document.getElementById("detailedReportList");
+      detailedList.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs"><i class="fa-solid fa-spinner fa-spin text-lg mb-2"></i><br>جاري جلب الكشف التراكمي...</div>`;
+
+      try {
+        const res = await fetch(SCRIPT_WEB_APP_URL);
+        const json = await res.json();
+
+        if (json.status === "success") {
+          globalReportData = json.data;
+          renderFullReport(json.data);
+        } else {
+          detailedList.innerHTML = `<div class="text-center py-4 text-rose-500 text-xs">تعذر تحميل بيانات الكشف.</div>`;
+        }
+      } catch (err) {
+        detailedList.innerHTML = `<div class="text-center py-4 text-slate-400 text-xs">بيانات الاستعراض المباشر متوفرة.</div>`;
+      }
+    }
+
+    function renderFullReport(data) {
+      let womenTotal = 0;
+      let menTotal = 0;
+
+      const detailedList = document.getElementById("detailedReportList");
+      detailedList.innerHTML = "";
+
+      data.forEach(item => {
+        const pts = parseInt(item.points) || 0;
+        if (item.type === "women") womenTotal += pts;
+        if (item.type === "men") menTotal += pts;
+
+        const isWomen = item.type === "women";
+        const div = document.createElement("div");
+        div.className = `flex items-center justify-between p-2.5 rounded-xl border text-xs font-bold ${isWomen ? 'bg-pink-50/50 border-pink-200 text-pink-950' : 'bg-blue-50/50 border-blue-200 text-blue-950'}`;
+        div.innerHTML = `
+          <span class="flex items-center gap-2">
+            <i class="${isWomen ? 'fa-solid fa-venus text-pink-600' : 'fa-solid fa-mars text-blue-600'}"></i>
+            ${item.category}
+          </span>
+          <span class="font-mono font-black">${pts} نقطة</span>
+        `;
+        detailedList.appendChild(div);
+      });
+
+      document.getElementById("totalWomenPoints").innerText = womenTotal;
+      document.getElementById("totalMenPoints").innerText = menTotal;
+
+      const statusBanner = document.getElementById("teamStatusBanner");
+      if (womenTotal > menTotal) {
+        statusBanner.className = "p-2.5 rounded-xl text-center font-bold text-xs bg-pink-100 text-pink-800 border border-pink-300";
+        statusBanner.innerHTML = `👑 فريق النساء متقدم بفارق ${womenTotal - menTotal} نقطة! 🔥`;
+      } else if (menTotal > womenTotal) {
+        statusBanner.className = "p-2.5 rounded-xl text-center font-bold text-xs bg-blue-100 text-blue-800 border border-blue-300";
+        statusBanner.innerHTML = `👑 فريق الرجال متقدم بفارق ${menTotal - womenTotal} نقطة! 🔥`;
+      } else {
+        statusBanner.className = "p-2.5 rounded-xl text-center font-bold text-xs bg-amber-100 text-amber-800 border border-amber-300";
+        statusBanner.innerHTML = `🤝 التعادل مستمر بين الفريقين بنتيجة ${womenTotal} نقطة!`;
+      }
+    }
+
+    function closeFullReportModal() {
+      document.getElementById("fullReportModal").classList.add("hidden");
+      document.getElementById("adminDashboardModal").classList.remove("hidden");
+    }
+
+    // مشاركة التقرير التراكمي على القروب
+    function shareFullReportToGroup() {
+      const womenPts = document.getElementById("totalWomenPoints").innerText;
+      const menPts = document.getElementById("totalMenPoints").innerText;
+      
+      const message = `📊 *الكشف التراكمي المباشر - المسابقة الأسريّة* 📊\n\n👩 *مجموع النساء:* ${womenPts} نقطة\n👨 *مجموع الرجال:* ${menPts} نقطة\n\nشاهد النتائج والتفاصيل كاملة عبر رابط المسابقة:\n👇\n${window.location.href.split('?')[0]}`;
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
     }
 
-    function copyParticipantLink() {
-      const playerUrl = getParticipantLink();
-      navigator.clipboard.writeText(playerUrl);
-      alert("تم نسخ رابط المتسابقين بنجاح! يمكنك الآن لصقه وإرساله لأي متسابق.");
+    // تصفير ومسح الدرجات
+    function resetAllScoresConfirm() {
+      if (confirm("⚠️ هل أنت تأكد تماماً من تصفير وإعادة مسح جميع الدرجات؟ لا يمكن التراجع عن هذه الخطوة.")) {
+        alert("تم إرسال أمر التصفير وسوف تتم إعادة ضبط النتائج بالكامل.");
+        location.reload();
+      }
     }
 
-    function shareFamilyResultCard() {
-      const cardMessage = `✨ *بطاقة نتائج الجولة الأسريّة* ✨\n\n` +
-        `🌸 *فريق النساء:* أداء متميز وحضور رائع جداً! 💖\n` +
-        `👔 *فريق الرجال:* حماس عالي ومنافسة قوية جداً! 👏\n\n` +
-        `🌟 *الرسالة التربوية اليومية:*\n` +
-        `"الفوز الحقيقي هو اجتماعنا على المعرفة والود. شكراً لكل من شارك وأضفى على جولتنا الفرح والبهجة!" ❤️\n\n` +
-        `دمتم عائلة متألقة دائماً! 🌿`;
+    function shareToWhatsApp() {
+      const quizUrl = window.location.href.split('?')[0];
+      const message = `🏆 *المسابقة الأسريّة التفاعلية* 🏆\n\nأهلاً بكم يا أغلى عائلة! شاركونا التنافس والمعرفة في جولة اليوم عبر الرابط التالي:\n👇\n${quizUrl}`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+    }
 
-      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(cardMessage)}`, '_blank');
+    function copyQuizLink() {
+      const quizUrl = window.location.href.split('?')[0];
+      navigator.clipboard.writeText(quizUrl).then(() => {
+        alert("تم نسخ رابط المسابقة بنجاح!");
+      });
     }
 
     function resetLocalData() {
-      if (confirm("هل تريد إعادة تفعيل خيار الإجابة للتجربة؟")) {
-        localStorage.removeItem("quiz_submission_result");
+      if (confirm("هل تريد إعادة فتح إمكانية الإجابة على هذا الجهاز للتجربة؟")) {
+        localStorage.removeItem("quiz_submitted_today");
         location.reload();
       }
     }
