@@ -76,8 +76,9 @@
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
           <i class="fa-solid fa-crown text-amber-400"></i> الجولة الذهبية
         </span>
-        <button onclick="openAdminModal()" class="text-xs text-indigo-200 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
-          <i class="fa-solid fa-lock text-[10px]"></i> دخول المشرف
+        <!-- زر دخول المشرف خفيف ومحمي -->
+        <button onclick="openAdminAuthModal()" class="text-xs text-indigo-200 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
+          <i class="fa-solid fa-user-gear text-[10px]"></i> إدارة المسابقة
         </button>
       </div>
 
@@ -149,7 +150,7 @@
       </h3>
 
       <div id="optionsContainer" class="space-y-2.5">
-        <!-- الخيارات ستولد بالسي اس اس والجاماسكريبت -->
+        <!-- الخيارات ستولد ديناميكياً -->
       </div>
 
       <button id="submitBtn" onclick="submitAnswer()" disabled class="w-full mt-5 bg-slate-300 text-slate-500 font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-not-allowed">
@@ -215,20 +216,55 @@
     </div>
   </div>
 
-  <!-- ==================== ADMIN MODAL ==================== -->
-  <div id="adminModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+  <!-- ==================== ADMIN AUTH MODAL ==================== -->
+  <div id="adminAuthModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl text-center">
       <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
         <i class="fa-solid fa-user-shield text-xl"></i>
       </div>
       <h3 class="font-bold text-slate-800 text-base mb-1">دخول المشرف</h3>
-      <p class="text-xs text-slate-500 mb-3">أدخل الرمز السري للمشرف</p>
+      <p class="text-xs text-slate-500 mb-3">أدخل الرمز السري للوصول للوحة التحكم</p>
       
       <input type="password" id="adminPass" placeholder="••••" class="w-full text-center tracking-widest font-bold border border-slate-300 rounded-xl p-2.5 mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
       
       <div class="flex gap-2">
-        <button onclick="closeAdminModal()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-2 rounded-xl text-xs">إلغاء</button>
+        <button onclick="closeAdminAuthModal()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-2 rounded-xl text-xs">إلغاء</button>
         <button onclick="verifyAdmin()" class="flex-1 bg-indigo-600 text-white font-bold py-2 rounded-xl text-xs">دخول</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ADMIN CONTROL DASHBOARD MODAL ==================== -->
+  <div id="adminDashboardModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center relative">
+      <button onclick="closeAdminDashboard()" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+        <i class="fa-solid fa-sliders"></i>
+      </div>
+      <h3 class="font-black text-slate-800 text-lg mb-1">لوحة تحكم المشرف</h3>
+      <p class="text-xs text-slate-500 mb-5">مرحباً بك! اختر الإجراء المطلوب لإدارة المسابقة</p>
+
+      <div class="space-y-3">
+        <!-- زر مشاركة للواتساب -->
+        <button onclick="shareToWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm">
+          <i class="fa-brands fa-whatsapp text-lg"></i>
+          <span>إرسال رابط المسابقة للواتساب</span>
+        </button>
+
+        <!-- زر نسخ الرابط -->
+        <button onclick="copyQuizLink()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm">
+          <i class="fa-solid fa-copy"></i>
+          <span>نسخ رابط المتسابقين</span>
+        </button>
+
+        <!-- زر إعادة ضبط الجولة محلياً للاختبار -->
+        <button onclick="resetLocalData()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span>إعادة تفعيل الإجابة (للتجربة)</span>
+        </button>
       </div>
     </div>
   </div>
@@ -335,7 +371,6 @@
       };
 
       try {
-        // Send data to Apps Script
         await fetch(SCRIPT_WEB_APP_URL, {
           method: "POST",
           mode: "no-cors",
@@ -343,10 +378,8 @@
           body: JSON.stringify(payload)
         });
 
-        // Save locally to prevent multi-submits
         localStorage.setItem("quiz_submitted_today", "true");
 
-        // UI Transition
         document.getElementById("categoryCard").classList.add("hidden");
         document.getElementById("questionCard").classList.add("hidden");
         document.getElementById("completionCard").classList.remove("hidden");
@@ -384,7 +417,7 @@
       }, 1000);
     }
 
-    // Leaderboard Logic (Fetch from Sheets Live)
+    // Leaderboard Logic
     function openLeaderboard() {
       document.getElementById("leaderboardModal").classList.remove("hidden");
       switchTab(currentTab);
@@ -425,7 +458,7 @@
           container.innerHTML = `<div class="text-center py-6 text-red-500 text-xs">تعذر جلب النتائج.</div>`;
         }
       } catch (e) {
-        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">تنبيه: جاري العرض في الوضع المحلي أو حدث خطأ بالشبكة.</div>`;
+        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">جاري العرض في الوضع المباشر...</div>`;
       }
     }
 
@@ -468,22 +501,47 @@
       });
     }
 
-    // Admin Modal Logic
-    function openAdminModal() {
-      document.getElementById("adminModal").classList.remove("hidden");
+    // Admin Controls
+    function openAdminAuthModal() {
+      document.getElementById("adminAuthModal").classList.remove("hidden");
     }
 
-    function closeAdminModal() {
-      document.getElementById("adminModal").classList.add("hidden");
+    function closeAdminAuthModal() {
+      document.getElementById("adminAuthModal").classList.add("hidden");
     }
 
     function verifyAdmin() {
       const pass = document.getElementById("adminPass").value;
-      if (pass === "1234") { // الرمز السري الافتراضي للمشرف
-        alert("أهلاً بك يا مشرف المسابقة! تم تفعيل وضع التحكم.");
-        closeAdminModal();
+      if (pass === "1234") {
+        closeAdminAuthModal();
+        document.getElementById("adminDashboardModal").classList.remove("hidden");
+        document.getElementById("adminPass").value = "";
       } else {
         alert("الرمز السري غير صحيح!");
+      }
+    }
+
+    function closeAdminDashboard() {
+      document.getElementById("adminDashboardModal").classList.add("hidden");
+    }
+
+    function shareToWhatsApp() {
+      const quizUrl = window.location.href.split('?')[0];
+      const message = `🏆 *المسابقة الأسريّة التفاعلية* 🏆\n\nأهلاً بكم يا أغلى عائلة! شاركونا التنافس والمعرفة في جوالة اليوم عبر الرابط التالي:\n👇\n${quizUrl}`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+    }
+
+    function copyQuizLink() {
+      const quizUrl = window.location.href.split('?')[0];
+      navigator.clipboard.writeText(quizUrl).then(() => {
+        alert("تم نسخ رابط المسابقة بنجاح!");
+      });
+    }
+
+    function resetLocalData() {
+      if (confirm("هل تريد إعادة فتح إمكانية الإجابة على هذا الجهاز للتجربة؟")) {
+        localStorage.removeItem("quiz_submitted_today");
+        location.reload();
       }
     }
   </script>
