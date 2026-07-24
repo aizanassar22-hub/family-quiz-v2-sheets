@@ -63,9 +63,9 @@
           <i class="fa-solid fa-crown text-amber-400"></i> الجولة الذهبية
         </span>
         
-        <!-- زر الإدارة: يظهر حصرياً للمشرف فقط عبر الرابط الخاص -->
-        <button id="adminAccessBtn" onclick="openAdminAuthModal()" class="hidden text-xs text-indigo-200 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
-          <i class="fa-solid fa-user-gear text-[10px]"></i> لوحة الإدارة
+        <!-- زر الإدارة: يظهر فقط إذا كان المستخدم هو المشرف -->
+        <button id="adminAccessBtn" onclick="openAdminDashboard()" class="hidden text-xs text-indigo-200 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
+          <i class="fa-solid fa-user-gear text-[10px]"></i> إدارة المسابقة
         </button>
       </div>
 
@@ -88,10 +88,10 @@
     </div>
   </header>
 
-  <!-- ==================== MAIN PARTICIPANT INTERFACE ==================== -->
+  <!-- ==================== MAIN INTERFACE ==================== -->
   <main class="max-w-md mx-auto px-4 -mt-6 relative z-20 w-full flex-1">
 
-    <!-- Step 1: Category Selection Card -->
+    <!-- Step 1: Category Selection Card (الظاهرة في الصورة A) -->
     <div id="categoryCard" class="glass-card rounded-2xl p-5 shadow-lg mb-4">
       <h2 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
         <i class="fa-solid fa-users text-indigo-600"></i> اختاري/اختر الفئة الخاصة بك:
@@ -137,7 +137,7 @@
       </h3>
 
       <div id="optionsContainer" class="space-y-2.5">
-        <!-- Options generated dynamically -->
+        <!-- الخيارات تتولد ديناميكياً -->
       </div>
 
       <button id="submitBtn" onclick="submitAnswer()" disabled class="w-full mt-5 bg-slate-300 text-slate-500 font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-not-allowed">
@@ -146,48 +146,27 @@
       </button>
     </div>
 
-    <!-- Step 3: Immediate Feedback & Completion Screen (Participant Only) -->
+    <!-- Step 3: Immediate Feedback Screen for Participant -->
     <div id="completionCard" class="glass-card rounded-2xl p-6 shadow-lg text-center hidden">
-      <div id="feedbackIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl">
-        <!-- Icon injected via JS -->
-      </div>
+      <div id="feedbackIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl"></div>
       <h3 id="feedbackTitle" class="text-lg font-black mb-1"></h3>
       <p id="feedbackText" class="text-xs text-slate-600 mb-4 leading-relaxed"></p>
       
       <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-500">
-        <i class="fa-solid fa-lock text-indigo-500 ml-1"></i>
-        تم حفظ مشاركتك بأمان. سيقوم المشرف بفرز نتائج الجميع ونشر البطاقة ختام الجولة!
+        <i class="fa-solid fa-shield-halved text-indigo-500 ml-1"></i>
+        تم تسجيل مشاركتك بنجاح. نتائلك محفوظة بخصوصية لدى المشرف!
       </div>
     </div>
 
   </main>
 
-  <!-- ==================== FOOTER (Participant/Admin dynamic) ==================== -->
-  <footer id="participantFooter" class="max-w-md mx-auto px-4 mt-4 w-full hidden">
-    <!-- حصرية للمشرف فقط لتصفح الترتيب المباشر -->
+  <!-- ==================== FOOTER (Leaderboard: Admin Only) ==================== -->
+  <footer id="adminFooter" class="max-w-md mx-auto px-4 mt-4 w-full hidden">
     <button onclick="openLeaderboard()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm">
       <i class="fa-solid fa-chart-line text-amber-400"></i>
-      <span>لوحة الترتيب والصدارة الحية (خاص بالمشرف)</span>
+      <span>لوحة الترتيب والصدارة الحية (خاص للمشرف)</span>
     </button>
   </footer>
-
-  <!-- ==================== ADMIN AUTH MODAL ==================== -->
-  <div id="adminAuthModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl text-center">
-      <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
-        <i class="fa-solid fa-user-shield text-xl"></i>
-      </div>
-      <h3 class="font-bold text-slate-800 text-base mb-1">دخول المشرف</h3>
-      <p class="text-xs text-slate-500 mb-3">أدخل الرمز السري للوصول للوحة التحكم</p>
-      
-      <input type="password" id="adminPass" placeholder="••••" class="w-full text-center tracking-widest font-bold border border-slate-300 rounded-xl p-2.5 mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-      
-      <div class="flex gap-2">
-        <button onclick="closeAdminAuthModal()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-2 rounded-xl text-xs">إلغاء</button>
-        <button onclick="verifyAdmin()" class="flex-1 bg-indigo-600 text-white font-bold py-2 rounded-xl text-xs">دخول</button>
-      </div>
-    </div>
-  </div>
 
   <!-- ==================== ADMIN CONTROL DASHBOARD MODAL ==================== -->
   <div id="adminDashboardModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
@@ -200,31 +179,31 @@
         <i class="fa-solid fa-sliders"></i>
       </div>
       <h3 class="font-black text-slate-800 text-lg mb-1">لوحة تحكم المشرف</h3>
-      <p class="text-xs text-slate-500 mb-4">إدارة وتوزيع نتائج المسابقة</p>
+      <p class="text-xs text-slate-500 mb-4">اختر الإجراء المطلوب لإدارة المسابقة</p>
 
       <div class="space-y-3">
         <!-- إرسال رابط المتسابقين للواتساب -->
-        <button onclick="shareParticipantLinkToWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
-          <i class="fa-brands fa-whatsapp text-base"></i>
-          <span>إرسال رابط المتسابقين إلى الواتساب</span>
+        <button onclick="shareParticipantLinkToWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+          <i class="fa-brands fa-whatsapp text-lg"></i>
+          <span>إرسال رابط المسابقة للواتساب (للمتسابقين)</span>
         </button>
 
-        <!-- مشاركة بطاقة النتيجة التربوية والأسرية -->
+        <!-- نسخ رابط المتسابقين -->
+        <button onclick="copyParticipantLink()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+          <i class="fa-solid fa-copy text-sm"></i>
+          <span>نسخ رابط المتسابقين</span>
+        </button>
+
+        <!-- نشر بطاقة النتائج التربوية -->
         <button onclick="shareFamilyResultCard()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
-          <i class="fa-solid fa-award text-base"></i>
-          <span>نشر بطاقة النتائج الأسرية المحفزة</span>
-        </button>
-
-        <!-- فتح لوحة النتائج المباشرة -->
-        <button onclick="closeAdminDashboard(); openLeaderboard();" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
-          <i class="fa-solid fa-trophy text-amber-400"></i>
-          <span>مراجعة نتائج وإحصائيات المشاركين</span>
+          <i class="fa-solid fa-award text-sm"></i>
+          <span>اعتماد ونشر بطاقة النتائج الأسرية</span>
         </button>
 
         <!-- إعادة التفعيل للتجربة -->
-        <button onclick="resetLocalData()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold py-2 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs">
+        <button onclick="resetLocalData()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs">
           <i class="fa-solid fa-rotate-right"></i>
-          <span>إعادة تفعيل الإجابة (للتجربة المحلية)</span>
+          <span>إعادة تفعيل الإجابة (للتجربة)</span>
         </button>
       </div>
     </div>
@@ -253,7 +232,7 @@
       </div>
 
       <div id="leaderboardContent" class="p-4 overflow-y-auto flex-1 space-y-2">
-        <div class="text-center py-8 text-slate-400 text-xs">جاري تحميل البيانات الحية...</div>
+        <div class="text-center py-8 text-slate-400 text-xs">جاري تحميل البيانات...</div>
       </div>
     </div>
   </div>
@@ -267,7 +246,7 @@
     let currentTab = "women";
     let questionTimerInterval = null;
     let questionTimeLeft = 60;
-    let isAdminMode = false;
+    let isPlayer = false;
 
     const sampleQuestion = {
       id: "q_001",
@@ -282,23 +261,31 @@
     };
 
     document.addEventListener("DOMContentLoaded", () => {
-      checkAdminPermission();
+      detectUserRole();
       startRoundTimer();
       checkPreviousSubmission();
     });
 
-    // Check if link contains admin query param (?mode=admin)
-    function checkAdminPermission() {
+    // Detect if user opened the link as a Player or as Admin
+    function detectUserRole() {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('mode') === 'admin') {
-        isAdminMode = true;
-        document.getElementById("adminAccessBtn").classList.remove("hidden");
-        document.getElementById("participantFooter").classList.remove("hidden");
-      } else {
-        isAdminMode = false;
+      if (urlParams.get('player') === 'true') {
+        // المتسابق: واجهة ناصعة نقية جداً كما في الصورة A
+        isPlayer = true;
         document.getElementById("adminAccessBtn").classList.add("hidden");
-        document.getElementById("participantFooter").classList.add("hidden");
+        document.getElementById("adminFooter").classList.add("hidden");
+      } else {
+        // المشرف: تظهر له لوحة التحكم والأزرار الكاملة
+        isPlayer = false;
+        document.getElementById("adminAccessBtn").classList.remove("hidden");
+        document.getElementById("adminFooter").classList.remove("hidden");
       }
+    }
+
+    function getParticipantLink() {
+      // يحول الرابط الحالي إلى رابط متسابق بإضافة ?player=true
+      const baseUrl = window.location.origin + window.location.pathname;
+      return `${baseUrl}?player=true`;
     }
 
     function checkPreviousSubmission() {
@@ -355,7 +342,7 @@
 
       const submitBtn = document.getElementById("submitBtn");
       submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري تسجيل إجابتك...</span>`;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري تسليم الإجابة...</span>`;
 
       const isCorrect = (selectedOption === sampleQuestion.correct);
       const points = isCorrect ? 10 : 0;
@@ -381,13 +368,12 @@
         clearInterval(questionTimerInterval);
 
       } catch (err) {
-        alert("حدث خطأ أثناء الاتصال بالخادم، يرجى المحاولة مرة أخرى.");
+        alert("حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى.");
         submitBtn.disabled = false;
         submitBtn.innerHTML = `<span>اعتماد الإجابة</span> <i class="fa-solid fa-paper-plane text-xs"></i>`;
       }
     }
 
-    // Display Feedback for Participant
     function showFeedbackScreen(isCorrect) {
       document.getElementById("categoryCard").classList.add("hidden");
       document.getElementById("questionCard").classList.add("hidden");
@@ -402,13 +388,13 @@
         iconDiv.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
         title.innerText = "إجابة صحيحة ورائعة! 🎉✨";
         title.className = "text-lg font-black text-emerald-700 mb-1";
-        text.innerText = "أحسنتِ/أحسنت! إجابتك دقيقة، وتم حفظ النقاط بنجاح لصالح فريقك.";
+        text.innerText = "أحسنتِ/أحسنت! الإجابة صحيحة وتم إضافة النقاط بنجاح.";
       } else {
         iconDiv.className = "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl bg-amber-100 text-amber-600 border-2 border-amber-300";
         iconDiv.innerHTML = `<i class="fa-solid fa-star-half-stroke"></i>`;
         title.innerText = "محاولة طيبة ومثمرة! 👏🌟";
         title.className = "text-lg font-black text-amber-700 mb-1";
-        text.innerText = "شكراً لمشاركتك الشجاعة! المعرفة هي الكسب الحقيقي، وتم تسجيل المشاركة بنجاح.";
+        text.innerText = "شكراً لمشاركتك الجميلة! المعرفة هي الفوز الحقيقي دائماً.";
       }
 
       completionCard.classList.remove("hidden");
@@ -437,7 +423,7 @@
       }, 1000);
     }
 
-    // Leaderboard
+    // Leaderboard Functions
     function openLeaderboard() {
       document.getElementById("leaderboardModal").classList.remove("hidden");
       switchTab(currentTab);
@@ -465,7 +451,7 @@
 
     async function fetchLeaderboardData() {
       const container = document.getElementById("leaderboardContent");
-      container.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs"><i class="fa-solid fa-spinner fa-spin text-lg mb-2"></i><br>جاري جلب نتائج الفريقين...</div>`;
+      container.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs"><i class="fa-solid fa-spinner fa-spin text-lg mb-2"></i><br>جاري جلب النتائج...</div>`;
 
       try {
         const res = await fetch(SCRIPT_WEB_APP_URL);
@@ -475,10 +461,10 @@
           const filtered = json.data.filter(item => item.type === currentTab);
           renderLeaderboardList(filtered);
         } else {
-          container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">لا توجد نتائج مسجلة بعد.</div>`;
+          container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">لا توجد نتائج مسجلة حتى الآن.</div>`;
         }
       } catch (e) {
-        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">البيانات متاحة في وضع العرض المباشر.</div>`;
+        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">البيانات الحية غير متوفرة حالياً.</div>`;
       }
     }
 
@@ -487,7 +473,7 @@
       container.innerHTML = "";
 
       if (list.length === 0) {
-        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">لا توجد مشاركات لهذه الفئة حتى الآن.</div>`;
+        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">لا توجد مشاركات لهذه الفئة بعد.</div>`;
         return;
       }
 
@@ -505,36 +491,25 @@
       });
     }
 
-    // Admin Modals
-    function openAdminAuthModal() {
-      document.getElementById("adminAuthModal").classList.remove("hidden");
-    }
-
-    function closeAdminAuthModal() {
-      document.getElementById("adminAuthModal").classList.add("hidden");
-    }
-
-    function verifyAdmin() {
-      const pass = document.getElementById("adminPass").value;
-      if (pass === "1234") {
-        closeAdminAuthModal();
-        document.getElementById("adminDashboardModal").classList.remove("hidden");
-        document.getElementById("adminPass").value = "";
-      } else {
-        alert("الرمز السري غير صحيح!");
-      }
+    // Admin Modal Actions
+    function openAdminDashboard() {
+      document.getElementById("adminDashboardModal").classList.remove("hidden");
     }
 
     function closeAdminDashboard() {
       document.getElementById("adminDashboardModal").classList.add("hidden");
     }
 
-    // WhatsApp Sharing Actions
     function shareParticipantLinkToWhatsApp() {
-      // الرابط النقي للمتسابقين خالٍ تماماً من وسوم الإدارة
-      const cleanUrl = window.location.origin + window.location.pathname;
-      const message = `🏆 *المسابقة الأسريّة التفاعلية* 🏆\n\nأهلاً بأغلى عائلة! 🎉\nتم فتح باب التنافس لجولة اليوم، شاركونا حماسكم وإجاباتكم عبر الرابط التالي:\n👇\n${cleanUrl}`;
+      const playerUrl = getParticipantLink();
+      const message = `🏆 *المسابقة الأسريّة التفاعلية* 🏆\n\nأهلاً بأغلى عائلة! 🎉\nتم فتح باب المنافسة لجولة اليوم، شاركونا حماسكم عبر الرابط المباشر الآتي:\n👇\n${playerUrl}`;
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+    }
+
+    function copyParticipantLink() {
+      const playerUrl = getParticipantLink();
+      navigator.clipboard.writeText(playerUrl);
+      alert("تم نسخ رابط المتسابقين بنجاح! يمكنك الآن لصقه وإرساله لأي متسابق.");
     }
 
     function shareFamilyResultCard() {
@@ -549,7 +524,7 @@
     }
 
     function resetLocalData() {
-      if (confirm("هل تريد إعادة فتح إمكانية الإجابة على هذا الجهاز للتجربة؟")) {
+      if (confirm("هل تريد إعادة تفعيل خيار الإجابة للتجربة؟")) {
         localStorage.removeItem("quiz_submission_result");
         location.reload();
       }
