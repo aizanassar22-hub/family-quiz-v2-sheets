@@ -52,18 +52,19 @@
   <header class="gradient-header text-white pt-6 pb-10 px-4 rounded-b-[2.5rem] shadow-xl relative overflow-hidden">
     <div class="max-w-md mx-auto relative z-10">
       
-      <!-- زر المشرف السرّي (يظهر فقط إذا كان في وضع المشرف أو عبر الضغط السريع) -->
       <div class="flex items-center justify-between mb-3">
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
           <i class="fa-solid fa-crown text-amber-400"></i> الجولة الذهبية (10 أسئلة)
         </span>
         
-        <button id="adminAccessBtn" onclick="openAdminAuthModal()" class="text-xs text-indigo-200/80 hover:text-white bg-white/10 px-2.5 py-1 rounded-lg transition-all flex items-center gap-1">
+        <!-- زر المشرف مخفي افتراضياً ولن يراه المتسابق -->
+        <button id="adminAccessBtn" onclick="openAdminAuthModal()" class="hidden text-xs text-indigo-200/80 hover:text-white bg-white/10 px-2.5 py-1 rounded-lg transition-all items-center gap-1">
           <i class="fa-solid fa-lock text-[10px]"></i> إدارة
         </button>
       </div>
 
-      <h1 class="text-2xl font-black text-center mb-1 text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-amber-100">
+      <!-- العنوان: النقر السريع 3 مرات عليه يفتح لوحة المشرف مخفية -->
+      <h1 id="mainTitle" onclick="handleSecretClick()" class="text-2xl font-black text-center mb-1 text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-amber-100 select-none cursor-pointer">
         المسابقة الأسريّة التفاعلية
       </h1>
       <p class="text-center text-xs text-indigo-200 font-semibold">تنافس، حماس، ومعرفة تجمع العائلة</p>
@@ -140,7 +141,7 @@
       </button>
     </div>
 
-    <!-- Result Feedback Screen (إبراز صحة/خطأ الإجابة فوراً للمتسابق) -->
+    <!-- Result Feedback Screen -->
     <div id="feedbackCard" class="glass-card rounded-2xl p-6 shadow-lg text-center hidden">
       <div id="feedbackIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"></div>
       <h3 id="feedbackTitle" class="text-lg font-black mb-1"></h3>
@@ -246,7 +247,6 @@
           </div>
         </div>
 
-        <!-- معيار الفائز والسرعة الزمنية عند التعادل -->
         <div id="teamStatusBanner" class="p-3 rounded-xl text-center font-bold text-xs bg-amber-50 text-amber-800 border border-amber-200">
           جاري حساب النتيجة والتوقيت الأسرع...
         </div>
@@ -290,6 +290,7 @@
     let currentQuestionIndex = 0;
     let earliestWomenTime = null;
     let earliestMenTime = null;
+    let secretClickCount = 0;
 
     const quizQuestions = [
       { id: "q_01", text: "1. ما هي السورة التي تسمى بعروس القرآن الكريم؟", options: [{ id: "a", text: "سورة الرحمن" }, { id: "b", text: "سورة يس" }, { id: "c", text: "سورة الواقعة" }, { id: "d", text: "سورة الملك" }], correct: "a" },
@@ -307,7 +308,24 @@
     document.addEventListener("DOMContentLoaded", () => {
       startRoundTimer();
       checkPreviousSubmission();
+
+      // التحقق هل يحتوي الرابط على ?admin لإظهار زر الإدارة لك
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('admin')) {
+        const btn = document.getElementById("adminAccessBtn");
+        btn.classList.remove("hidden");
+        btn.classList.add("flex");
+      }
     });
+
+    // طريقة نقر خفية للمشرف في حال عدم كتابة ?admin
+    function handleSecretClick() {
+      secretClickCount++;
+      if (secretClickCount >= 3) {
+        secretClickCount = 0;
+        openAdminAuthModal();
+      }
+    }
 
     function checkPreviousSubmission() {
       const savedIndex = localStorage.getItem("quiz_current_index");
@@ -362,7 +380,6 @@
       submitBtn.className = "w-full mt-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer";
     }
 
-    // إرسال الإجابة بسرعة وبدون أي تعليق في الواجهة
     function submitAnswer() {
       if (!selectedCategory || !selectedOption) return;
 
@@ -372,10 +389,8 @@
       const isCorrect = (selectedOption === q.correct);
       const points = isCorrect ? 10 : 0;
 
-      // إظهار النتيجة للمتسابق فوراً وبشكل فوري
       showFeedbackScreen(isCorrect, points);
 
-      // إرسال البيانات للخادم في الخلفية (Asynchronous Background Request)
       const payload = {
         quiz_id: q.id,
         category: selectedCategory,
@@ -390,7 +405,7 @@
         mode: "no-cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
-      }).catch(err => console.log("Background Sync Saved"));
+      }).catch(err => console.log("Saved in background"));
     }
 
     function showFeedbackScreen(isCorrect, points) {
@@ -572,7 +587,6 @@
         statusBanner.className = "p-3 rounded-xl text-center font-bold text-xs bg-slate-100 text-slate-600 border border-slate-200";
         statusBanner.innerHTML = "العدادات صفرية، ابدأ المسابقة الآن!";
       } else {
-        // حالة التعادل - تحديد الأسرع زمنياً
         let fasterMsg = "";
         if (earliestWomenTime && earliestMenTime) {
           fasterMsg = earliestWomenTime < earliestMenTime 
@@ -589,7 +603,6 @@
       document.getElementById("adminDashboardModal").classList.remove("hidden");
     }
 
-    // بطاقة الكشف المغلقة بدون روابط
     function shareCardReportToWhatsApp() {
       const womenPts = document.getElementById("totalWomenPoints").innerText;
       const menPts = document.getElementById("totalMenPoints").innerText;
@@ -617,7 +630,6 @@
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(cardMessage)}`, '_blank');
     }
 
-    // إرسال رابط نظيف ومغلق للمتسابقين فقط
     function shareCleanParticipantLink() {
       const cleanUrl = window.location.href.split('?')[0];
       const message = `🏆 *المسابقة الأسريّة التفاعلية* 🏆\n\nأهلاً بكم يا أغلى عائلة! شاركونا التنافس والمعرفة في جولة اليوم عبر الرابط التالي:\n👇\n${cleanUrl}`;
