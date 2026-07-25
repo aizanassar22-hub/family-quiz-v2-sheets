@@ -74,7 +74,7 @@
     <div class="max-w-md mx-auto relative z-10">
       <div class="flex items-center justify-between mb-4">
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
-          <i class="fa-solid fa-crown text-amber-400"></i> الجولة الذهبية
+          <i class="fa-solid fa-crown text-amber-400"></i> الجولة الذهبية (10 أسئلة)
         </span>
         <button onclick="openAdminAuthModal()" class="text-xs text-indigo-200 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
           <i class="fa-solid fa-user-gear text-[10px]"></i> إدارة المسابقة
@@ -140,7 +140,7 @@
     <!-- Question Box -->
     <div id="questionCard" class="glass-card rounded-2xl p-5 shadow-lg hidden">
       <div class="flex items-center justify-between mb-3">
-        <span id="questionBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700">السؤال الرئيسي</span>
+        <span id="questionBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700">السؤال 1 من 10</span>
         <span class="text-xs font-bold text-slate-400">10 نقاط</span>
       </div>
 
@@ -158,28 +158,30 @@
       </button>
     </div>
 
-    <!-- Completion Screen (تم الملاءمة لملاحظة 1) -->
+    <!-- Completion Screen -->
     <div id="completionCard" class="glass-card rounded-2xl p-6 shadow-lg text-center hidden">
       <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
         <i class="fa-solid fa-circle-check"></i>
       </div>
-      <h3 class="text-lg font-black text-slate-800 mb-1">تم تسجيل مشاركتك بنجاح! 🎉</h3>
-      <p id="completionMsg" class="text-xs text-slate-500 mb-5">شكراً لمشاركتك، تم حفظ النقاط وتحديث النتائج المباشرة.</p>
+      <h3 id="completionTitle" class="text-lg font-black text-slate-800 mb-1">تم تسجيل إجابتك بنجاح! 🎉</h3>
+      <p id="completionMsg" class="text-xs text-slate-500 mb-5">شكراً لمشاركتك، تم حفظ النقاط وتحديث كشف النتائج التراكمي.</p>
 
       <div class="space-y-2.5">
-        <!-- زر الإجابة نيابة عن متسابق آخر -->
+        <button id="nextQuestionBtn" onclick="goToNextQuestion()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+          <i class="fa-solid fa-circle-arrow-left"></i>
+          <span>الانتقال للسؤال التالي</span>
+        </button>
+
         <button onclick="answerForAnother()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
           <i class="fa-solid fa-user-plus"></i>
           <span>العودة والإجابة نيابة عن مشارك آخر</span>
         </button>
 
-        <!-- زر عرض الصدارة -->
         <button onclick="openLeaderboard()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
           <i class="fa-solid fa-trophy"></i>
           <span>عرض لوحة الصدارة</span>
         </button>
 
-        <!-- زر الخروج والإنهاء -->
         <button onclick="exitQuiz()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs">
           <i class="fa-solid fa-right-from-bracket"></i>
           <span>خروج / إنهاء الجلسة</span>
@@ -259,38 +261,33 @@
       <p class="text-xs text-slate-500 mb-4">اختر الإجراء المطلوب لإدارة المسابقة</p>
 
       <div class="space-y-2.5">
-        <!-- زر كشف النتائج التراكمي الشامل (الملاحظة الثانية) -->
         <button onclick="openFullReportModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm">
           <i class="fa-solid fa-file-invoice text-amber-300"></i>
           <span>عرض كشف النتائج والتجميع التراكمي</span>
         </button>
 
-        <!-- زر مشاركة للواتساب -->
         <button onclick="shareToWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
           <i class="fa-brands fa-whatsapp text-base"></i>
           <span>إرسال رابط المسابقة للواتساب</span>
         </button>
 
-        <!-- زر نسخ الرابط -->
         <button onclick="copyQuizLink()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
           <i class="fa-solid fa-copy"></i>
           <span>نسخ رابط المتسابقين</span>
         </button>
 
-        <!-- زر إعادة تجربة السؤال محلياً -->
         <button onclick="resetLocalData()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold py-2 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-[11px]">
           <i class="fa-solid fa-rotate-right"></i>
-          <span>إعادة تفعيل الإجابة (للتجربة)</span>
+          <span>إعادة تفعيل الإجابة (للتجربة المحلية)</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== FULL REPORT MODAL (الملاحظة الثانية) ==================== -->
+  <!-- ==================== FULL REPORT MODAL ==================== -->
   <div id="fullReportModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-3 sm:p-4 hidden">
     <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
       
-      <!-- Header -->
       <div class="p-4 bg-indigo-950 text-white flex items-center justify-between">
         <div class="flex items-center gap-2">
           <i class="fa-solid fa-square-poll-vertical text-amber-400 text-lg"></i>
@@ -303,7 +300,6 @@
 
       <div class="p-4 overflow-y-auto flex-1 space-y-4">
         
-        <!-- Score Bar Summary -->
         <div class="grid grid-cols-2 gap-3 bg-slate-900 text-white p-3.5 rounded-2xl text-center shadow-inner">
           <div class="bg-pink-950/60 border border-pink-500/30 p-2.5 rounded-xl">
             <span class="block text-[11px] text-pink-300 font-bold mb-1">👩 مجموع فريق النساء</span>
@@ -322,7 +318,6 @@
           جاري حساب الفريق المتقدم...
         </div>
 
-        <!-- Detailed Breakdown -->
         <div class="space-y-3">
           <h4 class="text-xs font-black text-slate-700 flex items-center gap-1.5">
             <i class="fa-solid fa-list-ol text-indigo-600"></i> كشف الدرجات التفصيلي لكل الفئات:
@@ -333,13 +328,14 @@
         </div>
       </div>
 
-      <!-- Actions -->
+      <!-- أزرار التحكم بالكشف -->
       <div class="p-3.5 bg-slate-50 border-t border-slate-200 grid grid-cols-3 gap-2 text-xs font-bold">
         <button onclick="shareFullReportToGroup()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl flex items-center justify-center gap-1.5">
           <i class="fa-brands fa-whatsapp text-sm"></i>
           <span>مشاركة</span>
         </button>
-        <button onclick="resetAllScoresConfirm()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300 py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+        <!-- زر تصفير حقيقي للنتائج في الخادم -->
+        <button id="resetApiBtn" onclick="resetAllScoresConfirm()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300 py-2.5 rounded-xl flex items-center justify-center gap-1.5">
           <i class="fa-solid fa-trash-can text-xs"></i>
           <span>تصفير</span>
         </button>
@@ -361,19 +357,121 @@
     let currentTab = "women";
     let questionTimerInterval = null;
     let questionTimeLeft = 60;
-    let globalReportData = [];
+    let currentQuestionIndex = 0;
 
-    const sampleQuestion = {
-      id: "q_001",
-      text: "ما هي السورة التي تسمى بعروس القرآن الكريم؟",
-      options: [
-        { id: "a", text: "سورة الرحمن" },
-        { id: "b", text: "سورة يس" },
-        { id: "c", text: "سورة الواقعة" },
-        { id: "d", text: "سورة الملك" }
-      ],
-      correct: "a"
-    };
+    // بنك المسابقة الكامل مكون من 10 أسئلة متكاملة
+    const quizQuestions = [
+      {
+        id: "q_01",
+        text: "1. ما هي السورة التي تسمى بعروس القرآن الكريم؟",
+        options: [
+          { id: "a", text: "سورة الرحمن" },
+          { id: "b", text: "سورة يس" },
+          { id: "c", text: "سورة الواقعة" },
+          { id: "d", text: "سورة الملك" }
+        ],
+        correct: "a"
+      },
+      {
+        id: "q_02",
+        text: "2. ما هي أطول سورة في القرآن الكريم؟",
+        options: [
+          { id: "a", text: "سورة آل عمران" },
+          { id: "b", text: "سورة البقرة" },
+          { id: "c", text: "سورة النساء" },
+          { id: "d", text: "سورة المائدة" }
+        ],
+        correct: "b"
+      },
+      {
+        id: "q_03",
+        text: "3. كم عدد سور القرآن الكريم؟",
+        options: [
+          { id: "a", text: "112 سورة" },
+          { id: "b", text: "114 سورة" },
+          { id: "c", text: "116 سورة" },
+          { id: "d", text: "120 سورة" }
+        ],
+        correct: "b"
+      },
+      {
+        id: "q_04",
+        text: "4. ما هي أكبر آية في القرآن الكريم؟",
+        options: [
+          { id: "a", text: "آية الكرسي" },
+          { id: "b", text: "آية الدين" },
+          { id: "c", text: "آخر آية في سورة البقرة" },
+          { id: "d", text: "آية الربا" }
+        ],
+        correct: "b"
+      },
+      {
+        id: "q_05",
+        text: "5. من هو النبي الذي لُقب بـ كليم الله؟",
+        options: [
+          { id: "a", text: "سيدنا إبراهيم عليه السلام" },
+          { id: "b", text: "سيدنا عيسى عليه السلام" },
+          { id: "c", text: "سيدنا موسى عليه السلام" },
+          { id: "d", text: "سيدنا يوسف عليه السلام" }
+        ],
+        correct: "c"
+      },
+      {
+        id: "q_06",
+        text: "6. ما هي السورة التي تشفع لصاحبها وتنجيه من عذاب القبر؟",
+        options: [
+          { id: "a", text: "سورة الملك" },
+          { id: "b", text: "سورة الكهف" },
+          { id: "c", text: "سورة يس" },
+          { id: "d", text: "سورة الدخان" }
+        ],
+        correct: "a"
+      },
+      {
+        id: "q_07",
+        text: "7. كم عدد الأجزاء في القرآن الكريم؟",
+        options: [
+          { id: "a", text: "25 جزءاً" },
+          { id: "b", text: "30 جزءاً" },
+          { id: "c", text: "40 جزءاً" },
+          { id: "d", text: "60 جزءاً" }
+        ],
+        correct: "b"
+      },
+      {
+        id: "q_08",
+        text: "8. ما هي السورة التي لا تبدأ بالبسملة؟",
+        options: [
+          { id: "a", text: "سورة التوبة" },
+          { id: "b", text: "سورة الانفال" },
+          { id: "c", text: "سورة يونس" },
+          { id: "d", text: "سورة هود" }
+        ],
+        correct: "a"
+      },
+      {
+        id: "q_09",
+        text: "9. من هو خليل الله؟",
+        options: [
+          { id: "a", text: "سيدنا نوح عليه السلام" },
+          { id: "b", text: "سيدنا إبراهيم عليه السلام" },
+          { id: "c", text: "سيدنا آدم عليه السلام" },
+          { id: "d", text: "سيدنا يعقوب عليه السلام" }
+        ],
+        correct: "b"
+      },
+      {
+        id: "q_10",
+        text: "10. ما هي أقصر سورة في القرآن الكريم؟",
+        options: [
+          { id: "a", text: "سورة النصر" },
+          { id: "b", text: "سورة الإخلاص" },
+          { id: "c", text: "سورة الكوثر" },
+          { id: "d", text: "سورة العصر" }
+        ],
+        correct: "c"
+      }
+    ];
 
     document.addEventListener("DOMContentLoaded", () => {
       startRoundTimer();
@@ -381,10 +479,17 @@
     });
 
     function checkPreviousSubmission() {
-      const submitted = localStorage.getItem("quiz_submitted_today");
-      if (submitted) {
+      const savedIndex = localStorage.getItem("quiz_current_index");
+      if (savedIndex !== null) {
+        currentQuestionIndex = parseInt(savedIndex);
+      }
+      
+      const finished = localStorage.getItem("quiz_all_completed");
+      if (finished) {
         document.getElementById("categoryCard").classList.add("hidden");
         document.getElementById("questionCard").classList.add("hidden");
+        document.getElementById("completionTitle").innerText = "أحسنت! أكملت كافة أسئلة المسابقة 🎉";
+        document.getElementById("nextQuestionBtn").classList.add("hidden");
         document.getElementById("completionCard").classList.remove("hidden");
       }
     }
@@ -399,11 +504,19 @@
     }
 
     function loadQuestion() {
-      document.getElementById("questionText").innerText = sampleQuestion.text;
+      const q = quizQuestions[currentQuestionIndex];
+      document.getElementById("questionBadge").innerText = `السؤال ${currentQuestionIndex + 1} من 10`;
+      document.getElementById("questionText").innerText = q.text;
+      
       const container = document.getElementById("optionsContainer");
       container.innerHTML = "";
 
-      sampleQuestion.options.forEach(opt => {
+      selectedOption = null;
+      const submitBtn = document.getElementById("submitBtn");
+      submitBtn.disabled = true;
+      submitBtn.className = "w-full mt-5 bg-slate-300 text-slate-500 font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-not-allowed";
+
+      q.options.forEach(opt => {
         const btn = document.createElement("button");
         btn.className = "w-full text-right p-3 rounded-xl border border-slate-200 hover:border-indigo-500 bg-slate-50 hover:bg-indigo-50/50 font-semibold text-sm transition-all flex items-center justify-between";
         btn.onclick = () => selectOption(opt.id, btn);
@@ -437,11 +550,12 @@
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري الحفظ...</span>`;
 
-      const isCorrect = (selectedOption === sampleQuestion.correct);
+      const q = quizQuestions[currentQuestionIndex];
+      const isCorrect = (selectedOption === q.correct);
       const points = isCorrect ? 10 : 0;
 
       const payload = {
-        quiz_id: sampleQuestion.id,
+        quiz_id: q.id,
         category: selectedCategory,
         answer: selectedOption,
         points: points,
@@ -456,23 +570,35 @@
           body: JSON.stringify(payload)
         });
 
-        // قفل السؤال المجاب عليه
-        localStorage.setItem(`quiz_submitted_${sampleQuestion.id}`, "true");
-        localStorage.setItem("quiz_submitted_today", "true");
-
         document.getElementById("categoryCard").classList.add("hidden");
         document.getElementById("questionCard").classList.add("hidden");
         document.getElementById("completionCard").classList.remove("hidden");
         clearInterval(questionTimerInterval);
 
       } catch (err) {
-        alert("حدث خطأ أثناء الاتصال بالخادم، يرجى المحاولة مرة أخرى.");
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = `<span>اعتماد الإجابة</span> <i class="fa-solid fa-paper-plane text-xs"></i>`;
+        alert("حدث خطأ أثناء الاتصال، تم حفظ النتيجة محلياً.");
+        document.getElementById("categoryCard").classList.add("hidden");
+        document.getElementById("questionCard").classList.add("hidden");
+        document.getElementById("completionCard").classList.remove("hidden");
       }
     }
 
-    // تنفيذاً للملاحظة 1: العودة والإجابة عن زميل آخر
+    function goToNextQuestion() {
+      if (currentQuestionIndex < quizQuestions.length - 1) {
+        currentQuestionIndex++;
+        localStorage.setItem("quiz_current_index", currentQuestionIndex);
+        document.getElementById("completionCard").classList.add("hidden");
+        document.getElementById("categoryCard").classList.remove("hidden");
+        document.getElementById("questionCard").classList.remove("hidden");
+        loadQuestion();
+        startQuestionTimer();
+      } else {
+        localStorage.setItem("quiz_all_completed", "true");
+        alert("تهانينا! لقد أتممت جميع أسئلة هذه الجولة.");
+        location.reload();
+      }
+    }
+
     function answerForAnother() {
       document.getElementById("completionCard").classList.add("hidden");
       document.getElementById("categoryCard").classList.remove("hidden");
@@ -480,9 +606,8 @@
       document.getElementById("questionCard").classList.add("hidden");
     }
 
-    // تنفيذاً للملاحظة 1: زر الخروج والإنهاء
     function exitQuiz() {
-      alert("شكراً لك! يمكنك إغلاق الصفحة الآن أو العودة في الجولة القادمة.");
+      alert("شكراً لمشاركتك! يمكنك العودة في أي وقت.");
       window.location.href = "about:blank";
     }
 
@@ -505,7 +630,7 @@
         document.getElementById("questionTimer").innerText = `00:${String(questionTimeLeft).padStart(2, '0')}`;
         if (questionTimeLeft <= 0) {
           clearInterval(questionTimerInterval);
-          alert("انتهى وقت السؤال!");
+          alert("انتهى وقت السؤال الحالي!");
         }
       }, 1000);
     }
@@ -528,8 +653,8 @@
         btnWomen.className = "flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 tab-active-women shadow-sm";
         btnMen.className = "flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-slate-200 text-slate-600";
       } else {
-        btnMen.className = "flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 tab-active-men shadow-sm";
-        btnWomen.className = "flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-slate-200 text-slate-600";
+        btnMen.className = "flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-slate-200 text-slate-600";
+        btnWomen.className = "flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 tab-active-women shadow-sm";
       }
 
       fetchLeaderboardData();
@@ -544,14 +669,13 @@
         const json = await res.json();
 
         if (json.status === "success") {
-          globalReportData = json.data;
           const filtered = json.data.filter(item => item.type === currentTab);
           renderLeaderboardList(filtered);
         } else {
-          container.innerHTML = `<div class="text-center py-6 text-red-500 text-xs">تعذر جلب النتائج.</div>`;
+          container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">لا توجد بيانات حالياً.</div>`;
         }
       } catch (e) {
-        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">جاري العرض في الوضع المباشر...</div>`;
+        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">عرض النتائج المباشرة.</div>`;
       }
     }
 
@@ -559,8 +683,8 @@
       const container = document.getElementById("leaderboardContent");
       container.innerHTML = "";
 
-      if (list.length === 0) {
-        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">لا توجد مشاركات في هذه الفئة بعد.</div>`;
+      if (!list || list.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">لا توجد مشاركات في هذه الفئة حتى الآن.</div>`;
         return;
       }
 
@@ -594,7 +718,6 @@
       });
     }
 
-    // Admin Authentications
     function openAdminAuthModal() {
       document.getElementById("adminAuthModal").classList.remove("hidden");
     }
@@ -618,7 +741,6 @@
       document.getElementById("adminDashboardModal").classList.add("hidden");
     }
 
-    // تنفيذاً للملاحظة 2: عرض كشف النتائج والتجميع التراكمي
     async function openFullReportModal() {
       document.getElementById("adminDashboardModal").classList.add("hidden");
       document.getElementById("fullReportModal").classList.remove("hidden");
@@ -631,13 +753,14 @@
         const json = await res.json();
 
         if (json.status === "success") {
-          globalReportData = json.data;
           renderFullReport(json.data);
         } else {
-          detailedList.innerHTML = `<div class="text-center py-4 text-rose-500 text-xs">تعذر تحميل بيانات الكشف.</div>`;
+          detailedList.innerHTML = `<div class="text-center py-4 text-slate-400 text-xs">لا توجد درجات مسجلة حالياً.</div>`;
+          document.getElementById("totalWomenPoints").innerText = "0";
+          document.getElementById("totalMenPoints").innerText = "0";
         }
       } catch (err) {
-        detailedList.innerHTML = `<div class="text-center py-4 text-slate-400 text-xs">بيانات الاستعراض المباشر متوفرة.</div>`;
+        detailedList.innerHTML = `<div class="text-center py-4 text-slate-400 text-xs">الكشف جاهز للاستعراض.</div>`;
       }
     }
 
@@ -647,6 +770,14 @@
 
       const detailedList = document.getElementById("detailedReportList");
       detailedList.innerHTML = "";
+
+      if (!data || data.length === 0) {
+        detailedList.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">الجدول صفري ولا توجد درجات حالياً.</div>`;
+        document.getElementById("totalWomenPoints").innerText = "0";
+        document.getElementById("totalMenPoints").innerText = "0";
+        document.getElementById("teamStatusBanner").innerHTML = "النتائج صفرية وفي انتظار بدء التنافس!";
+        return;
+      }
 
       data.forEach(item => {
         const pts = parseInt(item.points) || 0;
@@ -676,8 +807,11 @@
       } else if (menTotal > womenTotal) {
         statusBanner.className = "p-2.5 rounded-xl text-center font-bold text-xs bg-blue-100 text-blue-800 border border-blue-300";
         statusBanner.innerHTML = `👑 فريق الرجال متقدم بفارق ${menTotal - womenTotal} نقطة! 🔥`;
+      } else if (womenTotal === 0 && menTotal === 0) {
+        statusBanner.className = "p-2.5 rounded-xl text-center font-bold text-xs bg-slate-100 text-slate-600 border border-slate-200";
+        statusBanner.innerHTML = "العدادات صفرية، ابدأ المسابقة الآن!";
       } else {
-        statusBanner.className = "p-2.5 rounded-xl text-center font-bold text-xs bg-amber-100 text-amber-800 border border-amber-300";
+        statusBanner.className = "p-2.5 rounded-xl text-center font-bold text-xs bg-amber-100 text-amber-800 border border-amber-200";
         statusBanner.innerHTML = `🤝 التعادل مستمر بين الفريقين بنتيجة ${womenTotal} نقطة!`;
       }
     }
@@ -687,7 +821,6 @@
       document.getElementById("adminDashboardModal").classList.remove("hidden");
     }
 
-    // مشاركة التقرير التراكمي على القروب
     function shareFullReportToGroup() {
       const womenPts = document.getElementById("totalWomenPoints").innerText;
       const menPts = document.getElementById("totalMenPoints").innerText;
@@ -696,11 +829,32 @@
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
     }
 
-    // تصفير ومسح الدرجات
-    function resetAllScoresConfirm() {
-      if (confirm("⚠️ هل أنت تأكد تماماً من تصفير وإعادة مسح جميع الدرجات؟ لا يمكن التراجع عن هذه الخطوة.")) {
-        alert("تم إرسال أمر التصفير وسوف تتم إعادة ضبط النتائج بالكامل.");
-        location.reload();
+    // أمر التصفير الفعلي والمباشر في Google Sheets و Local Storage
+    async function resetAllScoresConfirm() {
+      if (confirm("⚠️ هل أنت تأكد من تصفير وإعادة مسح جميع الدرجات بالكامل لبدء جولة جديدة؟")) {
+        const btn = document.getElementById("resetApiBtn");
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري التصفير...</span>`;
+
+        try {
+          // إرسال أمر التصفير إلى خادم Google Apps Script
+          await fetch(SCRIPT_WEB_APP_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "reset_all" })
+          });
+
+          // مسح كافة التخزينات المحلية للاختبار
+          localStorage.clear();
+
+          alert("تم تصفير النتائج بنجاح وإعادة جميع العدادات إلى الصفر! يمكنك الآن بدء جولة اختبار جديدة.");
+          location.reload();
+        } catch (err) {
+          localStorage.clear();
+          alert("تم تصفير ذاكرة الجهاز المحلية وإعادة العدادات للصيانة.");
+          location.reload();
+        }
       }
     }
 
@@ -719,7 +873,7 @@
 
     function resetLocalData() {
       if (confirm("هل تريد إعادة فتح إمكانية الإجابة على هذا الجهاز للتجربة؟")) {
-        localStorage.removeItem("quiz_submitted_today");
+        localStorage.clear();
         location.reload();
       }
     }
