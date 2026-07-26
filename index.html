@@ -226,7 +226,7 @@
 
       <!-- Buttons Section -->
       <div class="space-y-2.5">
-        <!-- الزر الجديد: عرض ومشاركة لوحة الصدارة والتفاصيل (في المكان المضلل تماماً) -->
+        <!-- الزر: عرض ومشاركة لوحة الصدارة والتفاصيل -->
         <button onclick="openLeaderboardModal()" class="w-full bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
           <i class="fa-solid fa-trophy text-amber-300 text-sm"></i>
           <span>عرض ومشاركة لوحة الصدارة والتفاصيل</span>
@@ -752,6 +752,7 @@
       document.getElementById("adminDashboardModal").classList.add("hidden");
     }
 
+    // ================= ADMIN MATRIX (WITH CLEAR COLOR DOTS) =================
     function renderAdminMatrix() {
       const container = document.getElementById("adminMatrixContainer");
       container.innerHTML = "";
@@ -765,16 +766,30 @@
         const wLock = locks[womenKey];
         const mLock = locks[menKey];
 
+        // دالة تصحيحية لحساب وإظهار المؤشرات الملونة الدقيقة 🟢 🟡 🔴
+        const getStatusHTML = (lockData, label) => {
+          if (!lockData) {
+            return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow-sm"></span> <span>${label}: متاح</span></span>`;
+          }
+          if (lockData.status === 'completed') {
+            return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block shadow-sm"></span> <span>${label}: مكتمل (${lockData.by} - ${lockData.score}ن)</span></span>`;
+          }
+          if (lockData.status === 'pending' && !isTimeoutExpired(lockData.time)) {
+            return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse inline-block shadow-sm"></span> <span>${label}: قيد الإجابة (${lockData.by})</span></span>`;
+          }
+          return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow-sm"></span> <span>${label}: متاح</span></span>`;
+        };
+
         const row = document.createElement("div");
-        row.className = "bg-white p-2.5 rounded-xl border border-slate-200 flex flex-col gap-1.5";
+        row.className = "bg-white p-2.5 rounded-xl border border-slate-200 flex flex-col gap-1.5 shadow-sm";
         row.innerHTML = `
           <div class="font-bold text-slate-800 text-[11px]">${sub.title}</div>
           <div class="grid grid-cols-2 gap-2 text-[10px]">
-            <div class="p-1.5 rounded-lg border ${wLock && wLock.status==='completed' ? 'bg-pink-100 border-pink-300 text-pink-900' : 'bg-slate-50 border-slate-200 text-slate-500'}">
-              👩 النساء: ${wLock && wLock.status==='completed' ? `مكتمل (${wLock.by} - ${wLock.score}ن)` : 'متاح 🟢'}
+            <div class="p-2 rounded-lg border ${wLock && wLock.status==='completed' ? 'bg-pink-50 border-pink-200 text-pink-900 font-bold' : wLock && wLock.status==='pending' ? 'bg-amber-50 border-amber-200 text-amber-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600'}">
+              ${getStatusHTML(wLock, '👩 النساء')}
             </div>
-            <div class="p-1.5 rounded-lg border ${mLock && mLock.status==='completed' ? 'bg-blue-100 border-blue-300 text-blue-900' : 'bg-slate-50 border-slate-200 text-slate-500'}">
-              👨 الرجال: ${mLock && mLock.status==='completed' ? `مكتمل (${mLock.by} - ${mLock.score}ن)` : 'متاح 🟢'}
+            <div class="p-2 rounded-lg border ${mLock && mLock.status==='completed' ? 'bg-blue-50 border-blue-200 text-blue-900 font-bold' : mLock && mLock.status==='pending' ? 'bg-amber-50 border-amber-200 text-amber-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600'}">
+              ${getStatusHTML(mLock, '👨 الرجال')}
             </div>
           </div>
         `;
