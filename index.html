@@ -57,13 +57,11 @@
           <i class="fa-solid fa-crown text-amber-400"></i> المسابقة رقم #001
         </span>
         
-        <!-- زر المشرف مخفي افتراضياً -->
         <button id="adminAccessBtn" onclick="openAdminAuthModal()" class="hidden text-xs text-indigo-200/80 hover:text-white bg-white/10 px-2.5 py-1 rounded-lg transition-all items-center gap-1">
           <i class="fa-solid fa-lock text-[10px]"></i> إدارة
         </button>
       </div>
 
-      <!-- العنوان الرئيسي: 3 ضغطات متتالية فتح خفي للإدارة -->
       <h1 id="mainTitle" onclick="handleSecretClick()" class="text-2xl font-black text-center mb-1 text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-amber-100 select-none cursor-pointer">
         المسابقة الأسريّة التفاعلية
       </h1>
@@ -86,7 +84,7 @@
   <!-- ==================== MAIN CONTAINER ==================== -->
   <main class="max-w-md mx-auto px-4 -mt-5 relative z-20 w-full flex-1">
 
-    <!-- STEP 1: Select Category & Gender -->
+    <!-- STEP 1: Select Category -->
     <div id="participantSelectCard" class="glass-card rounded-2xl p-5 shadow-lg mb-4">
       <h2 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
         <i class="fa-solid fa-user-check text-indigo-600"></i> اختاري/اختر الفئة المشاركة:
@@ -110,7 +108,7 @@
       </select>
     </div>
 
-    <!-- STEP 2: Subject Grid Selection -->
+    <!-- STEP 2: Subject Grid -->
     <div id="subjectGridCard" class="glass-card rounded-2xl p-5 shadow-lg mb-4 hidden">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-xs font-black text-slate-700 flex items-center gap-1.5">
@@ -140,9 +138,7 @@
         جاري تحميل السؤال...
       </h3>
 
-      <div id="optionsContainer" class="space-y-2.5">
-        <!-- الخيارات تظهر برمجياً -->
-      </div>
+      <div id="optionsContainer" class="space-y-2.5"></div>
 
       <button id="submitBtn" onclick="submitAnswer()" disabled class="w-full mt-5 bg-slate-300 text-slate-500 font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-not-allowed">
         <span>اعتماد الإجابة</span>
@@ -150,7 +146,7 @@
       </button>
     </div>
 
-    <!-- STEP 4: Feedback Screen (Between questions & Final Result) -->
+    <!-- STEP 4: Feedback Screen -->
     <div id="feedbackCard" class="glass-card rounded-2xl p-6 shadow-lg text-center hidden">
       <div id="feedbackIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"></div>
       <h3 id="feedbackTitle" class="text-lg font-black mb-1"></h3>
@@ -171,7 +167,7 @@
       </div>
     </div>
 
-    <!-- Lock / Completed Block Screen -->
+    <!-- Blocked Card -->
     <div id="blockedCard" class="glass-card rounded-2xl p-6 shadow-lg text-center hidden">
       <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
         <i class="fa-solid fa-user-lock"></i>
@@ -190,9 +186,7 @@
       </div>
       <h3 class="font-bold text-slate-800 text-base mb-1">دخول المشرف</h3>
       <p class="text-xs text-slate-500 mb-3">أدخل الرمز السري للوصول للوحة التحكم</p>
-      
       <input type="password" id="adminPass" placeholder="••••" class="w-full text-center tracking-widest font-bold border border-slate-300 rounded-xl p-2.5 mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-      
       <div class="flex gap-2">
         <button onclick="closeAdminAuthModal()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-2 rounded-xl text-xs">إلغاء</button>
         <button onclick="verifyAdmin()" class="flex-1 bg-indigo-600 text-white font-bold py-2 rounded-xl text-xs">دخول</button>
@@ -212,21 +206,22 @@
           <i class="fa-solid fa-sliders"></i>
         </div>
         <h3 class="font-black text-slate-800 text-base">لوحة تحكم المشرف (المسابقة #001)</h3>
+        <span class="text-[10px] text-emerald-600 font-bold flex items-center justify-center gap-1 mt-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> التحديث اللحظي المباشر نشط
+        </span>
       </div>
 
-      <!-- Subject Lock Status Matrix -->
       <div class="mb-5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-        <h4 class="text-xs font-black text-slate-700 mb-2 flex items-center gap-1.5">
-          <i class="fa-solid fa-table-cells text-indigo-600"></i> مصفوفة حالة التخصصات (حجم القفل):
+        <h4 class="text-xs font-black text-slate-700 mb-2 flex items-center justify-between">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-table-cells text-indigo-600"></i> مصفوفة حالة التخصصات:</span>
+          <button onclick="fetchCloudDataAndRender()" class="text-[10px] text-indigo-600 hover:underline font-bold flex items-center gap-1">
+            <i class="fa-solid fa-rotate"></i> تحديث يدوي
+          </button>
         </h4>
-        <div id="adminMatrixContainer" class="space-y-2 text-xs">
-          <!-- تولد برمجياً -->
-        </div>
+        <div id="adminMatrixContainer" class="space-y-2 text-xs"></div>
       </div>
 
-      <!-- Buttons Section -->
       <div class="space-y-2.5">
-        <!-- الزر: عرض ومشاركة لوحة الصدارة والتفاصيل -->
         <button onclick="openLeaderboardModal()" class="w-full bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
           <i class="fa-solid fa-trophy text-amber-300 text-sm"></i>
           <span>عرض ومشاركة لوحة الصدارة والتفاصيل</span>
@@ -245,10 +240,9 @@
     </div>
   </div>
 
-  <!-- ==================== LEADERBOARD & DETAILED SCOREBOARD MODAL ==================== -->
+  <!-- ==================== LEADERBOARD MODAL ==================== -->
   <div id="leaderboardModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-3 sm:p-4 hidden">
     <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-      
       <div class="p-4 bg-indigo-950 text-white flex items-center justify-between">
         <div class="flex items-center gap-2">
           <i class="fa-solid fa-trophy text-amber-400 text-lg"></i>
@@ -260,63 +254,48 @@
       </div>
 
       <div class="p-4 overflow-y-auto flex-1 space-y-4">
-        
-        <!-- Summary Cards (Women vs Men) -->
         <div class="grid grid-cols-2 gap-3">
-          <!-- Women Card -->
-          <div class="bg-pink-50 border border-pink-200 p-3 rounded-2xl text-center relative overflow-hidden">
+          <div class="bg-pink-50 border border-pink-200 p-3 rounded-2xl text-center">
             <span class="block text-[11px] text-pink-700 font-bold mb-1">👩 مجموع فريق النساء</span>
             <span id="lbWomenPoints" class="text-2xl font-black text-pink-600 font-mono">0</span>
-            <span class="text-[10px] text-pink-500 font-bold block mt-0.5">نقطة</span>
-            <div class="mt-2 pt-2 border-t border-pink-200/60 text-[10px] text-pink-800 font-semibold flex items-center justify-center gap-1">
-              <i class="fa-solid fa-stopwatch text-pink-600"></i>
-              <span>الزمن التراكمي: <strong id="lbWomenTime" class="font-mono">00:00</strong></span>
+            <span class="text-[10px] text-pink-500 font-bold block">نقطة</span>
+            <div class="mt-2 pt-2 border-t border-pink-200/60 text-[10px] text-pink-800 font-semibold">
+              الزمن: <strong id="lbWomenTime" class="font-mono">00:00</strong>
             </div>
           </div>
 
-          <!-- Men Card -->
-          <div class="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-center relative overflow-hidden">
+          <div class="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-center">
             <span class="block text-[11px] text-blue-700 font-bold mb-1">👨 مجموع فريق الرجال</span>
             <span id="lbMenPoints" class="text-2xl font-black text-blue-600 font-mono">0</span>
-            <span class="text-[10px] text-blue-500 font-bold block mt-0.5">نقطة</span>
-            <div class="mt-2 pt-2 border-t border-blue-200/60 text-[10px] text-blue-800 font-semibold flex items-center justify-center gap-1">
-              <i class="fa-solid fa-stopwatch text-blue-600"></i>
-              <span>الزمن التراكمي: <strong id="lbMenTime" class="font-mono">00:00</strong></span>
+            <span class="text-[10px] text-blue-500 font-bold block">نقطة</span>
+            <div class="mt-2 pt-2 border-t border-blue-200/60 text-[10px] text-blue-800 font-semibold">
+              الزمن: <strong id="lbMenTime" class="font-mono">00:00</strong>
             </div>
           </div>
         </div>
 
-        <!-- Leaderboard Status Banner -->
         <div id="lbStatusBanner" class="p-3 rounded-xl text-center font-bold text-xs bg-amber-50 text-amber-900 border border-amber-200">
-          جاري حساب النتيجة وفارق الزمن...
+          جاري حساب النتائج...
         </div>
 
-        <!-- Individual Participants Breakdown -->
         <div class="space-y-2">
           <h4 class="text-xs font-black text-slate-700 flex items-center justify-between">
-            <span class="flex items-center gap-1.5">
-              <i class="fa-solid fa-users text-indigo-600"></i> الكشف التفصيلي لكل متسابق:
-            </span>
-            <span class="text-[10px] font-normal text-slate-400">(الدرجة والزمن)</span>
+            <span><i class="fa-solid fa-users text-indigo-600"></i> الكشف التفصيلي لكل متسابق:</span>
           </h4>
-          <div id="lbParticipantsList" class="space-y-1.5 max-h-52 overflow-y-auto pr-1">
-            <!-- ولد برمجياً -->
-          </div>
+          <div id="lbParticipantsList" class="space-y-1.5 max-h-52 overflow-y-auto pr-1"></div>
         </div>
-
       </div>
 
       <div class="p-3.5 bg-slate-50 border-t border-slate-200 grid grid-cols-2 gap-2 text-xs font-bold">
         <button onclick="shareLeaderboardToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-md">
           <i class="fa-brands fa-whatsapp text-sm"></i>
-          <span>مشاركة لوحة الصدارة</span>
+          <span>مشاركة الصدارة</span>
         </button>
         <button onclick="closeLeaderboardModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-xl flex items-center justify-center gap-1.5">
           <i class="fa-solid fa-xmark text-xs"></i>
           <span>إغلاق</span>
         </button>
       </div>
-
     </div>
   </div>
 
@@ -392,12 +371,19 @@
 
     let sessionTimeoutInterval = null;
     let questionTimerInterval = null;
+    let globalPollingInterval = null;
     let questionTimeLeft = 60;
     let secretClickCount = 0;
 
     document.addEventListener("DOMContentLoaded", () => {
       checkAdminParam();
       checkParticipantState();
+      
+      // التحديث اللحظي المباشر يعمل تلقائياً كل ثانيتين في الخلفية
+      fetchCloudDataAndRender();
+      globalPollingInterval = setInterval(() => {
+        fetchCloudDataAndRender();
+      }, 2000);
     });
 
     function checkAdminParam() {
@@ -434,6 +420,26 @@
 
       renderSubjectGrid();
       document.getElementById("subjectGridCard").classList.remove("hidden");
+    }
+
+    function fetchCloudDataAndRender() {
+      fetch(`${SCRIPT_WEB_APP_URL}?action=get_locks&contest_id=${CONTEST_ID}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.locks) {
+            saveSubjectLocks(data.locks);
+            
+            // إن كانت لوحة التحكم مفتوحة تحدّث تلقائياً
+            if (!document.getElementById("adminDashboardModal").classList.contains("hidden")) {
+              renderAdminMatrix();
+            }
+            // إن كانت شاشة التخصصات مفتوحة تحدّث تلقائياً
+            if (!document.getElementById("subjectGridCard").classList.contains("hidden")) {
+              renderSubjectGrid();
+            }
+          }
+        })
+        .catch(err => console.log("Auto-syncing..."));
     }
 
     function renderSubjectGrid() {
@@ -514,26 +520,46 @@
     function lockSubjectPending() {
       const locks = getSubjectLocks();
       const lockKey = `${CONTEST_ID}_${currentGender}_${selectedSubjectId}`;
-      locks[lockKey] = {
+      const lockPayload = {
         status: "pending",
         by: currentParticipant,
         time: new Date().getTime()
       };
+      locks[lockKey] = lockPayload;
       saveSubjectLocks(locks);
+      syncLockToCloud(lockKey, lockPayload);
       startSessionTimeoutTimer();
     }
 
     function lockSubjectCompleted() {
       const locks = getSubjectLocks();
       const lockKey = `${CONTEST_ID}_${currentGender}_${selectedSubjectId}`;
-      locks[lockKey] = {
+      const lockPayload = {
         status: "completed",
         by: currentParticipant,
         score: subjectScore,
         timeTakenSeconds: totalTimeTakenInSeconds,
         time: new Date().getTime()
       };
+      locks[lockKey] = lockPayload;
       saveSubjectLocks(locks);
+      syncLockToCloud(lockKey, lockPayload);
+    }
+
+    function syncLockToCloud(lockKey, lockPayload) {
+      const payload = {
+        action: "update_lock",
+        contest_id: CONTEST_ID,
+        lock_key: lockKey,
+        lock_data: lockPayload
+      };
+
+      fetch(SCRIPT_WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).catch(e => console.log("Cloud Lock Sync Sent"));
     }
 
     function getSubjectLocks() {
@@ -637,7 +663,6 @@
       }
 
       if (currentQuestionIndex === 4) {
-        // حُسب الإجمالي بالثواني عند إنهاء الأسئلة الخمسة
         const subjectEndTime = new Date();
         totalTimeTakenInSeconds = Math.round((subjectEndTime - subjectStartTime) / 1000);
 
@@ -675,6 +700,7 @@
 
     function sendScoreToSheet() {
       const payload = {
+        action: "submit_score",
         contest_id: CONTEST_ID,
         category: currentParticipant,
         subject: selectedSubjectId,
@@ -740,19 +766,22 @@
       const pass = document.getElementById("adminPass").value;
       if (pass === "1234") {
         closeAdminAuthModal();
-        renderAdminMatrix();
-        document.getElementById("adminDashboardModal").classList.remove("hidden");
+        openAdminDashboard();
         document.getElementById("adminPass").value = "";
       } else {
         alert("الرمز السري غير صحيح!");
       }
     }
 
+    function openAdminDashboard() {
+      renderAdminMatrix();
+      document.getElementById("adminDashboardModal").classList.remove("hidden");
+    }
+
     function closeAdminDashboard() {
       document.getElementById("adminDashboardModal").classList.add("hidden");
     }
 
-    // ================= ADMIN MATRIX (WITH CLEAR COLOR DOTS) =================
     function renderAdminMatrix() {
       const container = document.getElementById("adminMatrixContainer");
       container.innerHTML = "";
@@ -766,18 +795,17 @@
         const wLock = locks[womenKey];
         const mLock = locks[menKey];
 
-        // دالة تصحيحية لحساب وإظهار المؤشرات الملونة الدقيقة 🟢 🟡 🔴
         const getStatusHTML = (lockData, label) => {
           if (!lockData) {
-            return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow-sm"></span> <span>${label}: متاح</span></span>`;
+            return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> <span>${label}: متاح</span></span>`;
           }
           if (lockData.status === 'completed') {
-            return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block shadow-sm"></span> <span>${label}: مكتمل (${lockData.by} - ${lockData.score}ن)</span></span>`;
+            return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> <span>${label}: مكتمل (${lockData.by} - ${lockData.score}ن)</span></span>`;
           }
           if (lockData.status === 'pending' && !isTimeoutExpired(lockData.time)) {
-            return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse inline-block shadow-sm"></span> <span>${label}: قيد الإجابة (${lockData.by})</span></span>`;
+            return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse inline-block"></span> <span>${label}: قيد الإجابة (${lockData.by})</span></span>`;
           }
-          return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow-sm"></span> <span>${label}: متاح</span></span>`;
+          return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> <span>${label}: متاح</span></span>`;
         };
 
         const row = document.createElement("div");
@@ -797,7 +825,6 @@
       });
     }
 
-    // ================= LEADERBOARD LOGIC =================
     function openLeaderboardModal() {
       document.getElementById("adminDashboardModal").classList.add("hidden");
       document.getElementById("leaderboardModal").classList.remove("hidden");
@@ -855,7 +882,6 @@
       document.getElementById("lbWomenTime").innerText = formatSecondsToMMSS(womenTotalSeconds);
       document.getElementById("lbMenTime").innerText = formatSecondsToMMSS(menTotalSeconds);
 
-      // Status Banner
       const statusBanner = document.getElementById("lbStatusBanner");
       if (womenTotalPoints > menTotalPoints) {
         statusBanner.className = "p-3 rounded-xl text-center font-bold text-xs bg-pink-100 text-pink-900 border border-pink-300";
@@ -867,20 +893,10 @@
         statusBanner.className = "p-3 rounded-xl text-center font-bold text-xs bg-slate-100 text-slate-600 border border-slate-200";
         statusBanner.innerHTML = "المسابقة صفرية بانتظار مشاركة المتنافسين!";
       } else {
-        // التعادل بالنقاط -> الحسم بالزمن التراكمي
-        let speedWinner = "";
-        if (womenTotalSeconds < menTotalSeconds) {
-          speedWinner = "<br><span class='text-[11px] text-pink-800 font-black'>⚡ حُسمت لصالح فريق النساء بفارق الزمن التراكمي الأسرع! 🏆</span>";
-        } else if (menTotalSeconds < womenTotalSeconds) {
-          speedWinner = "<br><span class='text-[11px] text-blue-800 font-black'>⚡ حُسمت لصالح فريق الرجال بفارق الزمن التراكمي الأسرع! 🏆</span>";
-        } else {
-          speedWinner = "<br><span>تعادل كامل بالنقاط والزمن بالضبط!</span>";
-        }
         statusBanner.className = "p-3 rounded-xl text-center font-bold text-xs bg-amber-100 text-amber-900 border border-amber-300";
-        statusBanner.innerHTML = `🤝 تعادل الفريقين بنتيجة ${womenTotalPoints} نقطة لكل منهما! ${speedWinner}`;
+        statusBanner.innerHTML = `🤝 تعادل الفريقين بنتيجة ${womenTotalPoints} نقطة لكل منهما!`;
       }
 
-      // Individual List Render
       if (participantsList.length === 0) {
         listContainer.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">لا توجد مشاركات مكتملة بعد.</div>`;
       } else {
@@ -922,8 +938,6 @@
         winnerText = `👑 *الفائز بالمقدمة:* فريق النساء (بفارق ${wP - mP} نقطة) 🔥`;
       } else if (mP > wP) {
         winnerText = `👑 *الفائز بالمقدمة:* فريق الرجال (بفارق ${mP - wP} نقطة) 🔥`;
-      } else if (wP === 0 && mP === 0) {
-        winnerText = `🏁 *النتيجة:* لم تبدأ الجولة بعد!`;
       } else {
         winnerText = `🤝 *النتيجة:* تعادل بالفريقين بنتيجة (${wP}) نقطة!\n⚡ *الزمن:* النساء (${wTime}) | الرجال (${mTime})`;
       }
