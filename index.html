@@ -224,7 +224,14 @@
         </div>
       </div>
 
-      <div class="space-y-2">
+      <!-- Buttons Section -->
+      <div class="space-y-2.5">
+        <!-- الزر الجديد: عرض ومشاركة لوحة الصدارة والتفاصيل (في المكان المضلل تماماً) -->
+        <button onclick="openLeaderboardModal()" class="w-full bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+          <i class="fa-solid fa-trophy text-amber-300 text-sm"></i>
+          <span>عرض ومشاركة لوحة الصدارة والتفاصيل</span>
+        </button>
+
         <button onclick="shareCleanParticipantLink()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
           <i class="fa-brands fa-whatsapp text-base"></i>
           <span>مشاركة رابط المسابقة للمتسابقين (نظيف)</span>
@@ -238,22 +245,95 @@
     </div>
   </div>
 
+  <!-- ==================== LEADERBOARD & DETAILED SCOREBOARD MODAL ==================== -->
+  <div id="leaderboardModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <div class="p-4 bg-indigo-950 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-trophy text-amber-400 text-lg"></i>
+          <h3 class="font-black text-sm sm:text-base">لوحة الصدارة والتفاصيل (المسابقة #001)</h3>
+        </div>
+        <button onclick="closeLeaderboardModal()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-slate-300 hover:text-white">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto flex-1 space-y-4">
+        
+        <!-- Summary Cards (Women vs Men) -->
+        <div class="grid grid-cols-2 gap-3">
+          <!-- Women Card -->
+          <div class="bg-pink-50 border border-pink-200 p-3 rounded-2xl text-center relative overflow-hidden">
+            <span class="block text-[11px] text-pink-700 font-bold mb-1">👩 مجموع فريق النساء</span>
+            <span id="lbWomenPoints" class="text-2xl font-black text-pink-600 font-mono">0</span>
+            <span class="text-[10px] text-pink-500 font-bold block mt-0.5">نقطة</span>
+            <div class="mt-2 pt-2 border-t border-pink-200/60 text-[10px] text-pink-800 font-semibold flex items-center justify-center gap-1">
+              <i class="fa-solid fa-stopwatch text-pink-600"></i>
+              <span>الزمن التراكمي: <strong id="lbWomenTime" class="font-mono">00:00</strong></span>
+            </div>
+          </div>
+
+          <!-- Men Card -->
+          <div class="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-center relative overflow-hidden">
+            <span class="block text-[11px] text-blue-700 font-bold mb-1">👨 مجموع فريق الرجال</span>
+            <span id="lbMenPoints" class="text-2xl font-black text-blue-600 font-mono">0</span>
+            <span class="text-[10px] text-blue-500 font-bold block mt-0.5">نقطة</span>
+            <div class="mt-2 pt-2 border-t border-blue-200/60 text-[10px] text-blue-800 font-semibold flex items-center justify-center gap-1">
+              <i class="fa-solid fa-stopwatch text-blue-600"></i>
+              <span>الزمن التراكمي: <strong id="lbMenTime" class="font-mono">00:00</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leaderboard Status Banner -->
+        <div id="lbStatusBanner" class="p-3 rounded-xl text-center font-bold text-xs bg-amber-50 text-amber-900 border border-amber-200">
+          جاري حساب النتيجة وفارق الزمن...
+        </div>
+
+        <!-- Individual Participants Breakdown -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-black text-slate-700 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <i class="fa-solid fa-users text-indigo-600"></i> الكشف التفصيلي لكل متسابق:
+            </span>
+            <span class="text-[10px] font-normal text-slate-400">(الدرجة والزمن)</span>
+          </h4>
+          <div id="lbParticipantsList" class="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+            <!-- ولد برمجياً -->
+          </div>
+        </div>
+
+      </div>
+
+      <div class="p-3.5 bg-slate-50 border-t border-slate-200 grid grid-cols-2 gap-2 text-xs font-bold">
+        <button onclick="shareLeaderboardToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-md">
+          <i class="fa-brands fa-whatsapp text-sm"></i>
+          <span>مشاركة لوحة الصدارة</span>
+        </button>
+        <button onclick="closeLeaderboardModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-xmark text-xs"></i>
+          <span>إغلاق</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ==================== JAVASCRIPT ENGINE ==================== -->
   <script>
     const SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz-lampsS01cnHG_rPEmjthiUTAxi4Zfs86Ft7mRWoN4ROIvL39yhkPq6orQGLfC_J_/exec";
     const CONTEST_ID = "001";
 
-    // التخصصات الستة الافتراضية
     const subjectsData = [
-      { id: "quran", title: "علوم القرآن (معاني المفردات والإعراب)", icon: "fa-book-quran", color: "emerald" },
-      { id: "sirah", title: "السيرة النبوية والتاريخ الإسلامي", icon: "fa-kaaba", color: "amber" },
-      { id: "arabic", title: "اللغة العربية", icon: "fa-pen-nib", color: "indigo" },
-      { id: "general", title: "الثقافة العامة", icon: "fa-globe", color: "blue" },
-      { id: "prophets", title: "قصص الأنبياء", icon: "fa-scroll", color: "purple" },
-      { id: "geo", title: "الجغرافيا", icon: "fa-map-location-dot", color: "rose" }
+      { id: "quran", title: "علوم القرآن (معاني المفردات والإعراب)", icon: "fa-book-quran" },
+      { id: "sirah", title: "السيرة النبوية والتاريخ الإسلامي", icon: "fa-kaaba" },
+      { id: "arabic", title: "اللغة العربية", icon: "fa-pen-nib" },
+      { id: "general", title: "الثقافة العامة", icon: "fa-globe" },
+      { id: "prophets", title: "قصص الأنبياء", icon: "fa-scroll" },
+      { id: "geo", title: "الجغرافيا", icon: "fa-map-location-dot" }
     ];
 
-    // أسئلة تجريبية (5 أسئلة لكل تخصص)
     const mockQuestions = {
       quran: [
         { id: "q_q1", text: "1. ما معنى كلمة (الصمد) في سورة الإخلاص؟", options: [{ id: "a", text: "الذي يُقصد في الحوائج وتكتمل فيه الصفات" }, { id: "b", text: "القوي المنيع" }, { id: "c", text: "الخالق البارئ" }, { id: "d", text: "السميع البصير" }], correct: "a" },
@@ -299,14 +379,16 @@
       ]
     };
 
-    // حالة التطبيق الجارية
     let currentParticipant = "";
-    let currentGender = ""; // men / women
+    let currentGender = "";
     let selectedSubjectId = "";
     let currentQuestionIndex = 0;
     let selectedOption = null;
     let subjectScore = 0;
     let isQuizStarted = false;
+
+    let subjectStartTime = null;
+    let totalTimeTakenInSeconds = 0;
 
     let sessionTimeoutInterval = null;
     let questionTimerInterval = null;
@@ -448,6 +530,7 @@
         status: "completed",
         by: currentParticipant,
         score: subjectScore,
+        timeTakenSeconds: totalTimeTakenInSeconds,
         time: new Date().getTime()
       };
       saveSubjectLocks(locks);
@@ -510,9 +593,9 @@
     function submitAnswer() {
       if (!selectedOption) return;
 
-      // قفل التخصص نهائياً بمجرد إجابة أول سؤال
       if (!isQuizStarted) {
         isQuizStarted = true;
+        subjectStartTime = new Date();
         document.getElementById("changeSubjectBtn").classList.add("hidden");
         lockSubjectPending();
       }
@@ -554,18 +637,22 @@
       }
 
       if (currentQuestionIndex === 4) {
-        // انتهى التخصص
+        // حُسب الإجمالي بالثواني عند إنهاء الأسئلة الخمسة
+        const subjectEndTime = new Date();
+        totalTimeTakenInSeconds = Math.round((subjectEndTime - subjectStartTime) / 1000);
+
         lockSubjectCompleted();
         clearInterval(sessionTimeoutInterval);
 
         nextBtn.classList.add("hidden");
         exitSec.classList.remove("hidden");
 
+        const timeFormatted = formatSecondsToMMSS(totalTimeTakenInSeconds);
+
         title.innerText = "تهانينا! أكملت التخصص 🏆";
         title.className = "text-lg font-black mb-1 text-indigo-900";
-        msg.innerHTML = `حصلت الفئة (<b>${currentParticipant}</b>) على <b>${subjectScore} من 50</b> نقطة في تخصص (${subjectsData.find(s=>s.id===selectedSubjectId).title}).<br><span class="text-[11px] text-slate-400">تم تسجيل نتيجتك في كشف المشرف تلقائياً.</span>`;
+        msg.innerHTML = `حصلت الفئة (<b>${currentParticipant}</b>) على <b>${subjectScore} من 50</b> نقطة في زمن قدره <b>${timeFormatted}</b>.<br><span class="text-[11px] text-slate-400">تم تسجيل نتيجتك في كشف المشرف تلقائياً.</span>`;
         
-        // إرسال النتيجة للخادم
         sendScoreToSheet();
       } else {
         nextBtn.classList.remove("hidden");
@@ -592,6 +679,7 @@
         category: currentParticipant,
         subject: selectedSubjectId,
         score: subjectScore,
+        timeTakenSeconds: totalTimeTakenInSeconds,
         timestamp: new Date().toISOString()
       };
 
@@ -601,6 +689,12 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       }).catch(e => console.log("Background synced"));
+    }
+
+    function formatSecondsToMMSS(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
     function startQuestionTimer() {
@@ -686,6 +780,142 @@
         `;
         container.appendChild(row);
       });
+    }
+
+    // ================= LEADERBOARD LOGIC =================
+    function openLeaderboardModal() {
+      document.getElementById("adminDashboardModal").classList.add("hidden");
+      document.getElementById("leaderboardModal").classList.remove("hidden");
+
+      calculateAndRenderLeaderboard();
+    }
+
+    function closeLeaderboardModal() {
+      document.getElementById("leaderboardModal").classList.add("hidden");
+      document.getElementById("adminDashboardModal").classList.remove("hidden");
+    }
+
+    function calculateAndRenderLeaderboard() {
+      const locks = getSubjectLocks();
+
+      let womenTotalPoints = 0;
+      let menTotalPoints = 0;
+      let womenTotalSeconds = 0;
+      let menTotalSeconds = 0;
+
+      const listContainer = document.getElementById("lbParticipantsList");
+      listContainer.innerHTML = "";
+
+      let participantsList = [];
+
+      Object.keys(locks).forEach(key => {
+        const item = locks[key];
+        if (item && item.status === "completed") {
+          const isWomen = key.includes("_women_");
+          const pts = parseInt(item.score) || 0;
+          const secs = parseInt(item.timeTakenSeconds) || 0;
+
+          if (isWomen) {
+            womenTotalPoints += pts;
+            womenTotalSeconds += secs;
+          } else {
+            menTotalPoints += pts;
+            menTotalSeconds += secs;
+          }
+
+          const subObj = subjectsData.find(s => key.endsWith(`_${s.id}`));
+          participantsList.push({
+            participant: item.by,
+            isWomen: isWomen,
+            subjectTitle: subObj ? subObj.title : "تخصص",
+            score: pts,
+            timeSeconds: secs
+          });
+        }
+      });
+
+      document.getElementById("lbWomenPoints").innerText = womenTotalPoints;
+      document.getElementById("lbMenPoints").innerText = menTotalPoints;
+
+      document.getElementById("lbWomenTime").innerText = formatSecondsToMMSS(womenTotalSeconds);
+      document.getElementById("lbMenTime").innerText = formatSecondsToMMSS(menTotalSeconds);
+
+      // Status Banner
+      const statusBanner = document.getElementById("lbStatusBanner");
+      if (womenTotalPoints > menTotalPoints) {
+        statusBanner.className = "p-3 rounded-xl text-center font-bold text-xs bg-pink-100 text-pink-900 border border-pink-300";
+        statusBanner.innerHTML = `👑 *فريق النساء* متقدم بفرق ${womenTotalPoints - menTotalPoints} نقطة! 🔥`;
+      } else if (menTotalPoints > womenTotalPoints) {
+        statusBanner.className = "p-3 rounded-xl text-center font-bold text-xs bg-blue-100 text-blue-900 border border-blue-300";
+        statusBanner.innerHTML = `👑 *فريق الرجال* متقدم بفرق ${menTotalPoints - womenTotalPoints} نقطة! 🔥`;
+      } else if (womenTotalPoints === 0 && menTotalPoints === 0) {
+        statusBanner.className = "p-3 rounded-xl text-center font-bold text-xs bg-slate-100 text-slate-600 border border-slate-200";
+        statusBanner.innerHTML = "المسابقة صفرية بانتظار مشاركة المتنافسين!";
+      } else {
+        // التعادل بالنقاط -> الحسم بالزمن التراكمي
+        let speedWinner = "";
+        if (womenTotalSeconds < menTotalSeconds) {
+          speedWinner = "<br><span class='text-[11px] text-pink-800 font-black'>⚡ حُسمت لصالح فريق النساء بفارق الزمن التراكمي الأسرع! 🏆</span>";
+        } else if (menTotalSeconds < womenTotalSeconds) {
+          speedWinner = "<br><span class='text-[11px] text-blue-800 font-black'>⚡ حُسمت لصالح فريق الرجال بفارق الزمن التراكمي الأسرع! 🏆</span>";
+        } else {
+          speedWinner = "<br><span>تعادل كامل بالنقاط والزمن بالضبط!</span>";
+        }
+        statusBanner.className = "p-3 rounded-xl text-center font-bold text-xs bg-amber-100 text-amber-900 border border-amber-300";
+        statusBanner.innerHTML = `🤝 تعادل الفريقين بنتيجة ${womenTotalPoints} نقطة لكل منهما! ${speedWinner}`;
+      }
+
+      // Individual List Render
+      if (participantsList.length === 0) {
+        listContainer.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">لا توجد مشاركات مكتملة بعد.</div>`;
+      } else {
+        participantsList.forEach(p => {
+          const div = document.createElement("div");
+          div.className = `p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold ${
+            p.isWomen ? 'bg-pink-50/70 border-pink-200 text-pink-950' : 'bg-blue-50/70 border-blue-200 text-blue-950'
+          }`;
+
+          div.innerHTML = `
+            <div class="flex items-center gap-2">
+              <i class="${p.isWomen ? 'fa-solid fa-venus text-pink-600' : 'fa-solid fa-mars text-blue-600'}"></i>
+              <div>
+                <span>${p.participant}</span>
+                <span class="block text-[9px] text-slate-400 font-normal">${p.subjectTitle}</span>
+              </div>
+            </div>
+            <div class="text-left font-mono">
+              <span class="block font-black">${p.score} نقطة</span>
+              <span class="text-[10px] text-slate-500 font-normal"><i class="fa-regular fa-clock text-[9px]"></i> ${formatSecondsToMMSS(p.timeSeconds)}</span>
+            </div>
+          `;
+          listContainer.appendChild(div);
+        });
+      }
+    }
+
+    function shareLeaderboardToWhatsApp() {
+      const wPts = document.getElementById("lbWomenPoints").innerText;
+      const mPts = document.getElementById("lbMenPoints").innerText;
+      const wTime = document.getElementById("lbWomenTime").innerText;
+      const mTime = document.getElementById("lbMenTime").innerText;
+
+      let winnerText = "";
+      const wP = parseInt(wPts);
+      const mP = parseInt(mPts);
+
+      if (wP > mP) {
+        winnerText = `👑 *الفائز بالمقدمة:* فريق النساء (بفارق ${wP - mP} نقطة) 🔥`;
+      } else if (mP > wP) {
+        winnerText = `👑 *الفائز بالمقدمة:* فريق الرجال (بفارق ${mP - wP} نقطة) 🔥`;
+      } else if (wP === 0 && mP === 0) {
+        winnerText = `🏁 *النتيجة:* لم تبدأ الجولة بعد!`;
+      } else {
+        winnerText = `🤝 *النتيجة:* تعادل بالفريقين بنتيجة (${wP}) نقطة!\n⚡ *الزمن:* النساء (${wTime}) | الرجال (${mTime})`;
+      }
+
+      const message = `🏆 *لوحة صدارة المسابقة الأسريّة التفاعلية (#001)* 🏆\n\n👩 *فريق النساء:* ${wPts} نقطة (الزمن التراكمي: ${wTime})\n👨 *فريق الرجال:* ${mPts} نقطة (الزمن التراكمي: ${mTime})\n\n-----------------------------------\n${winnerText}\n-----------------------------------\nتنافس وحماس يجمع العائلة! ❤️`;
+
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
     }
 
     function shareCleanParticipantLink() {
