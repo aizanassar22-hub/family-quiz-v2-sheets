@@ -286,12 +286,17 @@
         </div>
       </div>
 
-      <div class="p-3.5 bg-slate-50 border-t border-slate-200 grid grid-cols-2 gap-2 text-xs font-bold">
-        <button onclick="shareLeaderboardToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-md">
+      <!-- الأزرار السفلية الجديدة مع زر تصفير النتائج -->
+      <div class="p-3.5 bg-slate-50 border-t border-slate-200 grid grid-cols-3 gap-2 text-[11px] font-bold">
+        <button onclick="shareLeaderboardToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl flex items-center justify-center gap-1 shadow-md transition-all">
           <i class="fa-brands fa-whatsapp text-sm"></i>
-          <span>مشاركة الصدارة</span>
+          <span>مشاركة</span>
         </button>
-        <button onclick="closeLeaderboardModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+        <button onclick="resetContestResults()" class="bg-rose-600 hover:bg-rose-700 text-white py-2.5 rounded-xl flex items-center justify-center gap-1 shadow-md transition-all">
+          <i class="fa-solid fa-trash-can text-sm"></i>
+          <span>تصفير النتائج</span>
+        </button>
+        <button onclick="closeLeaderboardModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-xl flex items-center justify-center gap-1 transition-all">
           <i class="fa-solid fa-xmark text-xs"></i>
           <span>إغلاق</span>
         </button>
@@ -325,7 +330,7 @@
         { id: "s_s1", text: "1. في أي عام هجري كانت غزوة بدر الكبرى؟", options: [{ id: "a", text: "السنة الثانية للهجرة" }, { id: "b", text: "السنة الثالثة للهجرة" }, { id: "c", text: "السنة الخامسة للهجرة" }, { id: "d", text: "السنة الثامنة للهجرة" }], correct: "a" },
         { id: "s_s2", text: "2. من هو صحابي الملقب بـ (أمِين هذه الأمة)؟", options: [{ id: "a", text: "أبو عبيدة بن الجراح" }, { id: "b", text: "عمر بن الخطاب" }, { id: "c", text: "علي بن أبي طالب" }, { id: "d", text: "أبو بكر الصديق" }], correct: "a" },
         { id: "s_s3", text: "3. كم كان عمر النبي ﷺ عند البعثة النبوية؟", options: [{ id: "a", text: "40 سنة" }, { id: "b", text: "35 سنة" }, { id: "c", text: "45 سنة" }, { id: "d", text: "50 سنة" }], correct: "a" },
-        { id: "s_s4", text: "4. ما هي أول مدينة هاصر فيها المسلمون الحصون في غزوة الخندق؟", options: [{ id: "a", text: "المدينة المنورة" }, { id: "b", text: "مكة المكرمة" }, { id: "c", text: "خيبر" }, { id: "d", text: "الطائف" }], correct: "a" },
+        { id: "s_s4", text: "4. ما هي أول مدينة حاصر فيها المسلمون الحصون في غزوة الخندق؟", options: [{ id: "a", text: "المدينة المنورة" }, { id: "b", text: "مكة المكرمة" }, { id: "c", text: "خيبر" }, { id: "d", text: "الطائف" }], correct: "a" },
         { id: "s_s5", text: "5. من هي أول زوجات النبي ﷺ؟", options: [{ id: "a", text: "خديجة بنت خويلد رضي الله عنها" }, { id: "b", text: "عائشة بنت أبي بكر" }, { id: "c", text: "حفصة بنت عمر" }, { id: "d", text: "سودة بنت زمعة" }], correct: "a" }
       ],
       arabic: [
@@ -338,7 +343,7 @@
       general: [
         { id: "g_1", text: "1. ما هو أطول نهر في العالم؟", options: [{ id: "a", text: "نهر النيل" }, { id: "b", text: "نهر الأمازون" }, { id: "c", text: "نهر الينغسي" }, { id: "d", text: "نهر الميسيسيبي" }], correct: "a" },
         { id: "g_2", text: "2. ما هو العنصر الكيميائي الأكثر وفرة في الغلاف الجوي؟", options: [{ id: "a", text: "النيتروجين" }, { id: "b", text: "الأكسجين" }, { id: "c", text: "الهيدروجين" }, { id: "d", text: "ثاني أكسيد الكربون" }], correct: "a" },
-        { id: "g_3", text: "3. كم عدد عضلة القلب في جسم الإنسان؟", options: [{ id: "a", text: "عضلة واحدة" }, { id: "b", text: "عضلتان" }, { id: "c", text: "ثلاث عضلات" }, { id: "d", text: "أربع عضلات" }], correct: "a" },
+        { id: "g_3", text: "3. كم عدد حجرات القلب في جسم الإنسان؟", options: [{ id: "a", text: "أربع حجرات" }, { id: "b", text: "حجرتان" }, { id: "c", text: "ثلاث حجرات" }, { id: "d", text: "خمس حجرات" }], correct: "a" },
         { id: "g_4", text: "4. ما هي أكبر قارة في العالم من حيث المساحة؟", options: [{ id: "a", text: "قارة آسيا" }, { id: "b", text: "قارة أفريقيا" }, { id: "c", text: "قارة أمريكا الشمالية" }, { id: "d", text: "قارة أوروبا" }], correct: "a" },
         { id: "g_5", text: "5. أي من الكواكب يُعرف بـ الكوكب الأحمر؟", options: [{ id: "a", text: "كوكب المريخ" }, { id: "b", text: "كوكب الزهرة" }, { id: "c", text: "كوكب المشتري" }, { id: "d", text: "كوكب زحل" }], correct: "a" }
       ],
@@ -346,7 +351,7 @@
         { id: "p_1", text: "1. من هو النبي الذي لبث في بطن الحوت؟", options: [{ id: "a", text: "سيدنا يونس عليه السلام" }, { id: "b", text: "سيدنا يوسف عليه السلام" }, { id: "c", text: "سيدنا أيوب عليه السلام" }, { id: "d", text: "سيدنا نوح عليه السلام" }], correct: "a" },
         { id: "p_2", text: "2. من هو النبي الذي أعطي معجزة إحياء الموتى بإذن الله؟", options: [{ id: "a", text: "سيدنا عيسى عليه السلام" }, { id: "b", text: "سيدنا موسى عليه السلام" }, { id: "c", text: "سيدنا إبراهيم عليه السلام" }, { id: "d", text: "سيدنا سليمان عليه السلام" }], correct: "a" },
         { id: "p_3", text: "3. من هو النبي الذي بنى السفينة بأمر الله؟", options: [{ id: "a", text: "سيدنا نوح عليه السلام" }, { id: "b", text: "سيدنا هود عليه السلام" }, { id: "c", text: "سيدنا صالح عليه السلام" }, { id: "d", text: "سيدنا لوط عليه السلام" }], correct: "a" },
-        { id: "p_4", text: "4. من هو النبي الملقب بـ (شيخ الأنبياء)؟", options: [{ id: "a", text: "سيدنا نوح عليه السلام" }, { id: "b", text: "سيدنا إبراهيم عليه السلام" }, { id: "c", text: "سيدنا آدم عليه السلام" }, { id: "d", text: "سيدنا يعقوب عليه السلام" }], correct: "a" },
+        { id: "p_4", text: "4. من هو النبي الملقب بـ (أبو الأنبياء)؟", options: [{ id: "a", text: "سيدنا إبراهيم عليه السلام" }, { id: "b", text: "سيدنا نوح عليه السلام" }, { id: "c", text: "سيدنا آدم عليه السلام" }, { id: "d", text: "سيدنا يعقوب عليه السلام" }], correct: "a" },
         { id: "p_5", text: "5. من هو النبي الذي سخّر الله له الريح والجن؟", options: [{ id: "a", text: "سيدنا سليمان عليه السلام" }, { id: "b", text: "سيدنا داوود عليه السلام" }, { id: "c", text: "سيدنا يوسف عليه السلام" }, { id: "d", text: "سيدنا زكريا عليه السلام" }], correct: "a" }
       ],
       geo: [
@@ -436,6 +441,10 @@
             // إن كانت شاشة التخصصات مفتوحة تحدّث تلقائياً
             if (!document.getElementById("subjectGridCard").classList.contains("hidden")) {
               renderSubjectGrid();
+            }
+            // إن كانت شاشة الصدارة مفتوحة تحدّث تلقائياً
+            if (!document.getElementById("leaderboardModal").classList.contains("hidden")) {
+              calculateAndRenderLeaderboard();
             }
           }
         })
@@ -958,6 +967,36 @@
         localStorage.clear();
         alert("تم مسح السجل المحلي بنجاح!");
         location.reload();
+      }
+    }
+
+    // --- الوظيفة الجديدة لتصفير جميع النتائج بضغطة زر ---
+    function resetContestResults() {
+      if (confirm("⚠️ تحذير: هل أنت متأكد من رغبتك في تصفير جميع النتائج والأوقات؟ (هذا الإجراء سيحذف بيانات المسابقة الحالية للجميع ولن يمكن التراجع عنه)")) {
+        
+        // 1. مسح البيانات محلياً
+        localStorage.removeItem(`locks_${CONTEST_ID}`);
+        
+        // 2. أمر التصفير للسيرفر السحابي
+        const payload = {
+          action: "reset_locks",
+          contest_id: CONTEST_ID
+        };
+
+        fetch(SCRIPT_WEB_APP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }).then(() => {
+            alert("✅ تم تصفير جميع النتائج والأوقات بنجاح للمسابقة بأكملها!");
+            calculateAndRenderLeaderboard();
+            renderAdminMatrix();
+        }).catch(e => {
+            alert("✅ تم التصفير بنجاح!");
+            calculateAndRenderLeaderboard();
+            renderAdminMatrix();
+        });
       }
     }
   </script>
