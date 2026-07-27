@@ -286,7 +286,7 @@
         </div>
       </div>
 
-      <!-- الأزرار السفلية الجديدة مع زر تصفير النتائج -->
+      <!-- الأزرار السفلية مع زر تصفير النتائج -->
       <div class="p-3.5 bg-slate-50 border-t border-slate-200 grid grid-cols-3 gap-2 text-[11px] font-bold">
         <button onclick="shareLeaderboardToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl flex items-center justify-center gap-1 shadow-md transition-all">
           <i class="fa-brands fa-whatsapp text-sm"></i>
@@ -434,15 +434,12 @@
           if (data && data.locks) {
             saveSubjectLocks(data.locks);
             
-            // إن كانت لوحة التحكم مفتوحة تحدّث تلقائياً
             if (!document.getElementById("adminDashboardModal").classList.contains("hidden")) {
               renderAdminMatrix();
             }
-            // إن كانت شاشة التخصصات مفتوحة تحدّث تلقائياً
             if (!document.getElementById("subjectGridCard").classList.contains("hidden")) {
               renderSubjectGrid();
             }
-            // إن كانت شاشة الصدارة مفتوحة تحدّث تلقائياً
             if (!document.getElementById("leaderboardModal").classList.contains("hidden")) {
               calculateAndRenderLeaderboard();
             }
@@ -956,28 +953,27 @@
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
     }
 
+    // --- تم تحديث نص رسالة المشاركة هنا بالصيغة الدقيقة المطلوبة ---
     function shareCleanParticipantLink() {
       const cleanUrl = window.location.href.split('?')[0];
-      const message = `🏆 *المسابقة الأسريّة التفاعلية (مسابقة #001)* 🏆\n\nأهلاً بكم يا أغلى عائلة! اختر فئتك ثم التخصص وشارك معنا عبر الرابط:\n👇\n${cleanUrl}`;
+      const message = `🏆 المسابقة الأسريّة التفاعلية (مسابقة #001) 🏆\n\nاختر فئتك ("رجال" - "نساء") ثم اختر "التخصص".\n\n✅ "في كل مرة نستفيد معلومة" ✅\n\n⚠️ تنبيه هام: الرجاء التأكد قبل دخول المسابقة من اختيار الفئة والرمز الصحيح الخاص بك.\n\nشارك معنا عبر الرابط التالي:\n👇\n${cleanUrl}`;
+      
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
     }
 
     function resetLocalData() {
-      if (confirm("هل تريد إعادة مسح السجل المحلي للجهاز واختبار المسابقة من جديد؟")) {
+      if (confirm("هل تريد إعادة مسح السجل المحلي للجهاز وااختبار المسابقة من جديد؟")) {
         localStorage.clear();
         alert("تم مسح السجل المحلي بنجاح!");
         location.reload();
       }
     }
 
-    // --- الوظيفة الجديدة لتصفير جميع النتائج بضغطة زر ---
     function resetContestResults() {
       if (confirm("⚠️ تحذير: هل أنت متأكد من رغبتك في تصفير جميع النتائج والأوقات؟ (هذا الإجراء سيحذف بيانات المسابقة الحالية للجميع ولن يمكن التراجع عنه)")) {
         
-        // 1. مسح البيانات محلياً
         localStorage.removeItem(`locks_${CONTEST_ID}`);
         
-        // 2. أمر التصفير للسيرفر السحابي
         const payload = {
           action: "reset_locks",
           contest_id: CONTEST_ID
