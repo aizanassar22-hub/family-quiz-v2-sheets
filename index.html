@@ -178,7 +178,9 @@
           <i class="fa-solid fa-star" onclick="setStarRating(4)"></i>
           <i class="fa-solid fa-star" onclick="setStarRating(5)"></i>
         </div>
-        <input type="text" id="feedbackNoteInput" placeholder="اكتب انطباعك أو ملاحظة سريعة (اختياري)" class="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 mb-3">
+
+        <!-- تم تحديث الحقل هنا لمنع استدعاء كلمات المرور -->
+        <textarea id="feedbackNoteInput" rows="2" autocomplete="off" placeholder="اكتب انطباعك أو ملاحظة سريعة (اختياري)" class="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 mb-3 resize-none"></textarea>
         
         <button id="submitRatingBtn" onclick="submitUserRating()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
           <i class="fa-solid fa-star"></i>
@@ -223,7 +225,7 @@
       </div>
       <h3 class="font-bold text-slate-800 text-base mb-1">دخول المشرف</h3>
       <p class="text-xs text-slate-500 mb-3">أدخل الرمز السري للوصول للوحة التحكم</p>
-      <input type="password" id="adminPass" placeholder="••••" class="w-full text-center tracking-widest font-bold border border-slate-300 rounded-xl p-2.5 mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      <input type="password" id="adminPass" autocomplete="off" placeholder="••••" class="w-full text-center tracking-widest font-bold border border-slate-300 rounded-xl p-2.5 mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
       <div class="flex gap-2">
         <button onclick="closeAdminAuthModal()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-2 rounded-xl text-xs">إلغاء</button>
         <button onclick="verifyAdmin()" class="flex-1 bg-indigo-600 text-white font-bold py-2 rounded-xl text-xs">دخول</button>
