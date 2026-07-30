@@ -47,7 +47,6 @@
       background-color: rgba(15, 23, 42, 0.8);
       backdrop-filter: blur(4px);
     }
-    /* تقييم النجوم */
     .star-rating .fa-star {
       cursor: pointer;
       transition: color 0.2s ease, transform 0.1s ease;
@@ -129,9 +128,7 @@
       </div>
       <p class="text-[11px] text-slate-500 mb-4">اختر تخصصاً واحداً فقط. بمجرد بدء السؤال الأول سيتم قفل التخصص لفئتك نهائياً.</p>
 
-      <div id="subjectsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <!-- التخصصات تولد برمجياً -->
-      </div>
+      <div id="subjectsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
     </div>
 
     <!-- STEP 3: Question Card -->
@@ -143,7 +140,6 @@
         </button>
       </div>
 
-      <!-- شريط التقدم البصري -->
       <div class="w-full bg-slate-100 rounded-full h-2 mb-3 overflow-hidden">
         <div id="quizProgressBar" class="bg-gradient-to-r from-sky-400 to-indigo-600 h-full w-0 transition-all duration-300"></div>
       </div>
@@ -168,7 +164,6 @@
       <h3 id="feedbackTitle" class="text-lg font-black mb-1"></h3>
       <p id="feedbackMsg" class="text-xs text-slate-500 mb-4"></p>
 
-      <!-- قسم التقييم عند نهاية التخصص (قيمنا) -->
       <div id="ratingSection" class="hidden border-t border-slate-200 pt-4 mt-3 mb-4">
         <h4 class="text-xs font-bold text-slate-700 mb-2">⭐ كيف كانت تجربتك في هذا التخصص؟ (قيمنا)</h4>
         <div class="star-rating flex justify-center gap-2 dir-ltr mb-3 text-2xl text-slate-300">
@@ -179,7 +174,6 @@
           <i class="fa-solid fa-star" onclick="setStarRating(5)"></i>
         </div>
 
-        <!-- تم تحديث الحقل هنا لمنع استدعاء كلمات المرور -->
         <textarea id="feedbackNoteInput" rows="2" autocomplete="off" placeholder="اكتب انطباعك أو ملاحظة سريعة (اختياري)" class="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 mb-3 resize-none"></textarea>
         
         <button id="submitRatingBtn" onclick="submitUserRating()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
@@ -266,6 +260,11 @@
           <span>عرض ومشاركة لوحة الصدارة والتفاصيل</span>
         </button>
 
+        <button onclick="openFeedbackModal()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+          <i class="fa-solid fa-comments text-base"></i>
+          <span>عرض تقييمات وملاحظات المتسابقين</span>
+        </button>
+
         <button onclick="shareCleanParticipantLink()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
           <i class="fa-brands fa-whatsapp text-base"></i>
           <span>مشاركة رابط المسابقة للمتسابقين (نظيف)</span>
@@ -276,6 +275,37 @@
           <span>إعادة تفعيل الاختبار التجريبي للجهاز الحاضر</span>
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ==================== FEEDBACK LIST MODAL ==================== -->
+  <div id="feedbackModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      
+      <div class="p-4 bg-amber-500 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-star text-amber-200 text-lg"></i>
+          <h3 class="font-black text-sm sm:text-base">آراء وتقييمات المتسابقين</h3>
+        </div>
+        <button onclick="closeFeedbackModal()" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto flex-1 space-y-3">
+        <div id="feedbackStatsBanner" class="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-center text-xs font-bold text-amber-900">
+          جاري تحميل التقييمات...
+        </div>
+
+        <div id="feedbackContainer" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+      </div>
+
+      <div class="p-3 bg-slate-50 border-t border-slate-200 text-left">
+        <button onclick="closeFeedbackModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl transition-all">
+          إغلاق
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -488,6 +518,9 @@
             if (!document.getElementById("leaderboardModal").classList.contains("hidden")) {
               calculateAndRenderLeaderboard();
             }
+            if (!document.getElementById("feedbackModal").classList.contains("hidden")) {
+              renderFeedbackList();
+            }
           }
         })
         .catch(err => console.log("Auto-syncing..."));
@@ -590,7 +623,9 @@
         by: currentParticipant,
         score: subjectScore,
         timeTakenSeconds: totalTimeTakenInSeconds,
-        time: new Date().getTime()
+        time: new Date().getTime(),
+        rating: userStarRating,
+        feedback: document.getElementById("feedbackNoteInput").value || ""
       };
       locks[lockKey] = lockPayload;
       saveSubjectLocks(locks);
@@ -785,6 +820,7 @@
     }
 
     function submitUserRating() {
+      lockSubjectCompleted();
       sendScoreToSheet();
       
       const submitBtn = document.getElementById("submitRatingBtn");
@@ -928,6 +964,76 @@
       });
     }
 
+    function openFeedbackModal() {
+      document.getElementById("adminDashboardModal").classList.add("hidden");
+      document.getElementById("feedbackModal").classList.remove("hidden");
+      renderFeedbackList();
+    }
+
+    function closeFeedbackModal() {
+      document.getElementById("feedbackModal").classList.add("hidden");
+      document.getElementById("adminDashboardModal").classList.remove("hidden");
+    }
+
+    function renderFeedbackList() {
+      const container = document.getElementById("feedbackContainer");
+      const statsBanner = document.getElementById("feedbackStatsBanner");
+      container.innerHTML = "";
+
+      const locks = getSubjectLocks();
+      let feedbackItems = [];
+      let totalStars = 0;
+      let ratedCount = 0;
+
+      Object.keys(locks).forEach(key => {
+        const item = locks[key];
+        if (item && item.status === "completed" && (item.rating > 0 || (item.feedback && item.feedback.trim() !== ""))) {
+          const subObj = subjectsData.find(s => key.endsWith(`_${s.id}`));
+          feedbackItems.push({
+            participant: item.by || "متسابق",
+            subjectTitle: subObj ? subObj.title : "تخصص",
+            rating: item.rating || 0,
+            feedback: item.feedback || ""
+          });
+
+          if (item.rating > 0) {
+            totalStars += item.rating;
+            ratedCount++;
+          }
+        }
+      });
+
+      if (ratedCount > 0) {
+        const avg = (totalStars / ratedCount).toFixed(1);
+        statsBanner.innerHTML = `⭐ متوسط التقييم العام: <strong class="text-base text-amber-600">${avg} / 5</strong> (من إجمالي ${ratedCount} تقييم)`;
+      } else {
+        statsBanner.innerHTML = `لا توجد تقييمات بالنجوم مسجلة حتى الآن.`;
+      }
+
+      if (feedbackItems.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">لم يقم أي متسابق بترك انطباع أو تقييم بعد.</div>`;
+      } else {
+        feedbackItems.forEach(fb => {
+          const card = document.createElement("div");
+          card.className = "p-3 rounded-2xl border border-slate-200 bg-slate-50/80 text-right space-y-1";
+
+          const starsHTML = Array.from({ length: 5 }, (_, i) => 
+            `<i class="fa-solid fa-star ${i < fb.rating ? 'text-amber-400' : 'text-slate-300'} text-xs"></i>`
+          ).join('');
+
+          card.innerHTML = `
+            <div class="flex items-center justify-between">
+              <span class="font-black text-xs text-indigo-950">${fb.participant}</span>
+              <div class="dir-ltr flex gap-0.5">${starsHTML}</div>
+            </div>
+            <p class="text-[11px] text-slate-600 font-semibold leading-relaxed">${fb.feedback ? fb.feedback : '<span class="text-slate-400 italic">بدون ملاحظة نصية</span>'}</p>
+            <span class="text-[9px] font-bold text-indigo-600 block pt-1 border-t border-slate-200/60">${fb.subjectTitle}</span>
+          `;
+          container.appendChild(card);
+        });
+      }
+    }
+
     function openLeaderboardModal() {
       document.getElementById("adminDashboardModal").classList.add("hidden");
       document.getElementById("leaderboardModal").classList.remove("hidden");
@@ -1058,7 +1164,7 @@
     }
 
     function resetLocalData() {
-      if (confirm("هل تريد إعادة مسح السجل المحلي للجهاز واختبار المسابقة من جديد؟")) {
+      if (confirm("هل تريد إعادة مسح السجل المحلي للجهاز وااختبار المسابقة من جديد؟")) {
         localStorage.clear();
         alert("تم مسح السجل المحلي بنجاح!");
         location.reload();
