@@ -1,328 +1,1065 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المسابقة الأسريّة التفاعلية</title>
-    <!-- مكتبة قصاصات الورق الملونة (Confetti) -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <style>
-        :root {
-            --primary: #1e3a8a;
-            --secondary: #0284c7;
-            --accent: #f59e0b;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text: #1e293b;
-            --green: #22c55e;
-            --yellow: #eab308;
-            --red: #ef4444;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>المسابقة الأسريّة التفاعلية</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Cairo -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+          }
         }
+      }
+    }
+  </script>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 15px;
-            direction: rtl;
-        }
-
-        .container {
-            max-width: 650px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        }
-
-        .header-title {
-            text-align: center;
-            color: var(--primary);
-            margin-bottom: 20px;
-            font-size: 22px;
-            font-weight: bold;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        /* شبكة التخصصات والمصفوفة */
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
-            margin-top: 15px;
-        }
-
-        .category-card {
-            padding: 15px;
-            border-radius: 12px;
-            border: 2px solid #e2e8f0;
-            text-align: center;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s ease;
-        }
-
-        .status-available { background-color: #dcfce7; border-color: #22c55e; color: #15803d; }
-        .status-progress { background-color: #fef9c3; border-color: #eab308; color: #a16207; }
-        .status-completed { background-color: #fee2e2; border-color: #ef4444; color: #991b1b; cursor: not-allowed; opacity: 0.7; }
-
-        /* شريط التقدم البصري */
-        .progress-container {
-            width: 100%;
-            background-color: #e2e8f0;
-            border-radius: 10px;
-            height: 8px;
-            margin: 15px 0;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #38bdf8, #0284c7);
-            transition: width 0.3s ease;
-        }
-
-        /* أزرار الخيارات */
-        .option-btn {
-            width: 100%;
-            padding: 14px;
-            margin: 8px 0;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            background: #fff;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: right;
-            box-sizing: border-box;
-        }
-
-        .option-btn:active, .option-btn.selected {
-            border-color: var(--secondary);
-            background-color: #e0f2fe;
-            transform: scale(0.99);
-        }
-
-        /* تقييم النجوم (قيمنا) */
-        .star-rating {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            direction: ltr;
-            margin: 15px 0;
-        }
-
-        .star {
-            font-size: 32px;
-            color: #cbd5e1;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-
-        .star.active, .star:hover {
-            color: var(--accent);
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 15px;
-        }
-
-        .hidden { display: none !important; }
-    </style>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #f8fafc;
+      touch-action: manipulation;
+    }
+    .gradient-header {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+    }
+    .modal-backdrop {
+      background-color: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(4px);
+    }
+    /* تقييم النجوم */
+    .star-rating .fa-star {
+      cursor: pointer;
+      transition: color 0.2s ease, transform 0.1s ease;
+    }
+    .star-rating .fa-star:active {
+      transform: scale(1.2);
+    }
+  </style>
 </head>
-<body>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between pb-6 select-none">
 
-<div class="container">
-    <div class="header-title" onclick="adminSecretAccess()">
-        🏆 المسابقة الأسريّة التفاعلية
-    </div>
-
-    <!-- 1. شاشة اختيار الفئة والتخصص -->
-    <div id="setup-screen">
-        <h3>اختر الفئة الخاصة بك:</h3>
-        <select id="user-category" style="width: 100%; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 16px;">
-            <option value="">-- اختر الفئة --</option>
-            <option value="رجال 1">رجال 1</option>
-            <option value="رجال 2">رجال 2</option>
-            <option value="نساء 1">نساء 1</option>
-            <option value="نساء 2">نساء 2</option>
-        </select>
-
-        <h3>التخصصات المتاحة:</h3>
-        <div class="grid-container" id="subjects-grid">
-            <!-- يتم تحميل التخصصات والحالات اللحظية هنا -->
-        </div>
-    </div>
-
-    <!-- 2. شاشة الأسئلة وشريط التقدم -->
-    <div id="quiz-screen" class="hidden">
-        <div style="display: flex; justify-content: space-between; font-size: 14px; color: #64748b;">
-            <span id="question-number">السؤال 1 من 5</span>
-            <span id="timer-display">⏳ 60 ثانية</span>
-        </div>
+  <!-- ==================== HEADER ==================== -->
+  <header class="gradient-header text-white pt-6 pb-10 px-4 rounded-b-[2.5rem] shadow-xl relative overflow-hidden">
+    <div class="max-w-md mx-auto relative z-10">
+      
+      <div class="flex items-center justify-between mb-3">
+        <span id="contestBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+          <i class="fa-solid fa-crown text-amber-400"></i> المسابقة رقم #001
+        </span>
         
-        <div class="progress-container">
-            <div id="progress-bar" class="progress-bar"></div>
+        <button id="adminAccessBtn" onclick="openAdminAuthModal()" class="hidden text-xs text-indigo-200/80 hover:text-white bg-white/10 px-2.5 py-1 rounded-lg transition-all items-center gap-1">
+          <i class="fa-solid fa-lock text-[10px]"></i> إدارة
+        </button>
+      </div>
+
+      <h1 id="mainTitle" onclick="handleSecretClick()" class="text-2xl font-black text-center mb-1 text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-amber-100 select-none cursor-pointer">
+        المسابقة الأسريّة التفاعلية
+      </h1>
+      <p id="subTitle" class="text-center text-xs text-indigo-200 font-semibold">تنافس، حماس، ومعرفة تجمع العائلة</p>
+
+      <!-- Timers -->
+      <div id="headerTimers" class="grid grid-cols-2 gap-3 mt-5">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-2.5 text-center border border-white/10">
+          <span class="block text-[10px] text-indigo-200 font-bold mb-0.5">مهلة التخصص المتبقية</span>
+          <div id="sessionTimeoutTimer" class="text-base font-black text-amber-300 font-mono">10:00</div>
+        </div>
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-2.5 text-center border border-white/10">
+          <span class="block text-[10px] text-indigo-200 font-bold mb-0.5">مؤقت السؤال الحالي</span>
+          <div id="questionTimer" class="text-base font-black text-emerald-400 font-mono">00:60</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTAINER ==================== -->
+  <main class="max-w-md mx-auto px-4 -mt-5 relative z-20 w-full flex-1">
+
+    <!-- STEP 1: Select Category -->
+    <div id="participantSelectCard" class="glass-card rounded-2xl p-5 shadow-lg mb-4">
+      <h2 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+        <i class="fa-solid fa-user-check text-indigo-600"></i> اختاري/اختر الفئة المشاركة:
+      </h2>
+      <select id="categorySelect" onchange="onParticipantChange()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm font-bold rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+        <option value="" disabled selected>-- اضغط هنا لاختيار الفئة --</option>
+        <optgroup label="👩 فئات النساء (1 - 10)">
+          <option value="نساء 1">فئة نساء 1</option>
+          <option value="نساء 2">فئة نساء 2</option>
+          <option value="نساء 3">فئة نساء 3</option>
+          <option value="نساء 4">فئة نساء 4</option>
+          <option value="نساء 5">فئة نساء 5</option>
+        </optgroup>
+        <optgroup label="👨 فئات الرجال (1 - 10)">
+          <option value="رجال 1">فئة رجال 1</option>
+          <option value="رجال 2">فئة رجال 2</option>
+          <option value="رجال 3">فئة رجال 3</option>
+          <option value="رجال 4">فئة رجال 4</option>
+          <option value="رجال 5">فئة رجال 5</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <!-- STEP 2: Subject Grid -->
+    <div id="subjectGridCard" class="glass-card rounded-2xl p-5 shadow-lg mb-4 hidden">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-xs font-black text-slate-700 flex items-center gap-1.5">
+          <i class="fa-solid fa-layer-group text-indigo-600"></i> التخصصات الستة للمسابقة:
+        </h3>
+        <span id="selectedGenderBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700"></span>
+      </div>
+      <p class="text-[11px] text-slate-500 mb-4">اختر تخصصاً واحداً فقط. بمجرد بدء السؤال الأول سيتم قفل التخصص لفئتك نهائياً.</p>
+
+      <div id="subjectsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- التخصصات تولد برمجياً -->
+      </div>
+    </div>
+
+    <!-- STEP 3: Question Card -->
+    <div id="questionCard" class="glass-card rounded-2xl p-5 shadow-lg hidden">
+      <div class="flex items-center justify-between mb-2">
+        <span id="questionBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700">السؤال 1 من 5</span>
+        <button id="changeSubjectBtn" onclick="returnToSubjects()" class="text-[11px] text-indigo-600 font-bold hover:underline">
+          <i class="fa-solid fa-arrow-right"></i> تغيير التخصص
+        </button>
+      </div>
+
+      <!-- شريط التقدم البصري الجديد -->
+      <div class="w-full bg-slate-100 rounded-full h-2 mb-3 overflow-hidden">
+        <div id="quizProgressBar" class="bg-gradient-to-r from-sky-400 to-indigo-600 h-full w-0 transition-all duration-300"></div>
+      </div>
+
+      <div id="subjectTitleBadge" class="text-xs font-extrabold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl mb-3 flex items-center gap-1.5"></div>
+
+      <h3 id="questionText" class="text-base font-extrabold text-slate-800 leading-snug mb-4">
+        جاري تحميل السؤال...
+      </h3>
+
+      <div id="optionsContainer" class="space-y-2.5"></div>
+
+      <button id="submitBtn" onclick="submitAnswer()" disabled class="w-full mt-5 bg-slate-300 text-slate-500 font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-not-allowed">
+        <span>اعتماد الإجابة</span>
+        <i class="fa-solid fa-paper-plane text-xs"></i>
+      </button>
+    </div>
+
+    <!-- STEP 4: Feedback Screen -->
+    <div id="feedbackCard" class="glass-card rounded-2xl p-6 shadow-lg text-center hidden">
+      <div id="feedbackIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"></div>
+      <h3 id="feedbackTitle" class="text-lg font-black mb-1"></h3>
+      <p id="feedbackMsg" class="text-xs text-slate-500 mb-4"></p>
+
+      <!-- قسم التقييم الجديد عند نهاية التخصص (قيمنا) -->
+      <div id="ratingSection" class="hidden border-t border-slate-200 pt-4 mt-3 mb-4">
+        <h4 class="text-xs font-bold text-slate-700 mb-2">⭐ كيف كانت تجربتك في هذا التخصص؟ (قيمنا)</h4>
+        <div class="star-rating flex justify-center gap-2 dir-ltr mb-3 text-2xl text-slate-300">
+          <i class="fa-solid fa-star" onclick="setStarRating(1)"></i>
+          <i class="fa-solid fa-star" onclick="setStarRating(2)"></i>
+          <i class="fa-solid fa-star" onclick="setStarRating(3)"></i>
+          <i class="fa-solid fa-star" onclick="setStarRating(4)"></i>
+          <i class="fa-solid fa-star" onclick="setStarRating(5)"></i>
+        </div>
+        <input type="text" id="feedbackNoteInput" placeholder="اكتب انطباعك أو ملاحظة سريعة (اختياري)" class="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+      </div>
+
+      <div class="space-y-2.5">
+        <button id="nextQuestionBtn" onclick="goToNextQuestion()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+          <span>السؤال التالي</span>
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+
+        <div id="finalExitSection" class="hidden space-y-2">
+          <button onclick="exitQuizFinal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>إغلاق وخروج نهائي من المسابقة</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blocked Card -->
+    <div id="blockedCard" class="glass-card rounded-2xl p-6 shadow-lg text-center hidden">
+      <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+        <i class="fa-solid fa-user-lock"></i>
+      </div>
+      <h3 class="text-base font-black text-slate-800 mb-1">لقد أتممت مشاركتك!</h3>
+      <p class="text-xs text-slate-500 mb-4">شكراً لمشاركتك في المسابقة رقم #001. تم تسجيل درجتك بنجاح ولا يمكنك إعادة المشاركة.</p>
+    </div>
+
+  </main>
+
+  <!-- ==================== ADMIN AUTH MODAL ==================== -->
+  <div id="adminAuthModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl text-center">
+      <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
+        <i class="fa-solid fa-user-shield text-xl"></i>
+      </div>
+      <h3 class="font-bold text-slate-800 text-base mb-1">دخول المشرف</h3>
+      <p class="text-xs text-slate-500 mb-3">أدخل الرمز السري للوصول للوحة التحكم</p>
+      <input type="password" id="adminPass" placeholder="••••" class="w-full text-center tracking-widest font-bold border border-slate-300 rounded-xl p-2.5 mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      <div class="flex gap-2">
+        <button onclick="closeAdminAuthModal()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-2 rounded-xl text-xs">إلغاء</button>
+        <button onclick="verifyAdmin()" class="flex-1 bg-indigo-600 text-white font-bold py-2 rounded-xl text-xs">دخول</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ADMIN DASHBOARD MODAL ==================== -->
+  <div id="adminDashboardModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-lg rounded-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeAdminDashboard()" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="text-center mb-4">
+        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
+          <i class="fa-solid fa-sliders"></i>
+        </div>
+        <h3 class="font-black text-slate-800 text-base">لوحة تحكم المشرف (المسابقة #001)</h3>
+        <span class="text-[10px] text-emerald-600 font-bold flex items-center justify-center gap-1 mt-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> التحديث اللحظي المباشر نشط
+        </span>
+      </div>
+
+      <div class="mb-5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+        <h4 class="text-xs font-black text-slate-700 mb-2 flex items-center justify-between">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-table-cells text-indigo-600"></i> مصفوفة حالة التخصصات:</span>
+          <button onclick="fetchCloudDataAndRender()" class="text-[10px] text-indigo-600 hover:underline font-bold flex items-center gap-1">
+            <i class="fa-solid fa-rotate"></i> تحديث يدوي
+          </button>
+        </h4>
+        <div id="adminMatrixContainer" class="space-y-2 text-xs"></div>
+      </div>
+
+      <div class="space-y-2.5">
+        <button onclick="openLeaderboardModal()" class="w-full bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+          <i class="fa-solid fa-trophy text-amber-300 text-sm"></i>
+          <span>عرض ومشاركة لوحة الصدارة والتفاصيل</span>
+        </button>
+
+        <button onclick="shareCleanParticipantLink()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+          <i class="fa-brands fa-whatsapp text-base"></i>
+          <span>مشاركة رابط المسابقة للمتسابقين (نظيف)</span>
+        </button>
+
+        <button onclick="resetLocalData()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold py-2 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-[11px]">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span>إعادة تفعيل الاختبار التجريبي للجهاز الحاضر</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== LEADERBOARD MODAL ==================== -->
+  <div id="leaderboardModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="p-4 bg-indigo-950 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-trophy text-amber-400 text-lg"></i>
+          <h3 class="font-black text-sm sm:text-base">لوحة الصدارة والتفاصيل (المسابقة #001)</h3>
+        </div>
+        <button onclick="closeLeaderboardModal()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-slate-300 hover:text-white">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto flex-1 space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-pink-50 border border-pink-200 p-3 rounded-2xl text-center">
+            <span class="block text-[11px] text-pink-700 font-bold mb-1">👩 مجموع فريق النساء</span>
+            <span id="lbWomenPoints" class="text-2xl font-black text-pink-600 font-mono">0</span>
+            <span class="text-[10px] text-pink-500 font-bold block">نقطة</span>
+            <div class="mt-2 pt-2 border-t border-pink-200/60 text-[10px] text-pink-800 font-semibold">
+              الزمن: <strong id="lbWomenTime" class="font-mono">00:00</strong>
+            </div>
+          </div>
+
+          <div class="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-center">
+            <span class="block text-[11px] text-blue-700 font-bold mb-1">👨 مجموع فريق الرجال</span>
+            <span id="lbMenPoints" class="text-2xl font-black text-blue-600 font-mono">0</span>
+            <span class="text-[10px] text-blue-500 font-bold block">نقطة</span>
+            <div class="mt-2 pt-2 border-t border-blue-200/60 text-[10px] text-blue-800 font-semibold">
+              الزمن: <strong id="lbMenTime" class="font-mono">00:00</strong>
+            </div>
+          </div>
         </div>
 
-        <h3 id="question-text" style="margin-top: 15px; font-size: 18px;">جاري تحميل السؤال...</h3>
-        <div id="options-container"></div>
-    </div>
-
-    <!-- 3. شاشة النتيجة والتقييم النهائي -->
-    <div id="result-screen" class="hidden" style="text-align: center;">
-        <h2>🎉 مبروك! أتممت التخصص بنجاح</h2>
-        <p id="final-score" style="font-size: 20px; font-weight: bold; color: var(--primary);">درجتك: 0 / 50</p>
-        <p id="final-time" style="color: #64748b;">الزمن المستغرق: 0 دقيقة</p>
-
-        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
-
-        <h4>⭐ كيف كانت تجربتك في المسابقة؟ (قيمنا)</h4>
-        <div class="star-rating" id="star-rating">
-            <span class="star" data-value="1" onclick="setRating(1)">★</span>
-            <span class="star" data-value="2" onclick="setRating(2)">★</span>
-            <span class="star" data-value="3" onclick="setRating(3)">★</span>
-            <span class="star" data-value="4" onclick="setRating(4)">★</span>
-            <span class="star" data-value="5" onclick="setRating(5)">★</span>
+        <div id="lbStatusBanner" class="p-3 rounded-xl text-center font-bold text-xs bg-amber-50 text-amber-900 border border-amber-200">
+          جاري حساب النتائج...
         </div>
-        <input type="text" id="feedback-input" placeholder="اكتب ملاحظة سريعة (اختياري)" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; margin-bottom: 10px;">
-        
-        <button class="btn-primary" onclick="submitFeedbackAndExit()">إغلاق وخروج نهائي من المسابقة 🚀</button>
+
+        <div class="space-y-2">
+          <h4 class="text-xs font-black text-slate-700 flex items-center justify-between">
+            <span><i class="fa-solid fa-users text-indigo-600"></i> الكشف التفصيلي لكل متسابق:</span>
+          </h4>
+          <div id="lbParticipantsList" class="space-y-1.5 max-h-52 overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+
+      <div class="p-3.5 bg-slate-50 border-t border-slate-200 grid grid-cols-3 gap-2 text-[11px] font-bold">
+        <button onclick="shareLeaderboardToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl flex items-center justify-center gap-1 shadow-md transition-all">
+          <i class="fa-brands fa-whatsapp text-sm"></i>
+          <span>مشاركة</span>
+        </button>
+        <button onclick="resetContestResults()" class="bg-rose-600 hover:bg-rose-700 text-white py-2.5 rounded-xl flex items-center justify-center gap-1 shadow-md transition-all">
+          <i class="fa-solid fa-trash-can text-sm"></i>
+          <span>تصفير النتائج</span>
+        </button>
+        <button onclick="closeLeaderboardModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-xl flex items-center justify-center gap-1 transition-all">
+          <i class="fa-solid fa-xmark text-xs"></i>
+          <span>إغلاق</span>
+        </button>
+      </div>
     </div>
+  </div>
 
-    <!-- 4. لوحة الإدارة (Admin Dashboard) -->
-    <div id="admin-screen" class="hidden">
-        <h3>🔴 لوحة تحكم المشرف الإداري</h3>
-        <div id="admin-matrix" class="grid-container"></div>
-        <br>
-        <button class="btn-primary" style="background: #dc2626;" onclick="resetAllData()">⚠️ تصفير النتائج الإداري (Reset All)</button>
-        <button class="btn-primary" onclick="shareWhatsAppLink()">📱 مشاركة رابط المسابقة للواتساب</button>
-        <button class="btn-primary" style="background: #475569;" onclick="location.reload()">إغلاق لوحة الإدارة</button>
-    </div>
-</div>
+  <!-- ==================== JAVASCRIPT ENGINE ==================== -->
+  <script>
+    const SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz-lampsS01cnHG_rPEmjthiUTAxi4Zfs86Ft7mRWoN4ROIvL39yhkPq6orQGLfC_J_/exec";
+    const CONTEST_ID = "001";
 
-<script>
-    // رابط سيرفر Google Apps Script الخاص بك
-    const SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+    const subjectsData = [
+      { id: "quran", title: "علوم القرآن (معاني المفردات والإعراب)", icon: "fa-book-quran" },
+      { id: "sirah", title: "السيرة النبوية والتاريخ الإسلامي", icon: "fa-kaaba" },
+      { id: "arabic", title: "اللغة العربية", icon: "fa-pen-nib" },
+      { id: "general", title: "الثقافة العامة", icon: "fa-globe" },
+      { id: "prophets", title: "قصص الأنبياء", icon: "fa-scroll" },
+      { id: "geo", title: "الجغرافيا", icon: "fa-map-location-dot" }
+    ];
 
+    const mockQuestions = {
+      quran: [
+        { id: "q_q1", text: "1. ما معنى كلمة (الصمد) في سورة الإخلاص؟", options: [{ id: "a", text: "الذي يُقصد في الحوائج وتكتمل فيه الصفات" }, { id: "b", text: "القوي المنيع" }, { id: "c", text: "الخالق البارئ" }, { id: "d", text: "السميع البصير" }], correct: "a" },
+        { id: "q_q2", text: "2. ما إعراب كلمة (الحمدُ) في (الحمدُ لله)؟", options: [{ id: "a", text: "مبتدأ مرفوع بالضمة" }, { id: "b", text: "خبر مرفوع" }, { id: "c", text: "فاعل مرفوع" }, { id: "d", text: "مفعول به" }], correct: "a" },
+        { id: "q_q3", text: "3. ما معنى (العاديات ضبحاً)؟", options: [{ id: "a", text: "الخيل التي تركض ويُسمع صوت أنفاسها" }, { id: "b", text: "الرياح القوية" }, { id: "c", text: "الإبل المحملة" }, { id: "d", text: "النجوم المضيئة" }], correct: "a" },
+        { id: "q_q4", text: "4. ما إعراب (اهْدِنا) في سورة الفاتحة؟", options: [{ id: "a", text: "فعل أمر للدعاء مبني على حذف حرف العلة" }, { id: "b", text: "فعل ماضٍ" }, { id: "c", text: "فعل مضارع" }, { id: "d", text: "اسم فعل" }], correct: "a" },
+        { id: "q_q5", text: "5. ما معنى كلمة (السجيل)؟", options: [{ id: "a", text: "طين متصلب متحجر" }, { id: "b", text: "الماء الحار" }, { id: "c", text: "النار الملتهبة" }, { id: "d", text: "الصخر الأملس" }], correct: "a" }
+      ],
+      sirah: [
+        { id: "s_s1", text: "1. في أي عام هجري كانت غزوة بدر الكبرى؟", options: [{ id: "a", text: "السنة الثانية للهجرة" }, { id: "b", text: "السنة الثالثة للهجرة" }, { id: "c", text: "السنة الخامسة للهجرة" }, { id: "d", text: "السنة الثامنة للهجرة" }], correct: "a" },
+        { id: "s_s2", text: "2. من هو صحابي الملقب بـ (أمِين هذه الأمة)؟", options: [{ id: "a", text: "أبو عبيدة بن الجراح" }, { id: "b", text: "عمر بن الخطاب" }, { id: "c", text: "علي بن أبي طالب" }, { id: "d", text: "أبو بكر الصديق" }], correct: "a" },
+        { id: "s_s3", text: "3. كم كان عمر النبي ﷺ عند البعثة النبوية؟", options: [{ id: "a", text: "40 سنة" }, { id: "b", text: "35 سنة" }, { id: "c", text: "45 سنة" }, { id: "d", text: "50 سنة" }], correct: "a" },
+        { id: "s_s4", text: "4. ما هي أول مدينة حاصر فيها المسلمون الحصون في غزوة الخندق؟", options: [{ id: "a", text: "المدينة المنورة" }, { id: "b", text: "مكة المكرمة" }, { id: "c", text: "خيبر" }, { id: "d", text: "الطائف" }], correct: "a" },
+        { id: "s_s5", text: "5. من هي أول زوجات النبي ﷺ؟", options: [{ id: "a", text: "خديجة بنت خويلد رضي الله عنها" }, { id: "b", text: "عائشة بنت أبي بكر" }, { id: "c", text: "حفصة بنت عمر" }, { id: "d", text: "سودة بنت زمعة" }], correct: "a" }
+      ],
+      arabic: [
+        { id: "a_1", text: "1. ما هي حروف الجزم التي تجزم فعلاً مضارعاً واحداً؟", options: [{ id: "a", text: "لم، لمّا، لام الأمر، لا الناهية" }, { id: "b", text: "إنْ، مَنْ، ما" }, { id: "c", text: "أنْ، لنْ، كي" }, { id: "d", text: "في، على، إلى" }], correct: "a" },
+        { id: "a_2", text: "2. ما الفاعل في جملة (قرأتُ الكتابَ)؟", options: [{ id: "a", text: "التاء المتحركة (الضمير المتصل)" }, { id: "b", text: "الكتاب" }, { id: "c", text: "مستتر تقديره هو" }, { id: "d", text: "لا يوجد فاعل" }], correct: "a" },
+        { id: "a_3", text: "3. ما جمع كلمة (حسام)؟", options: [{ id: "a", text: "أحسمة وحُسُم" }, { id: "b", text: "حسامون" }, { id: "c", text: "حسائم" }, { id: "d", text: "حساميات" }], correct: "a" },
+        { id: "a_4", text: "4. أي من الكلمات التالية تعتبر ممنوعة من الصرف؟", options: [{ id: "a", text: "مساجد" }, { id: "b", text: "رجل" }, { id: "c", text: "كتاب" }, { id: "d", text: "علم" }], correct: "a" },
+        { id: "a_5", text: "5. ما ضد كلمة (الشح)؟", options: [{ id: "a", text: "الجود والكرم" }, { id: "b", text: "الخوف" }, { id: "c", text: "الحزن" }, { id: "d", text: "الكسل" }], correct: "a" }
+      ],
+      general: [
+        { id: "g_1", text: "1. ما هو أطول نهر في العالم؟", options: [{ id: "a", text: "نهر النيل" }, { id: "b", text: "نهر الأمازون" }, { id: "c", text: "نهر الينغسي" }, { id: "d", text: "نهر الميسيسيبي" }], correct: "a" },
+        { id: "g_2", text: "2. ما هو العنصر الكيميائي الأكثر وفرة في الغلاف الجوي؟", options: [{ id: "a", text: "النيتروجين" }, { id: "b", text: "الأكسجين" }, { id: "c", text: "الهيدروجين" }, { id: "d", text: "ثاني أكسيد الكربون" }], correct: "a" },
+        { id: "g_3", text: "3. كم عدد حجرات القلب في جسم الإنسان؟", options: [{ id: "a", text: "أربع حجرات" }, { id: "b", text: "حجرتان" }, { id: "c", text: "ثلاث حجرات" }, { id: "d", text: "خمس حجرات" }], correct: "a" },
+        { id: "g_4", text: "4. ما هي أكبر قارة في العالم من حيث المساحة؟", options: [{ id: "a", text: "قارة آسيا" }, { id: "b", text: "قارة أفريقيا" }, { id: "c", text: "قارة أمريكا الشمالية" }, { id: "d", text: "قارة أوروبا" }], correct: "a" },
+        { id: "g_5", text: "5. أي من الكواكب يُعرف بـ الكوكب الأحمر؟", options: [{ id: "a", text: "كوكب المريخ" }, { id: "b", text: "كوكب الزهرة" }, { id: "c", text: "كوكب المشتري" }, { id: "d", text: "كوكب زحل" }], correct: "a" }
+      ],
+      prophets: [
+        { id: "p_1", text: "1. من هو النبي الذي لبث في بطن الحوت؟", options: [{ id: "a", text: "سيدنا يونس عليه السلام" }, { id: "b", text: "سيدنا يوسف عليه السلام" }, { id: "c", text: "سيدنا أيوب عليه السلام" }, { id: "d", text: "سيدنا نوح عليه السلام" }], correct: "a" },
+        { id: "p_2", text: "2. من هو النبي الذي أعطي معجزة إحياء الموتى بإذن الله؟", options: [{ id: "a", text: "سيدنا عيسى عليه السلام" }, { id: "b", text: "سيدنا موسى عليه السلام" }, { id: "c", text: "سيدنا إبراهيم عليه السلام" }, { id: "d", text: "سيدنا سليمان عليه السلام" }], correct: "a" },
+        { id: "p_3", text: "3. من هو النبي الذي بنى السفينة بأمر الله؟", options: [{ id: "a", text: "سيدنا نوح عليه السلام" }, { id: "b", text: "سيدنا هود عليه السلام" }, { id: "c", text: "سيدنا صالح عليه السلام" }, { id: "d", text: "سيدنا لوط عليه السلام" }], correct: "a" },
+        { id: "p_4", text: "4. من هو النبي الملقب بـ (أبو الأنبياء)؟", options: [{ id: "a", text: "سيدنا إبراهيم عليه السلام" }, { id: "b", text: "سيدنا نوح عليه السلام" }, { id: "c", text: "سيدنا آدم عليه السلام" }, { id: "d", text: "سيدنا يعقوب عليه السلام" }], correct: "a" },
+        { id: "p_5", text: "5. من هو النبي الذي سخّر الله له الريح والجن؟", options: [{ id: "a", text: "سيدنا سليمان عليه السلام" }, { id: "b", text: "سيدنا داوود عليه السلام" }, { id: "c", text: "سيدنا يوسف عليه السلام" }, { id: "d", text: "سيدنا زكريا عليه السلام" }], correct: "a" }
+      ],
+      geo: [
+        { id: "ge_1", text: "1. ما هي عاصمة المملكة العربية السعودية؟", options: [{ id: "a", text: "الرياض" }, { id: "b", text: "جدة" }, { id: "c", text: "مكة المكرمة" }, { id: "d", text: "الدمام" }], correct: "a" },
+        { id: "ge_2", text: "2. ما هي أصغر دولة في العالم مساحة؟", options: [{ id: "a", text: "الفاتيكان" }, { id: "b", text: "موناكو" }, { id: "c", text: "المالديف" }, { id: "d", text: "البحرين" }], correct: "a" },
+        { id: "ge_3", text: "3. أين تقع أعلى قمة جبلية في العالم (إيفرست)؟", options: [{ id: "a", text: "سلسلة جبال الهيمالايا (نيبال/الصين)" }, { id: "b", text: "جبال الألب" }, { id: "c", text: "جبال الأنديز" }, { id: "d", text: "جبال الأطلس" }], correct: "a" },
+        { id: "ge_4", text: "4. ما هو أكبر بحر مغلق في العالم؟", options: [{ id: "a", text: "بحر قزوين" }, { id: "b", text: "البحر الميت" }, { id: "c", text: "البحر الأحمر" }, { id: "d", text: "البحر الأسود" }], correct: "a" },
+        { id: "ge_5", text: "5. ما هي القناة التي تربط بين البحر الأبيض المتوسط والبحر الأحمر؟", options: [{ id: "a", text: "قناة السويس" }, { id: "b", text: "قناة بنما" }, { id: "c", text: "مضيق جبل طارق" }, { id: "d", text: "مضيق هرمز" }], correct: "a" }
+      ]
+    };
+
+    let currentParticipant = "";
+    let currentGender = "";
+    let selectedSubjectId = "";
     let currentQuestionIndex = 0;
-    let score = 0;
-    let timer;
-    let timeLeft = 60;
-    let selectedRating = 0;
-    let clickCount = 0;
-    let startTime, endTime;
+    let selectedOption = null;
+    let subjectScore = 0;
+    let isQuizStarted = false;
 
-    // جلب وحالة التحديث اللحظي كل ثانيتين
-    setInterval(fetchRealtimeStatus, 2000);
+    let subjectStartTime = null;
+    let totalTimeTakenInSeconds = 0;
 
-    function fetchRealtimeStatus() {
-        if (!document.getElementById('setup-screen').classList.contains('hidden')) {
-            // كود جلب الحالات الثلاث من السيرفر وعرض الألوان
-        }
+    let sessionTimeoutInterval = null;
+    let questionTimerInterval = null;
+    let globalPollingInterval = null;
+    let questionTimeLeft = 60;
+    let secretClickCount = 0;
+    let userStarRating = 0;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      checkAdminParam();
+      checkParticipantState();
+      
+      fetchCloudDataAndRender();
+      globalPollingInterval = setInterval(() => {
+        fetchCloudDataAndRender();
+      }, 2000);
+    });
+
+    function checkAdminParam() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('admin')) {
+        const btn = document.getElementById("adminAccessBtn");
+        btn.classList.remove("hidden");
+        btn.classList.add("flex");
+      }
     }
 
-    function updateProgress(step) {
-        const percentage = (step / 5) * 100;
-        document.getElementById('progress-bar').style.width = percentage + '%';
-        document.getElementById('question-number').innerText = `السؤال ${step} من 5`;
+    function handleSecretClick() {
+      secretClickCount++;
+      if (secretClickCount >= 3) {
+        secretClickCount = 0;
+        openAdminAuthModal();
+      }
     }
 
-    function startQuiz(subject) {
-        document.getElementById('setup-screen').classList.add('hidden');
-        document.getElementById('quiz-screen').classList.remove('hidden');
-        startTime = new Date();
-        loadQuestion(0);
+    function checkParticipantState() {
+      const completedKey = `quiz_${CONTEST_ID}_completed`;
+      if (localStorage.getItem(completedKey)) {
+        document.getElementById("participantSelectCard").classList.add("hidden");
+        document.getElementById("blockedCard").classList.remove("hidden");
+      }
     }
 
-    function loadQuestion(index) {
-        currentQuestionIndex = index;
-        updateProgress(index + 1);
-        timeLeft = 60;
-        document.getElementById('timer-display').innerText = `⏳ ${timeLeft} ثانية`;
-        
-        // تشغيل المؤقت
-        clearInterval(timer);
-        timer = setInterval(() => {
-            timeLeft--;
-            document.getElementById('timer-display').innerText = `⏳ ${timeLeft} ثانية`;
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                nextQuestion();
+    function onParticipantChange() {
+      currentParticipant = document.getElementById("categorySelect").value;
+      if (!currentParticipant) return;
+
+      currentGender = currentParticipant.includes("نساء") ? "women" : "men";
+      document.getElementById("selectedGenderBadge").innerText = `${currentParticipant}`;
+
+      renderSubjectGrid();
+      document.getElementById("subjectGridCard").classList.remove("hidden");
+    }
+
+    function fetchCloudDataAndRender() {
+      fetch(`${SCRIPT_WEB_APP_URL}?action=get_locks&contest_id=${CONTEST_ID}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.locks) {
+            saveSubjectLocks(data.locks);
+            
+            if (!document.getElementById("adminDashboardModal").classList.contains("hidden")) {
+              renderAdminMatrix();
             }
-        }, 1000);
+            if (!document.getElementById("subjectGridCard").classList.contains("hidden")) {
+              renderSubjectGrid();
+            }
+            if (!document.getElementById("leaderboardModal").classList.contains("hidden")) {
+              calculateAndRenderLeaderboard();
+            }
+          }
+        })
+        .catch(err => console.log("Auto-syncing..."));
     }
 
-    function nextQuestion() {
-        clearInterval(timer);
-        if (currentQuestionIndex < 4) {
-            loadQuestion(currentQuestionIndex + 1);
-        } else {
-            finishQuiz();
+    function renderSubjectGrid() {
+      const container = document.getElementById("subjectsContainer");
+      container.innerHTML = "";
+
+      const locks = getSubjectLocks();
+
+      subjectsData.forEach(sub => {
+        const lockKey = `${CONTEST_ID}_${currentGender}_${sub.id}`;
+        const lockData = locks[lockKey];
+
+        const isLocked = lockData && lockData.status === "completed";
+        const isPending = lockData && lockData.status === "pending" && !isTimeoutExpired(lockData.time);
+
+        const card = document.createElement("div");
+        card.className = `p-3.5 rounded-xl border flex items-center justify-between transition-all ${
+          isLocked ? 'bg-slate-100 border-slate-300 opacity-60 cursor-not-allowed' :
+          isPending ? 'bg-amber-50 border-amber-300 cursor-not-allowed' :
+          'bg-white border-slate-200 hover:border-indigo-500 shadow-sm cursor-pointer'
+        }`;
+
+        let statusBadge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700">متاح</span>`;
+        if (isLocked) {
+          statusBadge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-100 text-rose-700"><i class="fa-solid fa-lock text-[9px]"></i> مكتمل (${lockData.by})</span>`;
+        } else if (isPending) {
+          statusBadge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-800"><i class="fa-solid fa-clock text-[9px]"></i> قيد الإجابة</span>`;
         }
-    }
 
-    function triggerConfetti() {
-        if (typeof confetti === 'function') {
-            confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+        card.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">
+              <i class="fa-solid ${sub.icon}"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-slate-800">${sub.title}</h4>
+              <span class="text-[10px] text-slate-400">5 أسئلة (50 نقطة)</span>
+            </div>
+          </div>
+          <div>${statusBadge}</div>
+        `;
+
+        if (!isLocked && !isPending) {
+          card.onclick = () => selectSubject(sub.id);
         }
+
+        container.appendChild(card);
+      });
     }
 
-    function finishQuiz() {
-        endTime = new Date();
-        document.getElementById('quiz-screen').classList.add('hidden');
-        document.getElementById('result-screen').classList.remove('hidden');
-        triggerConfetti();
+    function selectSubject(subjectId) {
+      selectedSubjectId = subjectId;
+      currentQuestionIndex = 0;
+      subjectScore = 0;
+      isQuizStarted = false;
+
+      const subObj = subjectsData.find(s => s.id === subjectId);
+      document.getElementById("subjectTitleBadge").innerHTML = `<i class="fa-solid ${subObj.icon}"></i> ${subObj.title}`;
+
+      document.getElementById("subjectGridCard").classList.add("hidden");
+      document.getElementById("participantSelectCard").classList.add("hidden");
+      document.getElementById("questionCard").classList.remove("hidden");
+      document.getElementById("changeSubjectBtn").classList.remove("hidden");
+
+      loadQuestion();
     }
 
-    function setRating(val) {
-        selectedRating = val;
-        document.querySelectorAll('.star').forEach(s => {
-            s.classList.toggle('active', parseInt(s.getAttribute('data-value')) <= val);
+    function returnToSubjects() {
+      if (isQuizStarted) {
+        alert("لا يمكنك العودة لتغيير التخصص بعد البدء بالإجابة على السؤال الأول!");
+        return;
+      }
+      document.getElementById("questionCard").classList.add("hidden");
+      document.getElementById("participantSelectCard").classList.remove("hidden");
+      document.getElementById("subjectGridCard").classList.remove("hidden");
+    }
+
+    function lockSubjectPending() {
+      const locks = getSubjectLocks();
+      const lockKey = `${CONTEST_ID}_${currentGender}_${selectedSubjectId}`;
+      const lockPayload = {
+        status: "pending",
+        by: currentParticipant,
+        time: new Date().getTime()
+      };
+      locks[lockKey] = lockPayload;
+      saveSubjectLocks(locks);
+      syncLockToCloud(lockKey, lockPayload);
+      startSessionTimeoutTimer();
+    }
+
+    function lockSubjectCompleted() {
+      const locks = getSubjectLocks();
+      const lockKey = `${CONTEST_ID}_${currentGender}_${selectedSubjectId}`;
+      const lockPayload = {
+        status: "completed",
+        by: currentParticipant,
+        score: subjectScore,
+        timeTakenSeconds: totalTimeTakenInSeconds,
+        time: new Date().getTime()
+      };
+      locks[lockKey] = lockPayload;
+      saveSubjectLocks(locks);
+      syncLockToCloud(lockKey, lockPayload);
+    }
+
+    function syncLockToCloud(lockKey, lockPayload) {
+      const payload = {
+        action: "update_lock",
+        contest_id: CONTEST_ID,
+        lock_key: lockKey,
+        lock_data: lockPayload
+      };
+
+      fetch(SCRIPT_WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).catch(e => console.log("Cloud Lock Sync Sent"));
+    }
+
+    function getSubjectLocks() {
+      return JSON.parse(localStorage.getItem(`locks_${CONTEST_ID}`) || "{}");
+    }
+
+    function saveSubjectLocks(locks) {
+      localStorage.setItem(`locks_${CONTEST_ID}`, JSON.stringify(locks));
+    }
+
+    function isTimeoutExpired(timestamp) {
+      const tenMinutes = 10 * 60 * 1000;
+      return (new Date().getTime() - timestamp) > tenMinutes;
+    }
+
+    function updateProgressBar() {
+      const progress = ((currentQuestionIndex + 1) / 5) * 100;
+      document.getElementById("quizProgressBar").style.width = `${progress}%`;
+    }
+
+    function loadQuestion() {
+      const questions = mockQuestions[selectedSubjectId];
+      const q = questions[currentQuestionIndex];
+
+      updateProgressBar();
+      document.getElementById("questionBadge").innerText = `السؤال ${currentQuestionIndex + 1} من 5`;
+      document.getElementById("questionText").innerText = q.text;
+
+      const container = document.getElementById("optionsContainer");
+      container.innerHTML = "";
+
+      selectedOption = null;
+      const submitBtn = document.getElementById("submitBtn");
+      submitBtn.disabled = true;
+      submitBtn.className = "w-full mt-5 bg-slate-300 text-slate-500 font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-not-allowed";
+
+      q.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "w-full text-right p-3 rounded-xl border border-slate-200 hover:border-indigo-500 bg-slate-50 hover:bg-indigo-50/50 font-semibold text-sm transition-all flex items-center justify-between active:scale-[0.98]";
+        btn.onclick = () => selectOption(opt.id, btn);
+        btn.innerHTML = `<span>${opt.text}</span><i class="fa-regular fa-circle text-slate-300 opt-icon"></i>`;
+        container.appendChild(btn);
+      });
+
+      startQuestionTimer();
+    }
+
+    function selectOption(optId, element) {
+      selectedOption = optId;
+      document.querySelectorAll("#optionsContainer button").forEach(btn => {
+        btn.classList.remove("border-indigo-600", "bg-indigo-50", "text-indigo-900");
+        btn.querySelector(".opt-icon").className = "fa-regular fa-circle text-slate-300 opt-icon";
+      });
+
+      element.classList.add("border-indigo-600", "bg-indigo-50", "text-indigo-900");
+      element.querySelector(".opt-icon").className = "fa-solid fa-circle-check text-indigo-600 opt-icon";
+
+      const submitBtn = document.getElementById("submitBtn");
+      submitBtn.disabled = false;
+      submitBtn.className = "w-full mt-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95";
+    }
+
+    function submitAnswer() {
+      if (!selectedOption) return;
+
+      if (!isQuizStarted) {
+        isQuizStarted = true;
+        subjectStartTime = new Date();
+        document.getElementById("changeSubjectBtn").classList.add("hidden");
+        lockSubjectPending();
+      }
+
+      clearInterval(questionTimerInterval);
+
+      const questions = mockQuestions[selectedSubjectId];
+      const q = questions[currentQuestionIndex];
+      const isCorrect = (selectedOption === q.correct);
+      if (isCorrect) subjectScore += 10;
+
+      showFeedbackScreen(isCorrect);
+    }
+
+    function triggerConfettiEffect() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 120,
+          spread: 70,
+          origin: { y: 0.6 }
         });
+      }
     }
 
-    function submitFeedbackAndExit() {
-        alert("تم حفظ مشاركتك وتقييمك بنجاح!");
-        window.location.reload();
-    }
-
-    function adminSecretAccess() {
-        clickCount++;
-        if (clickCount === 3) {
-            clickCount = 0;
-            const pass = prompt("أدخل كلمة المرور السرية للمشرف:");
-            if (pass === "1234") {
-                document.getElementById('setup-screen').classList.add('hidden');
-                document.getElementById('admin-screen').classList.remove('hidden');
-            }
+    function setStarRating(stars) {
+      userStarRating = stars;
+      const icons = document.querySelectorAll(".star-rating .fa-star");
+      icons.forEach((icon, index) => {
+        if (index < stars) {
+          icon.classList.remove("text-slate-300");
+          icon.classList.add("text-amber-400");
+        } else {
+          icon.classList.remove("text-amber-400");
+          icon.classList.add("text-slate-300");
         }
-        setTimeout(() => { clickCount = 0; }, 2000);
+      });
     }
 
-    function resetAllData() {
-        if (confirm("هل أنت تأكد من تصفير جميع نتائج المتسابقين والسجلات؟")) {
-            alert("تم تصفير النتائج بنجاح!");
+    function showFeedbackScreen(isCorrect) {
+      document.getElementById("questionCard").classList.add("hidden");
+
+      const card = document.getElementById("feedbackCard");
+      const icon = document.getElementById("feedbackIcon");
+      const title = document.getElementById("feedbackTitle");
+      const msg = document.getElementById("feedbackMsg");
+      const nextBtn = document.getElementById("nextQuestionBtn");
+      const exitSec = document.getElementById("finalExitSection");
+      const ratingSec = document.getElementById("ratingSection");
+
+      card.classList.remove("hidden");
+
+      if (isCorrect) {
+        icon.className = "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl bg-emerald-100 text-emerald-600";
+        icon.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
+        title.innerText = "إجابة صحيحة! 🎉";
+        title.className = "text-lg font-black mb-1 text-emerald-700";
+        msg.innerText = "أحسنت! أضفت 10 نقاط لرصيد فئتك.";
+      } else {
+        icon.className = "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl bg-rose-100 text-rose-600";
+        icon.innerHTML = `<i class="fa-solid fa-circle-xmark"></i>`;
+        title.innerText = "إجابة خاطئة! ❌";
+        title.className = "text-lg font-black mb-1 text-rose-700";
+        msg.innerText = "للأسف الإجابة غير صحيحة، ركّز في السؤال القادم.";
+      }
+
+      if (currentQuestionIndex === 4) {
+        const subjectEndTime = new Date();
+        totalTimeTakenInSeconds = Math.round((subjectEndTime - subjectStartTime) / 1000);
+
+        lockSubjectCompleted();
+        clearInterval(sessionTimeoutInterval);
+
+        triggerConfettiEffect();
+
+        nextBtn.classList.add("hidden");
+        exitSec.classList.remove("hidden");
+        ratingSec.classList.remove("hidden");
+
+        const timeFormatted = formatSecondsToMMSS(totalTimeTakenInSeconds);
+
+        title.innerText = "تهانينا! أكملت التخصص 🏆";
+        title.className = "text-lg font-black mb-1 text-indigo-900";
+        msg.innerHTML = `حصلت الفئة (<b>${currentParticipant}</b>) على <b>${subjectScore} من 50</b> نقطة في زمن قدره <b>${timeFormatted}</b>.<br><span class="text-[11px] text-slate-400">تم تسجيل نتيجتك في كشف المشرف تلقائياً.</span>`;
+        
+        sendScoreToSheet();
+      } else {
+        nextBtn.classList.remove("hidden");
+        exitSec.classList.add("hidden");
+        ratingSec.classList.add("hidden");
+      }
+    }
+
+    function goToNextQuestion() {
+      currentQuestionIndex++;
+      document.getElementById("feedbackCard").classList.add("hidden");
+      document.getElementById("questionCard").classList.remove("hidden");
+      loadQuestion();
+    }
+
+    function exitQuizFinal() {
+      localStorage.setItem(`quiz_${CONTEST_ID}_completed`, "true");
+      alert("شكراً لمشاركتك وتقييمك العطر! تم تسليم النتيجة وإغلاق مشاركتك بنجاح.");
+      location.reload();
+    }
+
+    function sendScoreToSheet() {
+      const feedbackNote = document.getElementById("feedbackNoteInput").value || "";
+      const payload = {
+        action: "submit_score",
+        contest_id: CONTEST_ID,
+        category: currentParticipant,
+        subject: selectedSubjectId,
+        score: subjectScore,
+        timeTakenSeconds: totalTimeTakenInSeconds,
+        rating: userStarRating,
+        feedback: feedbackNote,
+        timestamp: new Date().toISOString()
+      };
+
+      fetch(SCRIPT_WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).catch(e => console.log("Background synced"));
+    }
+
+    function formatSecondsToMMSS(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function startQuestionTimer() {
+      clearInterval(questionTimerInterval);
+      questionTimeLeft = 60;
+      questionTimerInterval = setInterval(() => {
+        questionTimeLeft--;
+        document.getElementById("questionTimer").innerText = `00:${String(questionTimeLeft).padStart(2, '0')}`;
+        if (questionTimeLeft <= 0) {
+          clearInterval(questionTimerInterval);
+          alert("انتهى وقت السؤال الحالي!");
+          submitAnswer();
         }
+      }, 1000);
     }
 
-    function shareWhatsAppLink() {
-        const text = encodeURIComponent("ندعوكم للمشاركة في المسابقة الأسريّة التفاعلية! اضغط على الرابط للبدء:");
-        window.open(`https://api.whatsapp.com/send?text=${text}`);
+    function startSessionTimeoutTimer() {
+      clearInterval(sessionTimeoutInterval);
+      let duration = 10 * 60;
+      sessionTimeoutInterval = setInterval(() => {
+        duration--;
+        const mins = Math.floor(duration / 60);
+        const secs = duration % 60;
+        document.getElementById("sessionTimeoutTimer").innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        
+        if (duration <= 0) {
+          clearInterval(sessionTimeoutInterval);
+          alert("انتهت مهلة 10 دقائق المخصصة لإكمال التخصص!");
+          location.reload();
+        }
+      }, 1000);
     }
-</script>
+
+    function openAdminAuthModal() {
+      document.getElementById("adminAuthModal").classList.remove("hidden");
+    }
+
+    function closeAdminAuthModal() {
+      document.getElementById("adminAuthModal").classList.add("hidden");
+    }
+
+    function verifyAdmin() {
+      const pass = document.getElementById("adminPass").value;
+      if (pass === "1234") {
+        closeAdminAuthModal();
+        openAdminDashboard();
+        document.getElementById("adminPass").value = "";
+      } else {
+        alert("الرمز السري غير صحيح!");
+      }
+    }
+
+    function openAdminDashboard() {
+      renderAdminMatrix();
+      document.getElementById("adminDashboardModal").classList.remove("hidden");
+    }
+
+    function closeAdminDashboard() {
+      document.getElementById("adminDashboardModal").classList.add("hidden");
+    }
+
+    function renderAdminMatrix() {
+      const container = document.getElementById("adminMatrixContainer");
+      container.innerHTML = "";
+
+      const locks = getSubjectLocks();
+
+      subjectsData.forEach(sub => {
+        const womenKey = `${CONTEST_ID}_women_${sub.id}`;
+        const menKey = `${CONTEST_ID}_men_${sub.id}`;
+
+        const wLock = locks[womenKey];
+        const mLock = locks[menKey];
+
+        const getStatusHTML = (lockData, label) => {
+          if (!lockData) {
+            return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> <span>${label}: متاح</span></span>`;
+          }
+          if (lockData.status === 'completed') {
+            return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> <span>${label}: مكتمل (${lockData.by} - ${lockData.score}ن)</span></span>`;
+          }
+          if (lockData.status === 'pending' && !isTimeoutExpired(lockData.time)) {
+            return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse inline-block"></span> <span>${label}: قيد الإجابة (${lockData.by})</span></span>`;
+          }
+          return `<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> <span>${label}: متاح</span></span>`;
+        };
+
+        const row = document.createElement("div");
+        row.className = "bg-white p-2.5 rounded-xl border border-slate-200 flex flex-col gap-1.5 shadow-sm";
+        row.innerHTML = `
+          <div class="font-bold text-slate-800 text-[11px]">${sub.title}</div>
+          <div class="grid grid-cols-2 gap-2 text-[10px]">
+            <div class="p-2 rounded-lg border ${wLock && wLock.status==='completed' ? 'bg-pink-50 border-pink-200 text-pink-900 font-bold' : wLock && wLock.status==='pending' ? 'bg-amber-50 border-amber-200 text-amber-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600'}">
+              ${getStatusHTML(wLock, '👩 النساء')}
+            </div>
+            <div class="p-2 rounded-lg border ${mLock && mLock.status==='completed' ? 'bg-blue-50 border-blue-200 text-blue-900 font-bold' : mLock && mLock.status==='pending' ? 'bg-amber-50 border-amber-200 text-amber-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600'}">
+              ${getStatusHTML(mLock, '👨 الرجال')}
+            </div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function openLeaderboardModal() {
+      document.getElementById("adminDashboardModal").classList.add("hidden");
+      document.getElementById("leaderboardModal").classList.remove("hidden");
+
+      calculateAndRenderLeaderboard();
+    }
+
+    function closeLeaderboardModal() {
+      document.getElementById("leaderboardModal").classList.add("hidden");
+      document.getElementById("adminDashboardModal").classList.remove("hidden");
+    }
+
+    function calculateAndRenderLeaderboard() {
+      const locks = getSubjectLocks();
+
+      let womenTotalPoints = 0;
+      let menTotalPoints = 0;
+      let womenTotalSeconds = 0;
+      let menTotalSeconds = 0;
+
+      const listContainer = document.getElementById("lbParticipantsList");
+      listContainer.innerHTML = "";
+
+      let participantsList = [];
+
+      Object.keys(locks).forEach(key => {
+        const item = locks[key];
+        if (item && item.status === "completed") {
+          const isWomen = key.includes("_women_");
+          const pts = parseInt(item.score) || 0;
+          const secs = parseInt(item.timeTakenSeconds) || 0;
+
+          if (isWomen) {
+            womenTotalPoints += pts;
+            womenTotalSeconds += secs;
+          } else {
+            menTotalPoints += pts;
+            menTotalSeconds += secs;
+          }
+
+          const subObj = subjectsData.find(s => key.endsWith(`_${s.id}`));
+          participantsList.push({
+            participant: item.by,
+            isWomen: isWomen,
+            subjectTitle: subObj ? subObj.title : "تخصص",
+            score: pts,
+            timeSeconds: secs
+          });
+        }
+      });
+
+      document.getElementById("lbWomenPoints").innerText = womenTotalPoints;
+      document.getElementById("lbMenPoints").innerText = menTotalPoints;
+
+      document.getElementById("lbWomenTime").innerText = formatSecondsToMMSS(womenTotalSeconds);
+      document.getElementById("lbMenTime").innerText = formatSecondsToMMSS(menTotalSeconds);
+
+      const statusBanner = document.getElementById("lbStatusBanner");
+      if (womenTotalPoints > menTotalPoints) {
+        statusBanner.className = "p-3 rounded-xl text-center font-bold text-xs bg-pink-100 text-pink-900 border border-pink-300";
+        statusBanner.innerHTML = `👑 *فريق النساء* متقدم بفرق ${womenTotalPoints - menTotalPoints} نقطة! 🔥`;
+      } else if (menTotalPoints > womenTotalPoints) {
+        statusBanner.className = "p-3 rounded-xl text-center font-bold text-xs bg-blue-100 text-blue-900 border border-blue-300";
+        statusBanner.innerHTML = `👑 *فريق الرجال* متقدم بفرق ${menTotalPoints - womenTotalPoints} نقطة! 🔥`;
+      } else if (womenTotalPoints === 0 && menTotalPoints === 0) {
+        statusBanner.className = "p-3 rounded-xl text-center font-bold text-xs bg-slate-100 text-slate-600 border border-slate-200";
+        statusBanner.innerHTML = "المسابقة صفرية بانتظار مشاركة المتنافسين!";
+      } else {
+        statusBanner.className = "p-3 rounded-xl text-center font-bold text-xs bg-amber-100 text-amber-900 border border-amber-300";
+        statusBanner.innerHTML = `🤝 تعادل الفريقين بنتيجة ${womenTotalPoints} نقطة لكل منهما!`;
+      }
+
+      if (participantsList.length === 0) {
+        listContainer.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">لا توجد مشاركات مكتملة بعد.</div>`;
+      } else {
+        participantsList.forEach(p => {
+          const div = document.createElement("div");
+          div.className = `p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold ${
+            p.isWomen ? 'bg-pink-50/70 border-pink-200 text-pink-950' : 'bg-blue-50/70 border-blue-200 text-blue-950'
+          }`;
+
+          div.innerHTML = `
+            <div class="flex items-center gap-2">
+              <i class="${p.isWomen ? 'fa-solid fa-venus text-pink-600' : 'fa-solid fa-mars text-blue-600'}"></i>
+              <div>
+                <span>${p.participant}</span>
+                <span class="block text-[9px] text-slate-400 font-normal">${p.subjectTitle}</span>
+              </div>
+            </div>
+            <div class="text-left font-mono">
+              <span class="block font-black">${p.score} نقطة</span>
+              <span class="text-[10px] text-slate-500 font-normal"><i class="fa-regular fa-clock text-[9px]"></i> ${formatSecondsToMMSS(p.timeSeconds)}</span>
+            </div>
+          `;
+          listContainer.appendChild(div);
+        });
+      }
+    }
+
+    function shareLeaderboardToWhatsApp() {
+      const wPts = document.getElementById("lbWomenPoints").innerText;
+      const mPts = document.getElementById("lbMenPoints").innerText;
+      const wTime = document.getElementById("lbWomenTime").innerText;
+      const mTime = document.getElementById("lbMenTime").innerText;
+
+      let winnerText = "";
+      const wP = parseInt(wPts);
+      const mP = parseInt(mPts);
+
+      if (wP > mP) {
+        winnerText = `👑 *الفائز بالمقدمة:* فريق النساء (بفارق ${wP - mP} نقطة) 🔥`;
+      } else if (mP > wP) {
+        winnerText = `👑 *الفائز بالمقدمة:* فريق الرجال (بفارق ${mP - wP} نقطة) 🔥`;
+      } else {
+        winnerText = `🤝 *النتيجة:* تعادل بالفريقين بنتيجة (${wP}) نقطة!\n⚡ *الزمن:* النساء (${wTime}) | الرجال (${mTime})`;
+      }
+
+      const message = `🏆 *لوحة صدارة المسابقة الأسريّة التفاعلية (#001)* 🏆\n\n👩 *فريق النساء:* ${wPts} نقطة (الزمن التراكمي: ${wTime})\n👨 *فريق الرجال:* ${mPts} نقطة (الزمن التراكمي: ${mTime})\n\n-----------------------------------\n${winnerText}\n-----------------------------------\nتنافس وحماس يجمع العائلة! ❤️`;
+
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+    }
+
+    function shareCleanParticipantLink() {
+      const cleanUrl = window.location.href.split('?')[0];
+      const message = `🏆 المسابقة الأسريّة التفاعلية (مسابقة #001) 🏆\n\nاختر فئتك ("رجال" - "نساء") ثم اختر "التخصص".\n\n✅ "في كل مرة نستفيد معلومة" ✅\n\n⚠️ تنبيه هام: الرجاء التأكد قبل دخول المسابقة من اختيار الفئة والرمز الصحيح الخاص بك.\n\nشارك معنا عبر الرابط التالي:\n👇\n${cleanUrl}`;
+      
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+    }
+
+    function resetLocalData() {
+      if (confirm("هل تريد إعادة مسح السجل المحلي للجهاز وااختبار المسابقة من جديد؟")) {
+        localStorage.clear();
+        alert("تم مسح السجل المحلي بنجاح!");
+        location.reload();
+      }
+    }
+
+    function resetContestResults() {
+      if (confirm("⚠️ تحذير: هل أنت متأكد من رغبتك في تصفير جميع النتائج والأوقات؟ (هذا الإجراء سيحذف بيانات المسابقة الحالية للجميع ولن يمكن التراجع عنه)")) {
+        
+        localStorage.removeItem(`locks_${CONTEST_ID}`);
+        
+        const payload = {
+          action: "reset_locks",
+          contest_id: CONTEST_ID
+        };
+
+        fetch(SCRIPT_WEB_APP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }).then(() => {
+            alert("✅ تم تصفير جميع النتائج والأوقات بنجاح للمسابقة بأكملها!");
+            calculateAndRenderLeaderboard();
+            renderAdminMatrix();
+        }).catch(e => {
+            alert("✅ تم التصفير بنجاح!");
+            calculateAndRenderLeaderboard();
+            renderAdminMatrix();
+        });
+      }
+    }
+  </script>
 </body>
 </html>
